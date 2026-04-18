@@ -1,0 +1,41 @@
+[
+  {
+    "canonical_local_id": "seed-stock-unit-001",
+    "entity_type": "stock_unit",
+    "identifier_scheme": "seed_local",
+    "identifier_value": "stock-unit-alpha",
+    "mapped_target_id": "source-system-a:stock-unit-alpha",
+    "mapping_relation": "same_as",
+    "source": "seed scaffold record for identity-layer validation",
+    "confidence": "low",
+    "record_status": "seed",
+    "valid_time_or_version": "2026-04-17 seed scaffold",
+    "notes": "Non-authoritative placeholder record showing how a future stock-unit crosswalk should be represented."
+  },
+  {
+    "canonical_local_id": "seed-site-001",
+    "entity_type": "site",
+    "identifier_scheme": "seed_local",
+    "identifier_value": "site-beta",
+    "mapped_target_id": "source-system-b:site-beta",
+    "mapping_relation": "same_as",
+    "source": "seed scaffold record for identity-layer validation",
+    "confidence": "low",
+    "record_status": "seed",
+    "valid_time_or_version": "2026-04-17 seed scaffold",
+    "notes": "Non-authoritative placeholder record showing how a future site crosswalk should be represented."
+  },
+  {
+    "canonical_local_id": "seed-tag-group-001",
+    "entity_type": "tag_group",
+    "identifier_scheme": "seed_local",
+    "identifier_value": "tag-group-gamma",
+    "mapped_target_id": "source-system-c:release-group-gamma",
+    "mapping_relation": "related_to",
+    "source": "seed scaffold record for identity-layer validation",
+    "confidence": "low",
+    "record_status": "seed",
+    "valid_time_or_version": "2026-04-17 seed scaffold",
+    "notes": "Non-authoritative placeholder record showing a cross-system tag-group relationship without claiming a production-ready equivalence."
+  }
+]

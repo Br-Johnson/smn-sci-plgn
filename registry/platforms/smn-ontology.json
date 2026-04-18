@@ -1,0 +1,95 @@
+{
+  "platform_id": "smn-ontology",
+  "platform_name": "Salmon Domain Ontology (`smn`)",
+  "owner": "salmon-data-mobilization",
+  "canonical_urls": [
+    "https://w3id.org/smn",
+    "https://salmon-data-mobilization.github.io/salmon-domain-ontology/"
+  ],
+  "docs_urls": [
+    "https://salmon-data-mobilization.github.io/salmon-domain-ontology/smn.jsonld",
+    "https://github.com/salmon-data-mobilization/salmon-domain-ontology"
+  ],
+  "auth_access_model": "The published ontology artifacts are currently public and readable without credentials.",
+  "data_domains": [
+    "shared salmon semantics",
+    "cross-organization ontology terms",
+    "mapping and bridge rules"
+  ],
+  "identifier_systems": [
+    "smn IRIs",
+    "shared OWL and SKOS term identifiers"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "supported",
+      "note": "The current skill searches and fetches published JSON-LD terms."
+    },
+    "metadata_schema": {
+      "status": "supported",
+      "note": "Ontology metadata, labels, definitions, and term IRIs are exposed."
+    },
+    "entity_lookup": {
+      "status": "partial",
+      "note": "Ontology-term lookup exists, but operational stock/site identity lookup does not."
+    },
+    "identifier_crosswalks": {
+      "status": "partial",
+      "note": "The ontology can model mappings and bridge artifacts, but it is not itself the operational crosswalk graph."
+    },
+    "abundance_assessment": {
+      "status": "unknown",
+      "note": "Some shared concepts exist, but domain coverage is not yet tracked as a verified platform capability matrix."
+    },
+    "telemetry_passage": {
+      "status": "unknown",
+      "note": "Term coverage may exist, but the repo has not verified that surface as a maintained capability contract."
+    },
+    "hatchery": {
+      "status": "unknown",
+      "note": "The repo has not yet verified hatchery-semantic coverage as a maintained contract."
+    },
+    "harvest_fishery": {
+      "status": "unknown",
+      "note": "The repo has not yet verified fishery-semantic coverage as a maintained contract."
+    },
+    "genetics_gsi": {
+      "status": "unknown",
+      "note": "The repo has not yet verified genetics or GSI semantic coverage as a maintained contract."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "The ontology is a semantic layer, not a package/export engine."
+    },
+    "provenance_versioning": {
+      "status": "supported",
+      "note": "Published ontology metadata exposes version and modification details."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "Published JSON-LD is machine-readable, but there is no richer first-class API surface."
+    }
+  },
+  "blockers": [
+    "The ontology is schema, not operational instance data.",
+    "The repo does not yet maintain a verified domain-coverage matrix against every salmon subdomain."
+  ],
+  "governance_constraints": [
+    "Shared-term promotion should stay conservative and evidence-based."
+  ],
+  "related_skills": [
+    "smn-ontology-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://salmon-data-mobilization.github.io/salmon-domain-ontology/smn.jsonld",
+    "https://github.com/salmon-data-mobilization/salmon-domain-ontology",
+    "skills/smn-ontology-skill/SKILL.md",
+    "skills/smn-ontology-skill/scripts/smn_ontology_lookup.py"
+  ],
+  "watch_fields": [
+    "version metadata",
+    "JSON-LD publication surface",
+    "shared-vs-profile boundary decisions"
+  ]
+}

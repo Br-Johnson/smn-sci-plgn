@@ -2,6 +2,10 @@
 
 Purpose: keep a living register of where the salmon domain still lacks the platform maturity or rigor needed to reach parity with the Life Science Research plugin.
 
+Detailed per-platform truth now lives in:
+- [registry/platforms/](../registry/platforms/)
+- [kb/platforms/](../kb/platforms/)
+
 Update this file when:
 - a skill is added or widened
 - an upstream ontology or package version changes
@@ -22,19 +26,36 @@ These are the current parity dimensions taken from the Life Science Research plu
 | Contract-driven maintainability | Skills stay narrow, predictable, and explicit about limits, outputs, and raw-save behavior. |
 | Platform affordances | Published artifacts, scripts, docs, and versioned interfaces reduce reliance on ad hoc prompting. |
 
+## Platform Capability Categories Referenced
+
+The per-platform registry uses these normalized categories:
+
+- `discovery_search`
+- `metadata_schema`
+- `entity_lookup`
+- `identifier_crosswalks`
+- `abundance_assessment`
+- `telemetry_passage`
+- `hatchery`
+- `harvest_fishery`
+- `genetics_gsi`
+- `package_metadata_export`
+- `provenance_versioning`
+- `bulk_access_api_ergonomics`
+
 ## Current Gap Matrix
 
 | Priority | Category | Type | Current gap | Why it blocks parity | Current repo state | Next repo move |
 |---|---|---|---|---|---|---|
-| P0 | Identity and crosswalks | Platform + rigor | No canonical salmon identity graph across `CU`, `SMU`, `DU`, `ESU`, `DPS`, stock, site, hatchery, PIT, and CWT systems. | Cross-source joins remain brittle, so synthesis cannot be trusted at the same level as genetics/variant normalization in the Life Science Research plugin. | `salmon-entity-normalizer-skill` is still a seed alias matcher, not an identity service. | Build a versioned identity graph and crosswalk registry with stable IDs, aliases, lineage, and source provenance. |
-| P0 | Semantics and ontology grounding | Rigor | Ontology lookup now exists, but ontology-backed resolution rules are still thin. There is no authoritative mapping layer from real salmon platform fields to `smn` / `gcdfo` terms. | Lookup alone does not make downstream answers semantically safe. The hard part is consistent field, measure, and unit resolution. | `smn-ontology-skill` and `gcdfo-ontology-skill` can now search and fetch terms, but they do not yet drive automated crosswalks. | Add crosswalk fixtures, shared-vs-DFO resolution rules, and package-level semantic QA loops. |
-| P0 | Behavioral validation | Rigor | The repo validates structure and Python syntax, but not behavior. | Without fixtures, golden prompts, and regression tests, answers can drift silently as upstream APIs and ontologies change. | `scripts/validate_scaffold.py` only compiles Python and checks manifest/skill presence. | Add fixture-backed tests for each skill plus a small golden-prompt suite for the router and synthesis layer. |
-| P0 | Governance-aware access | Platform | Access control is connector-local and mostly environment-variable based. | Gated data sources need explicit policy-aware routing so the agent can distinguish “no data,” “no access,” and “wrong source.” | RMIS and PTAGIS surface auth expectations, but there is no shared governance metadata layer. | Add source-level access metadata, credential-scope notes, and blocked-by-governance routing behavior. |
+| P0 | Identity and crosswalks | Platform + rigor | No authoritative salmon identity graph spans `CU`, `SMU`, `DU`, `ESU`, `DPS`, stock, site, hatchery, PIT, and CWT systems. | Cross-source joins remain brittle, so synthesis cannot be trusted at the same level as genetics/variant normalization in the Life Science Research plugin. | `salmon-entity-normalizer-skill` is still a seed alias matcher. The repo now has `registry/identity-record.schema.json` and non-authoritative seed records, but not production crosswalk coverage. | Turn the seed identity layer into a versioned, evidence-backed crosswalk registry with stable IDs, aliases, lineage, and source provenance. |
+| P0 | Semantics and ontology grounding | Rigor | Ontology lookup now exists, but ontology-backed resolution rules are still thin. There is no authoritative mapping layer from real salmon platform fields to `smn` / `gcdfo` terms. | Lookup alone does not make downstream answers semantically safe. The hard part is consistent field, measure, and unit resolution. | `smn-ontology-skill` and `gcdfo-ontology-skill` can search and fetch terms, and the wiki now records the ontology-vs-identity boundary, but automated crosswalk resolution is still absent. | Add crosswalk fixtures, shared-vs-DFO resolution rules, and package-level semantic QA loops. |
+| P0 | Behavioral validation | Rigor | The repo validates structure, schemas, wiki wiring, and watch surfaces, but not answer quality. | Without fixtures, golden prompts, and regression tests, answers can drift silently as upstream APIs and ontologies change. | `scripts/validate_scaffold.py` now validates `registry/`, `kb/`, skill wiring, and live watch surfaces, but it still does not judge retrieval correctness or synthesis quality. | Add fixture-backed tests for each skill plus a small golden-prompt suite for the router and synthesis layer. |
+| P0 | Governance-aware access | Platform | Access control is still not a shared runtime policy layer. | Gated data sources need explicit policy-aware routing so the agent can distinguish “no data,” “no access,” and “wrong source.” | Platform cards now record auth models, blockers, and governance constraints, but routing behavior is still largely connector-local. | Add source-level access metadata to downstream decision logic and implement blocked-by-governance routing behavior. |
 | P1 | Source-family breadth | Platform | Coverage is still narrow relative to the Life Science Research plugin. | Missing wrappers create structural blind spots in hatchery, harvest, ocean, genetics, and stock-assessment lanes. | Current wrappers: StreamNet, PTAGIS, RMIS, DART, literature, ontology lookup, and `metasalmon`. | Add `CRITFC`, `NOAA SPS`, `NPAFC`, `NuSEDS`, `PacFIN`, and `FINS`, then rank remaining source-family gaps. |
 | P1 | Composite workflows | Platform + rigor | The repo routes and fetches, but still lacks durable multi-step workflows that reconcile evidence. | Mature parity requires workflows that convert retrieval into reproducible management or research products. | Router guidance exists; composite salmon workflows do not. | Build stock brief, watershed brief, and mixed-stock management workflows with structured outputs. |
 | P1 | Package-first semantic workflows | Platform | `metasalmon` is integrated only through a thin adapter surface. | The strongest current Salmon Data Package engine is not yet fully exposed to the plugin layer. | `metasalmon-skill` now supports runtime, catalog, `sources_for_role()`, `find_terms()`, `fetch_salmon_ontology()`, and `validate_salmon_datapackage()`. | Add safe bridges for package creation, reviewed-package reloads, gap detection, and term-request rendering. |
 | P1 | Provenance and evidence weighting | Rigor | Cross-source conflict handling is mostly narrative. | Parity with deterministic life-science synthesis requires explicit scoring, conflict notes, and reproducible output contracts. | Current source skills return summaries but no shared provenance scorecard. | Define a shared evidence-contract schema and use it in future composite workflows. |
-| P2 | Change monitoring | Platform + rigor | Skills depend on moving upstream ontologies, package interfaces, and API surfaces. | Without a watchlist, the repo will rot as upstreams evolve. | This register now records the current watch targets. | Add lightweight smoke checks against upstream version surfaces and document drift triggers. |
+| P2 | Change monitoring | Platform + rigor | Skills depend on moving upstream ontologies, package interfaces, and API surfaces. | Without a watchlist, the repo will rot as upstreams evolve. | This register, the platform cards, the wiki log, and live watch-surface checks now exist. | Deepen drift handling from visibility into automated remediation workflows and richer fixture updates. |
 
 ## Upstream Watchlist
 
@@ -53,6 +74,9 @@ Recent closures or partial closures:
 - ontology lookup is no longer missing as a skill family
 - `metasalmon` is no longer only a note in the README; there is now a thin execution skill
 - RMIS is no longer only a recommendation; there is now a real auth-aware scaffold
+- the repo now has a machine-readable platform registry
+- the repo now has a maintainer-first in-repo wiki
+- the repo now has an explicit identity/crosswalk schema boundary
 
 Still open at parity-blocking severity:
 - identity graph

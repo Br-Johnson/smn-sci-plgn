@@ -32,9 +32,12 @@ What is real now:
 - shared and DFO ontology lookup skills
 - a thin `metasalmon` execution skill
 - a living parity-gap register in `docs/platform-gap-register.md`
+- a machine-readable platform registry in `registry/`
+- a seed identity/crosswalk data layer with explicit schemas
+- a maintainer-first in-repo knowledge base in `kb/`
 
 What is still intentionally thin:
-- cross-jurisdiction identity graph
+- authoritative cross-jurisdiction identity graph coverage
 - full API coverage for salmon portals
 - hatchery, genetics, and management-data harmonization
 - composite workflows beyond router guidance
@@ -79,6 +82,15 @@ smn-sci-plgn/
 ├── docs/
 │   ├── entrypoints.md
 │   └── platform-gap-register.md
+├── registry/
+│   ├── platforms/
+│   └── identity/
+├── kb/
+│   ├── AGENTS.md
+│   ├── platforms/
+│   ├── concepts/
+│   ├── gaps/
+│   └── workflows/
 ├── skills/
 │   ├── salmon-research-router-skill/
 │   ├── salmon-entity-normalizer-skill/
@@ -251,6 +263,10 @@ The intended architecture is:
 
 `router -> normalization layer -> atomic source skills -> future composite workflows -> synthesis`
 
+The supporting data split is now:
+
+`ontologies as schema -> registry/identity as crosswalk data -> registry/platforms as source truth -> kb/ as narrative maintenance layer`
+
 Near-term workflow:
 - use the router for broad questions
 - normalize the entities
@@ -260,6 +276,7 @@ Near-term workflow:
 Canonical repo-maintenance docs:
 - [docs/entrypoints.md](./docs/entrypoints.md)
 - [docs/platform-gap-register.md](./docs/platform-gap-register.md)
+- [kb/index.md](./kb/index.md)
 
 ## Open-Source Strategy
 
@@ -286,8 +303,12 @@ This repo does not solve the deeper salmon-platform problems yet.
 The maintained register now lives here:
 - [docs/platform-gap-register.md](./docs/platform-gap-register.md)
 
+Per-platform truth now lives here:
+- [registry/platforms/](./registry/platforms/)
+- [kb/platforms/](./kb/platforms/)
+
 The highest-current blockers remain:
-- no universal salmon identity graph across `CU`, `SMU`, `DU`, `ESU`, `DPS`, stock, site, hatchery, and tag systems
+- no authoritative salmon identity graph across `CU`, `SMU`, `DU`, `ESU`, `DPS`, stock, site, hatchery, and tag systems
 - ontology lookup now exists, but ontology-backed crosswalk resolution is still thin
 - many important sources are export- or portal-first rather than API-first
 - genetics and telemetry access are partly gated by account or project governance
@@ -296,7 +317,7 @@ The highest-current blockers remain:
 
 ## Recommended Next Build Steps
 
-1. Add a first-class salmon identity graph and crosswalk registry.
+1. Turn the seed identity layer into authoritative cross-system coverage.
 2. Add behavioral tests, sample fixtures, and golden prompts for the skill suite.
 3. Expand wrappers for `CRITFC`, `NOAA SPS`, `NPAFC`, `NuSEDS`, `PacFIN`, and `FINS`.
 4. Deepen `metasalmon` coverage to package creation and post-review publication flows.

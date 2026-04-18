@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IdentityCrosswalkRecord",
+  "type": "object",
+  "required": [
+    "canonical_local_id",
+    "entity_type",
+    "identifier_scheme",
+    "identifier_value",
+    "mapped_target_id",
+    "mapping_relation",
+    "source",
+    "confidence",
+    "record_status",
+    "valid_time_or_version",
+    "notes"
+  ],
+  "properties": {
+    "canonical_local_id": {
+      "type": "string"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "identifier_scheme": {
+      "type": "string"
+    },
+    "identifier_value": {
+      "type": "string"
+    },
+    "mapped_target_id": {
+      "type": "string"
+    },
+    "mapping_relation": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "string"
+    },
+    "record_status": {
+      "type": "string"
+    },
+    "valid_time_or_version": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

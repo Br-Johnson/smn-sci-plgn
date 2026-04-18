@@ -1,0 +1,98 @@
+{
+  "platform_id": "metasalmon",
+  "platform_name": "metasalmon",
+  "owner": "DFO Pacific Science",
+  "canonical_urls": [
+    "https://github.com/dfo-pacific-science/metasalmon",
+    "https://dfo-pacific-science.github.io/metasalmon/"
+  ],
+  "docs_urls": [
+    "https://dfo-pacific-science.github.io/metasalmon/",
+    "https://github.com/dfo-pacific-science/metasalmon"
+  ],
+  "auth_access_model": "The package is locally executable when installed; some optional LLM or remote-source actions depend on external credentials.",
+  "data_domains": [
+    "Salmon Data Package creation",
+    "semantic term search",
+    "package validation",
+    "ontology fetch",
+    "publication helpers"
+  ],
+  "identifier_systems": [
+    "Salmon Data Package dataset IDs",
+    "table IDs",
+    "semantic IRIs"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "supported",
+      "note": "Role-aware term search is implemented through `find_terms()`."
+    },
+    "metadata_schema": {
+      "status": "supported",
+      "note": "Package metadata, dictionaries, and validation workflows are core package features."
+    },
+    "entity_lookup": {
+      "status": "partial",
+      "note": "The package can search semantic terms, but it is not an operational salmon identity graph."
+    },
+    "identifier_crosswalks": {
+      "status": "partial",
+      "note": "The package supports semantic reconciliation and term requests, but not full operational crosswalk resolution."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "The package is not an assessment data platform."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "The package is not a telemetry platform."
+    },
+    "hatchery": {
+      "status": "missing",
+      "note": "No hatchery-specific workflow is exposed in the current skill."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "No harvest or fishery-specific workflow is exposed in the current skill."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "No genetics or GSI-specific workflow is exposed in the current skill."
+    },
+    "package_metadata_export": {
+      "status": "supported",
+      "note": "Package validation and package-oriented workflows are the core value of `metasalmon`."
+    },
+    "provenance_versioning": {
+      "status": "partial",
+      "note": "Ontology fetch caching and package checks help, but the plugin does not yet expose the full provenance and publication workflow."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "The current adapter is local-R based rather than a full external API wrapper."
+    }
+  },
+  "blockers": [
+    "The plugin only exposes a thin adapter surface today.",
+    "Some advanced workflows depend on local package installation and optional credentials."
+  ],
+  "governance_constraints": [
+    "LLM-assisted features and publication helpers may depend on external provider setup and human review."
+  ],
+  "related_skills": [
+    "metasalmon-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://dfo-pacific-science.github.io/metasalmon/",
+    "https://github.com/dfo-pacific-science/metasalmon",
+    "skills/metasalmon-skill/SKILL.md",
+    "skills/metasalmon-skill/scripts/metasalmon_api.py"
+  ],
+  "watch_fields": [
+    "package version",
+    "exported function signatures",
+    "runtime dependency requirements"
+  ]
+}

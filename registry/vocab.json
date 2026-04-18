@@ -1,0 +1,51 @@
+{
+  "capability_statuses": [
+    "supported",
+    "partial",
+    "missing",
+    "gated",
+    "unknown"
+  ],
+  "capability_categories": [
+    "discovery_search",
+    "metadata_schema",
+    "entity_lookup",
+    "identifier_crosswalks",
+    "abundance_assessment",
+    "telemetry_passage",
+    "hatchery",
+    "harvest_fishery",
+    "genetics_gsi",
+    "package_metadata_export",
+    "provenance_versioning",
+    "bulk_access_api_ergonomics"
+  ],
+  "identity_entity_types": [
+    "stock_unit",
+    "management_unit",
+    "site",
+    "hatchery",
+    "tag_group",
+    "release_group",
+    "dataset"
+  ],
+  "mapping_relations": [
+    "same_as",
+    "close_match",
+    "broader_than",
+    "narrower_than",
+    "related_to",
+    "member_of"
+  ],
+  "confidence_levels": [
+    "low",
+    "medium",
+    "high"
+  ],
+  "identity_record_statuses": [
+    "seed",
+    "provisional",
+    "validated",
+    "deprecated"
+  ]
+}

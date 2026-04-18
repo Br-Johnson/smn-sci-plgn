@@ -1,0 +1,44 @@
+{
+  "skills": [
+    {
+      "skill": "streamnet-api-skill",
+      "platform_id": "streamnet",
+      "kb_page": "kb/platforms/streamnet.md"
+    },
+    {
+      "skill": "ptagis-skill",
+      "platform_id": "ptagis",
+      "kb_page": "kb/platforms/ptagis.md"
+    },
+    {
+      "skill": "rmis-skill",
+      "platform_id": "rmis",
+      "kb_page": "kb/platforms/rmis.md"
+    },
+    {
+      "skill": "dart-query-skill",
+      "platform_id": "dart",
+      "kb_page": "kb/platforms/dart.md"
+    },
+    {
+      "skill": "salmon-literature-skill",
+      "platform_id": "pubmed",
+      "kb_page": "kb/platforms/pubmed.md"
+    },
+    {
+      "skill": "smn-ontology-skill",
+      "platform_id": "smn-ontology",
+      "kb_page": "kb/platforms/smn-ontology.md"
+    },
+    {
+      "skill": "gcdfo-ontology-skill",
+      "platform_id": "gcdfo-ontology",
+      "kb_page": "kb/platforms/gcdfo-ontology.md"
+    },
+    {
+      "skill": "metasalmon-skill",
+      "platform_id": "metasalmon",
+      "kb_page": "kb/platforms/metasalmon.md"
+    }
+  ]
+}

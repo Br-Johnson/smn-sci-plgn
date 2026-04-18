@@ -1,0 +1,94 @@
+{
+  "platform_id": "dart",
+  "platform_name": "Columbia River DART",
+  "owner": "Columbia Basin Research, University of Washington",
+  "canonical_urls": [
+    "https://www.cbr.washington.edu/dart/",
+    "https://www.cbr.washington.edu/"
+  ],
+  "docs_urls": [
+    "https://www.cbr.washington.edu/dart/overview"
+  ],
+  "auth_access_model": "The current scaffold uses public page surfaces with no auth requirement.",
+  "data_domains": [
+    "adult passage counts",
+    "juvenile PIT observations",
+    "river and basin conditions",
+    "hatchery release context"
+  ],
+  "identifier_systems": [
+    "DART query paths",
+    "catalog entry names"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "supported",
+      "note": "The catalog skill provides page discovery across key DART surfaces."
+    },
+    "metadata_schema": {
+      "status": "missing",
+      "note": "No structured schema or parameter contract is modeled."
+    },
+    "entity_lookup": {
+      "status": "missing",
+      "note": "No canonical entity lookup is implemented."
+    },
+    "identifier_crosswalks": {
+      "status": "missing",
+      "note": "Cross-system identifier mapping is not implemented."
+    },
+    "abundance_assessment": {
+      "status": "partial",
+      "note": "Adult-passage surfaces are discoverable, but no structured extraction workflow exists."
+    },
+    "telemetry_passage": {
+      "status": "partial",
+      "note": "Passage and PIT-oriented pages are discoverable, but not yet extracted into structured records."
+    },
+    "hatchery": {
+      "status": "partial",
+      "note": "Hatchery-release query surfaces are discoverable."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "Harvest and fishery workflows are not implemented."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Genetics and GSI workflows are not implemented."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "No package/export workflow is implemented."
+    },
+    "provenance_versioning": {
+      "status": "missing",
+      "note": "The scaffold does not expose version or provenance contracts for DART pages."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "Public surfaces are easy to reach, but the current skill is page-discovery only."
+    }
+  },
+  "blockers": [
+    "The skill is a catalog helper rather than a structured extractor.",
+    "Page-level HTML discovery leaves parameter and schema handling implicit."
+  ],
+  "governance_constraints": [
+    "The current public-page workflow is open, but downstream structured reuse still depends on page stability."
+  ],
+  "related_skills": [
+    "dart-query-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://www.cbr.washington.edu/dart/overview",
+    "skills/dart-query-skill/SKILL.md",
+    "skills/dart-query-skill/scripts/dart_query_catalog.py"
+  ],
+  "watch_fields": [
+    "query-page paths",
+    "page titles and descriptions",
+    "public HTML structure"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PlatformCard",
+  "type": "object",
+  "required": [
+    "platform_id",
+    "platform_name",
+    "owner",
+    "canonical_urls",
+    "docs_urls",
+    "auth_access_model",
+    "data_domains",
+    "identifier_systems",
+    "capabilities",
+    "blockers",
+    "governance_constraints",
+    "related_skills",
+    "last_verified_date",
+    "evidence_links",
+    "watch_fields"
+  ],
+  "properties": {
+    "platform_id": {
+      "type": "string"
+    },
+    "platform_name": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "canonical_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "docs_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "auth_access_model": {
+      "type": "string"
+    },
+    "data_domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "identifier_systems": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "Map from capability category to a status-and-note object."
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "governance_constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_verified_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "watch_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

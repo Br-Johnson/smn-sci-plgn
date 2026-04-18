@@ -1,0 +1,99 @@
+{
+  "platform_id": "rmis",
+  "platform_name": "RMIS / RMPC API",
+  "owner": "PSMFC Regional Mark Processing Center",
+  "canonical_urls": [
+    "https://phish.rmis.org",
+    "https://www.rmis.org/"
+  ],
+  "docs_urls": [
+    "https://www.rmpc.org/submission/api/",
+    "https://github.com/PSMFC-Streamnet-RMPC/api-docs"
+  ],
+  "auth_access_model": "The public announcement page is open, but data endpoints require an API key or authorization token.",
+  "data_domains": [
+    "coded-wire-tag release and recovery data",
+    "catch samples",
+    "location records",
+    "system status"
+  ],
+  "identifier_systems": [
+    "RMIS release records",
+    "RMIS recovery records",
+    "RMIS location records"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "partial",
+      "note": "Query-string filtering and search exist, but all substantive data access is authenticated."
+    },
+    "metadata_schema": {
+      "status": "partial",
+      "note": "The description endpoint and public docs help, but no full schema browser is wrapped."
+    },
+    "entity_lookup": {
+      "status": "partial",
+      "note": "Location and description endpoints are available, but not a canonical identity layer."
+    },
+    "identifier_crosswalks": {
+      "status": "partial",
+      "note": "Release, recovery, and location surfaces can support crosswalk work, but no explicit crosswalk workflow exists."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "Assessment workflows are not implemented."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "Telemetry and passage workflows are not part of RMIS."
+    },
+    "hatchery": {
+      "status": "partial",
+      "note": "Release-oriented data can inform hatchery context, but no hatchery workflow is implemented."
+    },
+    "harvest_fishery": {
+      "status": "partial",
+      "note": "Recovery and catch-sample endpoints expose fishery-relevant context."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Genetics and GSI workflows are not implemented."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "No package/export workflow is implemented."
+    },
+    "provenance_versioning": {
+      "status": "partial",
+      "note": "The public announcement surface exposes the current RMIS version, but no richer provenance contract is modeled."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "The API is machine-readable, but auth and reporting/API split surfaces add friction."
+    }
+  },
+  "blockers": [
+    "Authenticated access is required for useful data retrieval.",
+    "The current wrapper exposes only a narrow slice of the full API surface."
+  ],
+  "governance_constraints": [
+    "The agent must treat RMIS as access-controlled rather than public-by-default."
+  ],
+  "related_skills": [
+    "rmis-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://www.rmpc.org/submission/api/",
+    "https://www.rmis.org/include/rmis_announce.html",
+    "skills/rmis-skill/SKILL.md",
+    "skills/rmis-skill/references/rmis-access.md",
+    "skills/rmis-skill/scripts/rmis_api.py"
+  ],
+  "watch_fields": [
+    "auth model",
+    "endpoint surface",
+    "public version announcement",
+    "query syntax"
+  ]
+}

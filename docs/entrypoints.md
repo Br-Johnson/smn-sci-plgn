@@ -12,6 +12,9 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 
 - Repo overview and setup: `README.md`
 - Living parity-gap register: `docs/platform-gap-register.md`
+- Machine-readable platform truth: `registry/platforms/`
+- Maintainer-first wiki navigation: `kb/index.md`
+- Wiki maintenance rules: `kb/AGENTS.md`
 
 ## Canonical Skill Entry Points
 
@@ -30,9 +33,20 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 
 - Shared JSON-LD ontology lookup helper: `scripts/ontology_lookup_common.py`
 - Shared stdlib helper utilities: `scripts/_common.py`
+- Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`
+
+## Canonical Data Contracts
+
+- Platform card contract: `registry/platform-card.schema.json`
+- Identity/crosswalk record contract: `registry/identity-record.schema.json`
+- Vocabulary for platform and identity status fields: `registry/vocab.json`
+- Skill-to-platform mapping: `registry/skill-platform-map.json`
 
 ## What To Edit
 
 - Add or widen a source skill: `skills/<skill-name>/`
 - Update the maintained parity and rigor view: `docs/platform-gap-register.md`
+- Update source-specific truth: `registry/platforms/<platform>.json`
+- Update seed identity/crosswalk scaffolding: `registry/identity/seed-crosswalks.json`
+- Update narrative platform knowledge: `kb/platforms/` and `kb/concepts/`
 - Change user-facing repo scope or setup: `README.md`

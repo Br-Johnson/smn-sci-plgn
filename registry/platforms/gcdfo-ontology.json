@@ -1,0 +1,95 @@
+{
+  "platform_id": "gcdfo-ontology",
+  "platform_name": "DFO Salmon Ontology (`gcdfo`)",
+  "owner": "DFO Pacific Science",
+  "canonical_urls": [
+    "https://w3id.org/gcdfo/salmon",
+    "https://dfo-pacific-science.github.io/dfo-salmon-ontology/"
+  ],
+  "docs_urls": [
+    "https://dfo-pacific-science.github.io/dfo-salmon-ontology/gcdfo.jsonld",
+    "https://github.com/dfo-pacific-science/dfo-salmon-ontology"
+  ],
+  "auth_access_model": "The published ontology artifacts are currently public and readable without credentials.",
+  "data_domains": [
+    "DFO-specific salmon semantics",
+    "program and profile-scoped ontology terms",
+    "shared-vs-DFO boundary decisions"
+  ],
+  "identifier_systems": [
+    "gcdfo IRIs",
+    "DFO-specific OWL and SKOS term identifiers"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "supported",
+      "note": "The current skill searches and fetches published JSON-LD terms."
+    },
+    "metadata_schema": {
+      "status": "supported",
+      "note": "Ontology metadata, labels, definitions, and DFO-specific term IRIs are exposed."
+    },
+    "entity_lookup": {
+      "status": "partial",
+      "note": "Ontology-term lookup exists, but operational stock/site identity lookup does not."
+    },
+    "identifier_crosswalks": {
+      "status": "partial",
+      "note": "The ontology can model DFO-specific mapping context, but it is not the operational identity graph."
+    },
+    "abundance_assessment": {
+      "status": "unknown",
+      "note": "The repo has not yet verified DFO assessment-semantic coverage as a maintained capability contract."
+    },
+    "telemetry_passage": {
+      "status": "unknown",
+      "note": "The repo has not yet verified DFO telemetry or passage semantic coverage as a maintained capability contract."
+    },
+    "hatchery": {
+      "status": "unknown",
+      "note": "The repo has not yet verified DFO hatchery-semantic coverage as a maintained capability contract."
+    },
+    "harvest_fishery": {
+      "status": "unknown",
+      "note": "The repo has not yet verified DFO fishery-semantic coverage as a maintained capability contract."
+    },
+    "genetics_gsi": {
+      "status": "unknown",
+      "note": "The repo has not yet verified DFO genetics or GSI semantic coverage as a maintained capability contract."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "The ontology is a semantic layer, not a package/export engine."
+    },
+    "provenance_versioning": {
+      "status": "supported",
+      "note": "Published ontology metadata exposes version, import, and modification details."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "Published JSON-LD is machine-readable, but there is no richer first-class API surface."
+    }
+  },
+  "blockers": [
+    "The ontology is schema, not operational instance data.",
+    "Coverage claims beyond term lookup are not yet maintained as verified platform capabilities."
+  ],
+  "governance_constraints": [
+    "DFO-specific terms should remain separate from shared `smn` terms unless explicit promotion criteria are met."
+  ],
+  "related_skills": [
+    "gcdfo-ontology-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://dfo-pacific-science.github.io/dfo-salmon-ontology/gcdfo.jsonld",
+    "https://github.com/dfo-pacific-science/dfo-salmon-ontology",
+    "skills/gcdfo-ontology-skill/SKILL.md",
+    "skills/gcdfo-ontology-skill/scripts/gcdfo_ontology_lookup.py"
+  ],
+  "watch_fields": [
+    "version metadata",
+    "JSON-LD publication surface",
+    "shared-vs-DFO boundary decisions"
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "platform_id": "streamnet",
+  "platform_name": "StreamNet",
+  "owner": "StreamNet",
+  "canonical_urls": [
+    "https://api.streamnet.org",
+    "https://www.streamnet.org/"
+  ],
+  "docs_urls": [
+    "https://www.streamnet.org/resources/exchange-tools/rest-api-documentation/"
+  ],
+  "auth_access_model": "The scaffold expects an API key for most real REST calls via STREAMNET_API_KEY.",
+  "data_domains": [
+    "coordinated assessment metadata",
+    "status and abundance records"
+  ],
+  "identifier_systems": [
+    "Coordinated Assessment table IDs",
+    "StreamNet record IDs"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "partial",
+      "note": "The current skill lists tables but does not expose a broad search surface."
+    },
+    "metadata_schema": {
+      "status": "supported",
+      "note": "Table listing and table schema fetch are implemented."
+    },
+    "entity_lookup": {
+      "status": "missing",
+      "note": "No canonical stock, site, or hatchery identity lookup is exposed."
+    },
+    "identifier_crosswalks": {
+      "status": "missing",
+      "note": "Cross-system identifier reconciliation is not surfaced."
+    },
+    "abundance_assessment": {
+      "status": "supported",
+      "note": "Coordinated Assessment records are available through the wrapper."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "This scaffold does not expose telemetry or passage surfaces from StreamNet."
+    },
+    "hatchery": {
+      "status": "missing",
+      "note": "No hatchery-oriented access path is implemented."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "Harvest and fishery workflows are not implemented."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Genetics and GSI workflows are not implemented."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "There is no package/export workflow in the current wrapper."
+    },
+    "provenance_versioning": {
+      "status": "partial",
+      "note": "The API exposes updated filters, but the scaffold does not model full provenance/version contracts."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "The REST surface is machine-readable, but live use is narrow and API-key dependent."
+    }
+  },
+  "blockers": [
+    "Live access depends on API credentials.",
+    "The wrapper currently covers only a narrow Coordinated Assessment slice."
+  ],
+  "governance_constraints": [
+    "Credential-gated access means the agent must distinguish unsupported from unauthorized."
+  ],
+  "related_skills": [
+    "streamnet-api-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://www.streamnet.org/resources/exchange-tools/rest-api-documentation/",
+    "skills/streamnet-api-skill/SKILL.md",
+    "skills/streamnet-api-skill/scripts/streamnet_api.py"
+  ],
+  "watch_fields": [
+    "auth model",
+    "Coordinated Assessment endpoint surface",
+    "table schema shape"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "platform_id": "pubmed",
+  "platform_name": "PubMed via NCBI E-utilities",
+  "owner": "NCBI",
+  "canonical_urls": [
+    "https://pubmed.ncbi.nlm.nih.gov/",
+    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+  ],
+  "docs_urls": [
+    "https://www.ncbi.nlm.nih.gov/books/NBK25501/"
+  ],
+  "auth_access_model": "The current literature wrapper uses public E-utilities without a private auth requirement.",
+  "data_domains": [
+    "salmon-related literature discovery",
+    "article metadata"
+  ],
+  "identifier_systems": [
+    "PMID"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "supported",
+      "note": "Query search is implemented with bounded retmax."
+    },
+    "metadata_schema": {
+      "status": "partial",
+      "note": "Article summary metadata is available, but no richer schema contract is modeled."
+    },
+    "entity_lookup": {
+      "status": "missing",
+      "note": "The current skill is topic and article oriented, not canonical entity lookup."
+    },
+    "identifier_crosswalks": {
+      "status": "missing",
+      "note": "Cross-system identifier mapping is not implemented."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "This platform is literature, not a direct assessment data source."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "This platform is literature, not a telemetry platform."
+    },
+    "hatchery": {
+      "status": "missing",
+      "note": "This platform is literature, not a hatchery platform."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "This platform is literature, not a fishery data platform."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "This skill does not expose genetics or GSI-specific retrieval."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "No package/export workflow is implemented."
+    },
+    "provenance_versioning": {
+      "status": "supported",
+      "note": "PMIDs, publication metadata, and source URLs provide stable citation context."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "supported",
+      "note": "NCBI E-utilities are easy to query from the current stdlib wrapper."
+    }
+  },
+  "blockers": [
+    "The skill is intentionally compact and does not cover the wider Entrez or PMC surface."
+  ],
+  "governance_constraints": [
+    "Public access is straightforward, but query volume should still be kept modest."
+  ],
+  "related_skills": [
+    "salmon-literature-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://www.ncbi.nlm.nih.gov/books/NBK25501/",
+    "skills/salmon-literature-skill/SKILL.md",
+    "skills/salmon-literature-skill/scripts/salmon_literature.py"
+  ],
+  "watch_fields": [
+    "E-utilities parameter contract",
+    "summary payload shape",
+    "rate-limit guidance"
+  ]
+}

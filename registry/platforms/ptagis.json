@@ -1,0 +1,95 @@
+{
+  "platform_id": "ptagis",
+  "platform_name": "PTAGIS",
+  "owner": "PTAGIS",
+  "canonical_urls": [
+    "https://api.ptagis.org",
+    "https://www.ptagis.org/"
+  ],
+  "docs_urls": [
+    "https://www.ptagis.org/Content/DataSpecification/topics/api.htm"
+  ],
+  "auth_access_model": "Many useful calls require a bearer token via PTAGIS_API_TOKEN or PTAGIS_API_KEY.",
+  "data_domains": [
+    "PIT-tag observation access",
+    "site metadata",
+    "validation-code metadata",
+    "report listings"
+  ],
+  "identifier_systems": [
+    "PTAGIS site codes",
+    "MRR project codes",
+    "report names"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "partial",
+      "note": "There is metadata discovery for reports and site codes, but not a broad search workflow."
+    },
+    "metadata_schema": {
+      "status": "partial",
+      "note": "Validation-code and site metadata are exposed, but no general schema browser exists."
+    },
+    "entity_lookup": {
+      "status": "partial",
+      "note": "Site-code access exists, but there is no canonical entity service."
+    },
+    "identifier_crosswalks": {
+      "status": "missing",
+      "note": "Cross-system identifier mapping is not exposed."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "Assessment or abundance workflows are not implemented here."
+    },
+    "telemetry_passage": {
+      "status": "supported",
+      "note": "Site observations and interrogation files are implemented."
+    },
+    "hatchery": {
+      "status": "partial",
+      "note": "MRR-oriented metadata exists, but hatchery workflows are not explicit."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "Harvest and fishery workflows are not implemented."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Genetics and GSI workflows are not implemented."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "No package or export workflow is implemented."
+    },
+    "provenance_versioning": {
+      "status": "partial",
+      "note": "Revision metadata exists for validation codes, but the wrapper does not model a full provenance contract."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "The API is structured, but useful calls are often token-gated and the wrapper is narrow."
+    }
+  },
+  "blockers": [
+    "Bearer-token requirements gate many high-value calls.",
+    "The current wrapper is intentionally narrow."
+  ],
+  "governance_constraints": [
+    "Access should be treated as governance-aware rather than universally available."
+  ],
+  "related_skills": [
+    "ptagis-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://www.ptagis.org/Content/DataSpecification/topics/api.htm",
+    "skills/ptagis-skill/SKILL.md",
+    "skills/ptagis-skill/scripts/ptagis_api.py"
+  ],
+  "watch_fields": [
+    "bearer-token requirements",
+    "reporting endpoint surface",
+    "validation-code endpoint set"
+  ]
+}
