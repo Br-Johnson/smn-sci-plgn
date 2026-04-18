@@ -33,6 +33,7 @@ What is real now:
 - a thin `metasalmon` execution skill
 - a living parity-gap register in `docs/platform-gap-register.md`
 - a machine-readable platform registry in `registry/`
+- a typed router-adjacent skill graph in `registry/skill-graph.json`
 - a seed identity/crosswalk data layer with explicit schemas
 - a maintainer-first in-repo knowledge base in `kb/`
 
@@ -83,6 +84,8 @@ smn-sci-plgn/
 │   ├── entrypoints.md
 │   └── platform-gap-register.md
 ├── registry/
+│   ├── skill-graph.json
+│   ├── skill-graph.schema.json
 │   ├── platforms/
 │   └── identity/
 ├── kb/
@@ -261,15 +264,17 @@ Repo:
 
 The intended architecture is:
 
-`router -> normalization layer -> atomic source skills -> future composite workflows -> synthesis`
+`router -> semantic or lexical seed -> normalization layer -> skill-graph expansion -> atomic source skills -> future composite workflows -> synthesis`
 
 The supporting data split is now:
 
-`ontologies as schema -> registry/identity as crosswalk data -> registry/platforms as source truth -> kb/ as narrative maintenance layer`
+`ontologies as schema -> registry/identity as crosswalk data -> registry/platforms as source truth -> registry/skill-graph as routing topology -> kb/ as narrative maintenance layer`
 
 Near-term workflow:
 - use the router for broad questions
+- seed 1 to 3 candidate lanes
 - normalize the entities
+- expand through the skill graph
 - call one or more source skills
 - synthesize findings with caveats
 
@@ -319,10 +324,11 @@ The highest-current blockers remain:
 
 1. Turn the seed identity layer into authoritative cross-system coverage.
 2. Add behavioral tests, sample fixtures, and golden prompts for the skill suite.
-3. Expand wrappers for `CRITFC`, `NOAA SPS`, `NPAFC`, `NuSEDS`, `PacFIN`, and `FINS`.
-4. Deepen `metasalmon` coverage to package creation and post-review publication flows.
-5. Add composite workflows for stock briefs, watershed risk briefs, and mixed-stock management briefs.
-6. Add governance-aware access metadata for gated sources and credential scopes.
+3. Add fixture-backed graph-routing cases and capability-aware subgraph selection.
+4. Expand wrappers for `CRITFC`, `NOAA SPS`, `NPAFC`, `NuSEDS`, `PacFIN`, and `FINS`.
+5. Deepen `metasalmon` coverage to package creation and post-review publication flows.
+6. Add composite workflows for stock briefs, watershed risk briefs, and mixed-stock management briefs.
+7. Add governance-aware access metadata for gated sources and credential scopes.
 
 ## Sources Used For This Scaffold
 

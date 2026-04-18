@@ -20,6 +20,19 @@
     "provenance_versioning",
     "bulk_access_api_ergonomics"
   ],
+  "skill_graph_node_types": [
+    "skill",
+    "platform",
+    "lane",
+    "governance_tag"
+  ],
+  "skill_graph_edge_relations": [
+    "routes_to",
+    "depends_on",
+    "compose_with",
+    "uses_platform",
+    "constrained_by"
+  ],
   "identity_entity_types": [
     "stock_unit",
     "management_unit",

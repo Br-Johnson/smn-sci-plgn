@@ -13,6 +13,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Repo overview and setup: `README.md`
 - Living parity-gap register: `docs/platform-gap-register.md`
 - Machine-readable platform truth: `registry/platforms/`
+- Machine-readable routing topology: `registry/skill-graph.json`
 - Maintainer-first wiki navigation: `kb/index.md`
 - Wiki maintenance rules: `kb/AGENTS.md`
 
@@ -39,12 +40,16 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 
 - Platform card contract: `registry/platform-card.schema.json`
 - Identity/crosswalk record contract: `registry/identity-record.schema.json`
+- Skill-graph contract: `registry/skill-graph.schema.json`
+- Skill-graph topology: `registry/skill-graph.json`
 - Vocabulary for platform and identity status fields: `registry/vocab.json`
 - Skill-to-platform mapping: `registry/skill-platform-map.json`
 
 ## What To Edit
 
 - Add or widen a source skill: `skills/<skill-name>/`
+- Change router topology or typed skill relations: `registry/skill-graph.json`
+- Change router graph-selection guidance: `skills/salmon-research-router-skill/references/skill-graph-routing.md`
 - Update the maintained parity and rigor view: `docs/platform-gap-register.md`
 - Update source-specific truth: `registry/platforms/<platform>.json`
 - Update seed identity/crosswalk scaffolding: `registry/identity/seed-crosswalks.json`

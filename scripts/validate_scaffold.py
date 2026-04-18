@@ -30,6 +30,13 @@ def require_string_list(value, label: str) -> None:
         require(isinstance(item, str) and item.strip(), f"{label} must contain non-empty strings")
 
 
+def require_existing_path_or_url(repo_root: Path, value: str, label: str) -> None:
+    require(isinstance(value, str) and value.strip(), f"{label} must be a non-empty string")
+    if value.startswith("http://") or value.startswith("https://"):
+        return
+    require((repo_root / value).exists(), f"{label} references a missing path: {value}")
+
+
 def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
     registry_root = repo_root / "registry"
     vocab = load_json(registry_root / "vocab.json")
@@ -118,6 +125,135 @@ def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
         "platform_card_count": len(platform_cards),
         "mapped_external_skills": len(seen_mapped_skills),
         "identity_record_count": len(identity_records),
+    }
+
+
+def validate_skill_graph(repo_root: Path, skill_names: list[str]) -> dict:
+    registry_root = repo_root / "registry"
+    vocab = load_json(registry_root / "vocab.json")
+    graph_schema = load_json(registry_root / "skill-graph.schema.json")
+    graph = load_json(registry_root / "skill-graph.json")
+    skill_map = load_json(registry_root / "skill-platform-map.json")
+
+    node_required = graph_schema["properties"]["nodes"]["items"]["required"]
+    edge_required = graph_schema["properties"]["edges"]["items"]["required"]
+    node_types = set(vocab["skill_graph_node_types"])
+    edge_relations = set(vocab["skill_graph_edge_relations"])
+    platform_ids = {path.stem for path in (registry_root / "platforms").glob("*.json")}
+
+    for field in graph_schema["required"]:
+        require(field in graph, f"registry/skill-graph.json missing field: {field}")
+    require(isinstance(graph["graph_version"], str) and graph["graph_version"].strip(), "registry/skill-graph.json graph_version must be a non-empty string")
+    require(isinstance(graph["last_updated"], str) and DATE_RE.fullmatch(graph["last_updated"]), "registry/skill-graph.json last_updated must be a date")
+    require(isinstance(graph["description"], str) and graph["description"].strip(), "registry/skill-graph.json description must be a non-empty string")
+
+    nodes = graph["nodes"]
+    edges = graph["edges"]
+    require(isinstance(nodes, list) and nodes, "registry/skill-graph.json must contain nodes")
+    require(isinstance(edges, list) and edges, "registry/skill-graph.json must contain edges")
+
+    node_lookup: dict[str, dict] = {}
+    lane_node_ids: set[str] = set()
+    skill_node_names: set[str] = set()
+    platform_node_ids: set[str] = set()
+
+    for index, node in enumerate(nodes):
+        label = f"skill-graph node {index}"
+        require(isinstance(node, dict), f"{label} must be an object")
+        for field in node_required:
+            require(field in node, f"{label} missing field: {field}")
+        node_id = node["id"]
+        node_type = node["type"]
+        require(isinstance(node_id, str) and node_id.strip(), f"{label} has invalid id")
+        require(node_id not in node_lookup, f"duplicate skill-graph node id: {node_id}")
+        require(node_type in node_types, f"{label} has invalid type: {node_type}")
+        require(isinstance(node["label"], str) and node["label"].strip(), f"{label} has invalid label")
+        require(isinstance(node["description"], str) and node["description"].strip(), f"{label} has invalid description")
+        if "entrypoint" in node:
+            require_existing_path_or_url(repo_root, node["entrypoint"], f"{label} entrypoint")
+        if "lane_tags" in node:
+            require_string_list(node["lane_tags"], f"{label} lane_tags")
+        if node_type == "skill":
+            require(node_id.startswith("skill:"), f"{label} must use a skill: prefix")
+            skill_name = node_id.split(":", 1)[1]
+            require(skill_name in skill_names, f"{label} references unknown skill {skill_name}")
+            skill_node_names.add(skill_name)
+        elif node_type == "platform":
+            require(node_id.startswith("platform:"), f"{label} must use a platform: prefix")
+            platform_id = node.get("platform_id")
+            require(isinstance(platform_id, str) and platform_id in platform_ids, f"{label} has invalid platform_id")
+            platform_node_ids.add(platform_id)
+            if "platform_card" in node:
+                require_existing_path_or_url(repo_root, node["platform_card"], f"{label} platform_card")
+        elif node_type == "lane":
+            require(node_id.startswith("lane:"), f"{label} must use a lane: prefix")
+            lane_node_ids.add(node_id)
+        elif node_type == "governance_tag":
+            require(node_id.startswith("governance:"), f"{label} must use a governance: prefix")
+        node_lookup[node_id] = node
+
+    require(skill_node_names == set(skill_names), "skill graph must contain exactly one node for every repo skill")
+    require(platform_node_ids == platform_ids, "skill graph must contain exactly one node for every platform card")
+    require(lane_node_ids, "skill graph must contain at least one lane node")
+
+    for node_id, node in node_lookup.items():
+        for lane_tag in node.get("lane_tags", []):
+            require(lane_tag in lane_node_ids, f"{node_id} references unknown lane tag {lane_tag}")
+
+    expected_skill_platform_pairs = {
+        (entry["skill"], entry["platform_id"])
+        for entry in skill_map["skills"]
+    }
+    actual_skill_platform_pairs: set[tuple[str, str]] = set()
+    lane_route_counts = {lane_id: 0 for lane_id in lane_node_ids}
+    router_route_count = 0
+
+    for index, edge in enumerate(edges):
+        label = f"skill-graph edge {index}"
+        require(isinstance(edge, dict), f"{label} must be an object")
+        for field in edge_required:
+            require(field in edge, f"{label} missing field: {field}")
+        source = edge["source"]
+        relation = edge["relation"]
+        target = edge["target"]
+        require(source in node_lookup, f"{label} references unknown source {source}")
+        require(target in node_lookup, f"{label} references unknown target {target}")
+        require(relation in edge_relations, f"{label} has invalid relation {relation}")
+        require(isinstance(edge["rationale"], str) and edge["rationale"].strip(), f"{label} has invalid rationale")
+        require_string_list(edge["evidence_refs"], f"{label} evidence_refs")
+        for ref in edge["evidence_refs"]:
+            require_existing_path_or_url(repo_root, ref, f"{label} evidence ref")
+
+        source_type = node_lookup[source]["type"]
+        target_type = node_lookup[target]["type"]
+
+        if relation == "routes_to":
+            require((source_type, target_type) in {("skill", "lane"), ("lane", "skill")}, f"{label} has invalid routes_to topology")
+            if source == "skill:salmon-research-router-skill":
+                router_route_count += 1
+            if source_type == "lane":
+                lane_route_counts[source] += 1
+        elif relation in {"depends_on", "compose_with"}:
+            require(source_type == "skill" and target_type == "skill", f"{label} must connect skill to skill")
+        elif relation == "uses_platform":
+            require(source_type == "skill" and target_type == "platform", f"{label} must connect skill to platform")
+            actual_skill_platform_pairs.add((source.split(":", 1)[1], target.split(":", 1)[1]))
+        elif relation == "constrained_by":
+            require(source_type in {"skill", "platform", "lane"} and target_type == "governance_tag", f"{label} must point to a governance tag")
+
+    require(router_route_count > 0, "skill graph must route from the router to at least one lane")
+    require(all(count > 0 for count in lane_route_counts.values()), "every lane node must route to at least one skill")
+    require(actual_skill_platform_pairs == expected_skill_platform_pairs, "skill graph uses_platform edges must match registry/skill-platform-map.json exactly")
+
+    router_graph_ref = repo_root / "skills" / "salmon-research-router-skill" / "references" / "skill-graph-routing.md"
+    require(router_graph_ref.exists(), "router graph routing reference is missing")
+    router_skill_text = (repo_root / "skills" / "salmon-research-router-skill" / "SKILL.md").read_text(encoding="utf-8")
+    require("skill-graph-routing.md" in router_skill_text, "router SKILL.md must link to the graph routing reference")
+
+    return {
+        "node_count": len(nodes),
+        "edge_count": len(edges),
+        "lane_count": len(lane_node_ids),
     }
 
 
@@ -281,6 +417,7 @@ def main() -> None:
         py_compile.compile(str(path), doraise=True)
 
     registry_stats = validate_platform_registry(repo_root, skill_names)
+    skill_graph_stats = validate_skill_graph(repo_root, skill_names)
     kb_stats = validate_kb(repo_root)
     vocab = load_json(repo_root / "registry" / "vocab.json")
     validate_gap_register(repo_root, vocab["capability_categories"])
@@ -310,6 +447,7 @@ def main() -> None:
         "skills": skill_names,
         "python_files_compiled": len(python_files),
         "registry": registry_stats,
+        "skill_graph": skill_graph_stats,
         "kb": kb_stats,
         "watch_surface_checks": watch_surface_checks,
         "warnings": warnings,

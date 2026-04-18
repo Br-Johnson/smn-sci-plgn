@@ -5,6 +5,7 @@ Maintainer-first knowledge base for the salmon plugin scaffold.
 Canonical structured truth:
 - [platform gap register](../docs/platform-gap-register.md)
 - [platform registry](../registry/)
+- [skill graph](../registry/skill-graph.json)
 - [identity seed records](../registry/identity/seed-crosswalks.json)
 
 ## Concepts
@@ -13,6 +14,7 @@ Canonical structured truth:
 - [Crosswalks and provenance](concepts/crosswalks-and-provenance.md): minimum record fields and approval rules for cross-system mappings.
 - [Shared vs DFO term boundary](concepts/shared-vs-dfo-term-boundary.md): when to use `smn`, `gcdfo`, and profile bridge artifacts.
 - [Platform gap method](concepts/platform-gap-method.md): how capability status, evidence, and drift are tracked.
+- [Skill graph method](concepts/skill-graph-method.md): how lane seeding, graph expansion, and capability filtering fit together.
 
 ## Platforms
 
@@ -31,6 +33,7 @@ Canonical structured truth:
 - [Governance-aware access gap](gaps/governance-access-gap.md)
 - [Behavioral validation gap](gaps/behavioral-validation-gap.md)
 - [Deterministic workflow gap](gaps/deterministic-workflow-gap.md)
+- [Skill graph maturity gap](gaps/skill-graph-maturity-gap.md)
 
 ## Workflows
 

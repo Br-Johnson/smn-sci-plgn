@@ -1,0 +1,807 @@
+{
+  "graph_version": "0.0.1",
+  "last_updated": "2026-04-17",
+  "description": "Typed skill graph for the salmon scaffold. Seed candidate lanes lexically or semantically, normalize the entities, then expand through typed skill, platform, and governance edges.",
+  "nodes": [
+    {
+      "id": "skill:salmon-research-router-skill",
+      "type": "skill",
+      "label": "salmon-research-router-skill",
+      "description": "Default router for broad salmon ecology, conservation, and management-science questions.",
+      "entrypoint": "skills/salmon-research-router-skill/SKILL.md",
+      "role": "router",
+      "input_contract": "Broad, ambiguous, or multi-source salmon questions.",
+      "lane_tags": [
+        "lane:stock-assessment",
+        "lane:telemetry-passage",
+        "lane:watershed-connectivity",
+        "lane:hatchery-harvest-management",
+        "lane:coded-wire-tag-recovery",
+        "lane:genetics-stock-identification",
+        "lane:climate-ocean-context",
+        "lane:ontology-semantic-resolution",
+        "lane:literature-reports-dataset-discovery",
+        "lane:package-metadata-validation"
+      ],
+      "selection_note": "Seed 1 to 3 lanes, then expand to the smallest defensible connected subgraph."
+    },
+    {
+      "id": "skill:salmon-entity-normalizer-skill",
+      "type": "skill",
+      "label": "salmon-entity-normalizer-skill",
+      "description": "Seed normalization layer for salmon entities, aliases, and management-unit systems.",
+      "entrypoint": "skills/salmon-entity-normalizer-skill/SKILL.md",
+      "role": "normalizer",
+      "input_contract": "Species aliases, jurisdictions, management-unit systems, and common identifier tokens.",
+      "lane_tags": [
+        "lane:stock-assessment",
+        "lane:telemetry-passage",
+        "lane:watershed-connectivity",
+        "lane:hatchery-harvest-management",
+        "lane:coded-wire-tag-recovery",
+        "lane:genetics-stock-identification",
+        "lane:climate-ocean-context",
+        "lane:ontology-semantic-resolution",
+        "lane:literature-reports-dataset-discovery"
+      ],
+      "selection_note": "Use early, but do not treat this as an authoritative production identity graph."
+    },
+    {
+      "id": "skill:smn-ontology-skill",
+      "type": "skill",
+      "label": "smn-ontology-skill",
+      "description": "Shared Salmon Domain Ontology lookup over published smn JSON-LD.",
+      "entrypoint": "skills/smn-ontology-skill/SKILL.md",
+      "role": "semantic",
+      "input_contract": "Shared salmon concepts, term lookups, labels, definitions, and IRIs.",
+      "lane_tags": [
+        "lane:ontology-semantic-resolution",
+        "lane:package-metadata-validation"
+      ]
+    },
+    {
+      "id": "skill:gcdfo-ontology-skill",
+      "type": "skill",
+      "label": "gcdfo-ontology-skill",
+      "description": "DFO-specific salmon ontology lookup over published gcdfo JSON-LD.",
+      "entrypoint": "skills/gcdfo-ontology-skill/SKILL.md",
+      "role": "semantic",
+      "input_contract": "DFO-specific salmon concepts, term lookups, labels, definitions, and IRIs.",
+      "lane_tags": [
+        "lane:ontology-semantic-resolution",
+        "lane:package-metadata-validation"
+      ]
+    },
+    {
+      "id": "skill:metasalmon-skill",
+      "type": "skill",
+      "label": "metasalmon-skill",
+      "description": "Thin execution wrapper around the installed metasalmon R package.",
+      "entrypoint": "skills/metasalmon-skill/SKILL.md",
+      "role": "package",
+      "input_contract": "Salmon Data Package validation, term finding, source role lookup, and ontology fetch helpers.",
+      "lane_tags": [
+        "lane:ontology-semantic-resolution",
+        "lane:package-metadata-validation"
+      ]
+    },
+    {
+      "id": "skill:streamnet-api-skill",
+      "type": "skill",
+      "label": "streamnet-api-skill",
+      "description": "Narrow StreamNet REST wrapper for coordinated assessment and related metadata.",
+      "entrypoint": "skills/streamnet-api-skill/SKILL.md",
+      "role": "source",
+      "input_contract": "Coordinated Assessment table listings, schemas, and record retrieval.",
+      "lane_tags": [
+        "lane:stock-assessment",
+        "lane:watershed-connectivity"
+      ]
+    },
+    {
+      "id": "skill:ptagis-skill",
+      "type": "skill",
+      "label": "ptagis-skill",
+      "description": "Narrow PTAGIS wrapper for telemetry observations, site codes, and metadata surfaces.",
+      "entrypoint": "skills/ptagis-skill/SKILL.md",
+      "role": "source",
+      "input_contract": "PIT-tag observations, site-code listings, report metadata, and validation codes.",
+      "lane_tags": [
+        "lane:telemetry-passage"
+      ]
+    },
+    {
+      "id": "skill:rmis-skill",
+      "type": "skill",
+      "label": "rmis-skill",
+      "description": "Authenticated RMIS and RMPC API wrapper plus public RMIS status lookups.",
+      "entrypoint": "skills/rmis-skill/SKILL.md",
+      "role": "source",
+      "input_contract": "Coded-wire-tag release, recovery, location, and catch-sample queries.",
+      "lane_tags": [
+        "lane:coded-wire-tag-recovery",
+        "lane:hatchery-harvest-management"
+      ]
+    },
+    {
+      "id": "skill:dart-query-skill",
+      "type": "skill",
+      "label": "dart-query-skill",
+      "description": "Catalog and fetch helper for important Columbia River DART query surfaces.",
+      "entrypoint": "skills/dart-query-skill/SKILL.md",
+      "role": "source",
+      "input_contract": "Catalog lookups and important DART page fetches by short name or path.",
+      "lane_tags": [
+        "lane:telemetry-passage",
+        "lane:watershed-connectivity"
+      ]
+    },
+    {
+      "id": "skill:salmon-literature-skill",
+      "type": "skill",
+      "label": "salmon-literature-skill",
+      "description": "PubMed-backed literature search and article summary skill for salmon topics.",
+      "entrypoint": "skills/salmon-literature-skill/SKILL.md",
+      "role": "literature",
+      "input_contract": "Free-text salmon research questions, literature discovery, and compact article summaries.",
+      "lane_tags": [
+        "lane:stock-assessment",
+        "lane:watershed-connectivity",
+        "lane:hatchery-harvest-management",
+        "lane:genetics-stock-identification",
+        "lane:climate-ocean-context",
+        "lane:literature-reports-dataset-discovery"
+      ]
+    },
+    {
+      "id": "platform:streamnet",
+      "type": "platform",
+      "label": "StreamNet",
+      "description": "Platform card-backed source node for coordinated assessment and status or abundance access.",
+      "entrypoint": "registry/platforms/streamnet.json",
+      "platform_id": "streamnet",
+      "platform_card": "registry/platforms/streamnet.json"
+    },
+    {
+      "id": "platform:ptagis",
+      "type": "platform",
+      "label": "PTAGIS",
+      "description": "Platform card-backed source node for PIT-tag telemetry and site metadata.",
+      "entrypoint": "registry/platforms/ptagis.json",
+      "platform_id": "ptagis",
+      "platform_card": "registry/platforms/ptagis.json"
+    },
+    {
+      "id": "platform:rmis",
+      "type": "platform",
+      "label": "RMIS / RMPC API",
+      "description": "Platform card-backed source node for coded-wire-tag and recovery workflows.",
+      "entrypoint": "registry/platforms/rmis.json",
+      "platform_id": "rmis",
+      "platform_card": "registry/platforms/rmis.json"
+    },
+    {
+      "id": "platform:dart",
+      "type": "platform",
+      "label": "DART",
+      "description": "Platform card-backed source node for Columbia River DART queries and page surfaces.",
+      "entrypoint": "registry/platforms/dart.json",
+      "platform_id": "dart",
+      "platform_card": "registry/platforms/dart.json"
+    },
+    {
+      "id": "platform:pubmed",
+      "type": "platform",
+      "label": "PubMed / NCBI E-utilities",
+      "description": "Platform card-backed source node for salmon literature discovery and summaries.",
+      "entrypoint": "registry/platforms/pubmed.json",
+      "platform_id": "pubmed",
+      "platform_card": "registry/platforms/pubmed.json"
+    },
+    {
+      "id": "platform:smn-ontology",
+      "type": "platform",
+      "label": "SMN ontology",
+      "description": "Platform card-backed shared ontology node for organization-neutral salmon terms.",
+      "entrypoint": "registry/platforms/smn-ontology.json",
+      "platform_id": "smn-ontology",
+      "platform_card": "registry/platforms/smn-ontology.json"
+    },
+    {
+      "id": "platform:gcdfo-ontology",
+      "type": "platform",
+      "label": "GCDFO ontology",
+      "description": "Platform card-backed DFO ontology node for program- or profile-specific terms.",
+      "entrypoint": "registry/platforms/gcdfo-ontology.json",
+      "platform_id": "gcdfo-ontology",
+      "platform_card": "registry/platforms/gcdfo-ontology.json"
+    },
+    {
+      "id": "platform:metasalmon",
+      "type": "platform",
+      "label": "metasalmon",
+      "description": "Platform card-backed package engine node for Salmon Data Package workflows.",
+      "entrypoint": "registry/platforms/metasalmon.json",
+      "platform_id": "metasalmon",
+      "platform_card": "registry/platforms/metasalmon.json"
+    },
+    {
+      "id": "lane:stock-assessment",
+      "type": "lane",
+      "label": "stock-assessment",
+      "description": "Stock status, abundance, trend, and assessment-oriented questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:telemetry-passage",
+      "type": "lane",
+      "label": "telemetry-passage",
+      "description": "Telemetry, migration, survival, and passage questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:watershed-connectivity",
+      "type": "lane",
+      "label": "watershed-connectivity",
+      "description": "Habitat, basin, watershed, barrier, and connectivity questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:hatchery-harvest-management",
+      "type": "lane",
+      "label": "hatchery-harvest-management",
+      "description": "Hatchery, harvest, management, and mixed-use context questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:coded-wire-tag-recovery",
+      "type": "lane",
+      "label": "coded-wire-tag-recovery",
+      "description": "Coded-wire-tag release, recovery, and RMIS-specific questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:genetics-stock-identification",
+      "type": "lane",
+      "label": "genetics-stock-identification",
+      "description": "Genetics, GSI, and stock-identification questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:climate-ocean-context",
+      "type": "lane",
+      "label": "climate-ocean-context",
+      "description": "Climate, ocean, and environmental context questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:ontology-semantic-resolution",
+      "type": "lane",
+      "label": "ontology-semantic-resolution",
+      "description": "Semantic, term-resolution, and ontology-boundary questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:literature-reports-dataset-discovery",
+      "type": "lane",
+      "label": "literature-reports-dataset-discovery",
+      "description": "Literature, reports, and dataset-discovery questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:package-metadata-validation",
+      "type": "lane",
+      "label": "package-metadata-validation",
+      "description": "Salmon Data Package authoring, validation, and metadata questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "governance:auth-required",
+      "type": "governance_tag",
+      "label": "auth-required",
+      "description": "Meaningful or full access depends on credentials, tokens, or another explicit authorization state."
+    },
+    {
+      "id": "governance:organization-profile",
+      "type": "governance_tag",
+      "label": "organization-profile",
+      "description": "Terms or workflows are scoped to one organization and should not be generalized automatically."
+    },
+    {
+      "id": "governance:portal-export-first",
+      "type": "governance_tag",
+      "label": "portal-export-first",
+      "description": "The source is portal-, report-, or export-first rather than a clean public API-first surface."
+    },
+    {
+      "id": "governance:seed-identity-only",
+      "type": "governance_tag",
+      "label": "seed-identity-only",
+      "description": "The current identity layer is scaffold-only and non-authoritative for production crosswalks."
+    }
+  ],
+  "edges": [
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "depends_on",
+      "target": "skill:salmon-entity-normalizer-skill",
+      "rationale": "Broad requests should normalize species, jurisdictions, and management-unit systems before deeper retrieval.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md",
+        "skills/salmon-entity-normalizer-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:stock-assessment",
+      "rationale": "Stock status and abundance are first-class router lanes.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:telemetry-passage",
+      "rationale": "Telemetry and passage are first-class router lanes.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:watershed-connectivity",
+      "rationale": "Habitat and watershed connectivity are first-class router lanes.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:hatchery-harvest-management",
+      "rationale": "Hatchery, harvest, and management questions need a separate lane.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:coded-wire-tag-recovery",
+      "rationale": "Coded-wire-tag and RMIS-oriented questions are distinct enough to seed separately.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:genetics-stock-identification",
+      "rationale": "Genetics and stock-identification remain explicit lanes even though wrappers are still thin.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:climate-ocean-context",
+      "rationale": "Climate and ocean context remain explicit lanes even though source coverage is still thin.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:ontology-semantic-resolution",
+      "rationale": "Ontology and semantic-resolution requests have their own lane.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:literature-reports-dataset-discovery",
+      "rationale": "Literature, reports, and discovery remain explicit router lanes.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:package-metadata-validation",
+      "rationale": "Salmon Data Package workflows now have a dedicated route.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:stock-assessment",
+      "relation": "routes_to",
+      "target": "skill:streamnet-api-skill",
+      "rationale": "Stock and abundance questions start with coordinated assessment surfaces.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:stock-assessment",
+      "relation": "routes_to",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "Literature is the default corroboration path for stock and assessment questions.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:telemetry-passage",
+      "relation": "routes_to",
+      "target": "skill:ptagis-skill",
+      "rationale": "Telemetry and passage questions start with PIT-tag observations and site metadata.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:telemetry-passage",
+      "relation": "routes_to",
+      "target": "skill:dart-query-skill",
+      "rationale": "DART is a natural paired source for Columbia-basin telemetry and passage context.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:watershed-connectivity",
+      "relation": "routes_to",
+      "target": "skill:dart-query-skill",
+      "rationale": "Watershed and basin questions often start with DART query surfaces.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:watershed-connectivity",
+      "relation": "routes_to",
+      "target": "skill:streamnet-api-skill",
+      "rationale": "StreamNet contributes basin-oriented assessment context.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:watershed-connectivity",
+      "relation": "routes_to",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "Literature fills habitat and connectivity context that the current wrappers do not cover directly.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:hatchery-harvest-management",
+      "relation": "routes_to",
+      "target": "skill:rmis-skill",
+      "rationale": "Release, recovery, and catch-sample data are the strongest current structured surface for this lane.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:hatchery-harvest-management",
+      "relation": "routes_to",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "Literature remains necessary because hatchery and harvest wrapper coverage is still partial.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md",
+        "docs/platform-gap-register.md"
+      ]
+    },
+    {
+      "source": "lane:coded-wire-tag-recovery",
+      "relation": "routes_to",
+      "target": "skill:rmis-skill",
+      "rationale": "RMIS is the explicit source skill for coded-wire-tag release and recovery workflows.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:genetics-stock-identification",
+      "relation": "routes_to",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "Until dedicated genetics or GSI wrappers exist, literature is the defensible starting point.",
+      "evidence_refs": [
+        "docs/platform-gap-register.md",
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:climate-ocean-context",
+      "relation": "routes_to",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "Until climate or ocean data wrappers are added, literature is the defensible starting point.",
+      "evidence_refs": [
+        "docs/platform-gap-register.md",
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:ontology-semantic-resolution",
+      "relation": "routes_to",
+      "target": "skill:smn-ontology-skill",
+      "rationale": "Shared ontology resolution starts with the shared smn layer.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:ontology-semantic-resolution",
+      "relation": "routes_to",
+      "target": "skill:gcdfo-ontology-skill",
+      "rationale": "DFO-specific concept questions need gcdfo as a paired semantic source.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:literature-reports-dataset-discovery",
+      "relation": "routes_to",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "Literature discovery starts with the PubMed-backed literature skill.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:package-metadata-validation",
+      "relation": "routes_to",
+      "target": "skill:metasalmon-skill",
+      "rationale": "Package validation and helper flows are currently implemented through metasalmon.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-entity-normalizer-skill",
+      "relation": "compose_with",
+      "target": "skill:smn-ontology-skill",
+      "rationale": "Normalization often needs shared semantic grounding without claiming full identity resolution.",
+      "evidence_refs": [
+        "README.md",
+        "skills/salmon-entity-normalizer-skill/references/normalization-schema.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-entity-normalizer-skill",
+      "relation": "compose_with",
+      "target": "skill:gcdfo-ontology-skill",
+      "rationale": "DFO-specific semantic questions can require the profile ontology alongside seed normalization.",
+      "evidence_refs": [
+        "kb/concepts/shared-vs-dfo-term-boundary.md",
+        "skills/salmon-entity-normalizer-skill/references/normalization-schema.md"
+      ]
+    },
+    {
+      "source": "skill:streamnet-api-skill",
+      "relation": "compose_with",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "Assessment retrieval often needs literature corroboration or context.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:ptagis-skill",
+      "relation": "compose_with",
+      "target": "skill:dart-query-skill",
+      "rationale": "Telemetry and passage questions often require both PTAGIS and DART context.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:rmis-skill",
+      "relation": "compose_with",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "RMIS results often need literature context because harvest and hatchery semantics are still thin.",
+      "evidence_refs": [
+        "docs/platform-gap-register.md",
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:gcdfo-ontology-skill",
+      "relation": "compose_with",
+      "target": "skill:smn-ontology-skill",
+      "rationale": "DFO-specific term work should stay connected to the shared ontology layer.",
+      "evidence_refs": [
+        "kb/concepts/shared-vs-dfo-term-boundary.md",
+        "README.md"
+      ]
+    },
+    {
+      "source": "skill:metasalmon-skill",
+      "relation": "depends_on",
+      "target": "skill:smn-ontology-skill",
+      "rationale": "metasalmon package semantics depend on the shared ontology surface.",
+      "evidence_refs": [
+        "README.md",
+        "skills/metasalmon-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:metasalmon-skill",
+      "relation": "compose_with",
+      "target": "skill:gcdfo-ontology-skill",
+      "rationale": "DFO-scoped package semantics can require gcdfo context in addition to shared terms.",
+      "evidence_refs": [
+        "README.md",
+        "kb/concepts/shared-vs-dfo-term-boundary.md"
+      ]
+    },
+    {
+      "source": "skill:streamnet-api-skill",
+      "relation": "uses_platform",
+      "target": "platform:streamnet",
+      "rationale": "The skill is the repo wrapper for the StreamNet platform surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/streamnet.json"
+      ]
+    },
+    {
+      "source": "skill:ptagis-skill",
+      "relation": "uses_platform",
+      "target": "platform:ptagis",
+      "rationale": "The skill is the repo wrapper for the PTAGIS platform surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/ptagis.json"
+      ]
+    },
+    {
+      "source": "skill:rmis-skill",
+      "relation": "uses_platform",
+      "target": "platform:rmis",
+      "rationale": "The skill is the repo wrapper for the RMIS and RMPC API surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/rmis.json"
+      ]
+    },
+    {
+      "source": "skill:dart-query-skill",
+      "relation": "uses_platform",
+      "target": "platform:dart",
+      "rationale": "The skill is the repo wrapper for the DART query surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/dart.json"
+      ]
+    },
+    {
+      "source": "skill:salmon-literature-skill",
+      "relation": "uses_platform",
+      "target": "platform:pubmed",
+      "rationale": "The skill is the repo wrapper for the PubMed and NCBI E-utilities surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/pubmed.json"
+      ]
+    },
+    {
+      "source": "skill:smn-ontology-skill",
+      "relation": "uses_platform",
+      "target": "platform:smn-ontology",
+      "rationale": "The skill is the repo wrapper for the shared SMN ontology surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/smn-ontology.json"
+      ]
+    },
+    {
+      "source": "skill:gcdfo-ontology-skill",
+      "relation": "uses_platform",
+      "target": "platform:gcdfo-ontology",
+      "rationale": "The skill is the repo wrapper for the GCDFO ontology surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/gcdfo-ontology.json"
+      ]
+    },
+    {
+      "source": "skill:metasalmon-skill",
+      "relation": "uses_platform",
+      "target": "platform:metasalmon",
+      "rationale": "The skill is the repo wrapper for the metasalmon package surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/metasalmon.json"
+      ]
+    },
+    {
+      "source": "skill:salmon-entity-normalizer-skill",
+      "relation": "constrained_by",
+      "target": "governance:seed-identity-only",
+      "rationale": "The normalizer is a seed alias matcher and explicitly not an authoritative identity graph.",
+      "evidence_refs": [
+        "README.md",
+        "skills/salmon-entity-normalizer-skill/references/normalization-schema.md"
+      ]
+    },
+    {
+      "source": "skill:gcdfo-ontology-skill",
+      "relation": "constrained_by",
+      "target": "governance:organization-profile",
+      "rationale": "DFO-specific terms should remain profile-scoped unless explicit promotion criteria are met.",
+      "evidence_refs": [
+        "kb/concepts/shared-vs-dfo-term-boundary.md",
+        "registry/platforms/gcdfo-ontology.json"
+      ]
+    },
+    {
+      "source": "platform:gcdfo-ontology",
+      "relation": "constrained_by",
+      "target": "governance:organization-profile",
+      "rationale": "The GCDFO ontology is intentionally a DFO-specific profile layer.",
+      "evidence_refs": [
+        "registry/platforms/gcdfo-ontology.json",
+        "kb/concepts/shared-vs-dfo-term-boundary.md"
+      ]
+    },
+    {
+      "source": "platform:streamnet",
+      "relation": "constrained_by",
+      "target": "governance:auth-required",
+      "rationale": "Most real StreamNet REST calls in the scaffold depend on credentials.",
+      "evidence_refs": [
+        "registry/platforms/streamnet.json"
+      ]
+    },
+    {
+      "source": "platform:ptagis",
+      "relation": "constrained_by",
+      "target": "governance:auth-required",
+      "rationale": "Many useful PTAGIS calls are bearer-token gated.",
+      "evidence_refs": [
+        "registry/platforms/ptagis.json"
+      ]
+    },
+    {
+      "source": "platform:rmis",
+      "relation": "constrained_by",
+      "target": "governance:auth-required",
+      "rationale": "RMIS data endpoints require an API key or authorization token.",
+      "evidence_refs": [
+        "registry/platforms/rmis.json"
+      ]
+    },
+    {
+      "source": "platform:dart",
+      "relation": "constrained_by",
+      "target": "governance:portal-export-first",
+      "rationale": "The current DART skill is centered on cataloged page and query surfaces rather than a broad API-first contract.",
+      "evidence_refs": [
+        "registry/platforms/dart.json",
+        "skills/dart-query-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "platform:rmis",
+      "relation": "constrained_by",
+      "target": "governance:portal-export-first",
+      "rationale": "RMIS mixes public status pages, docs, and authenticated endpoints rather than a single frictionless public API surface.",
+      "evidence_refs": [
+        "registry/platforms/rmis.json",
+        "skills/rmis-skill/references/rmis-access.md"
+      ]
+    }
+  ]
+}

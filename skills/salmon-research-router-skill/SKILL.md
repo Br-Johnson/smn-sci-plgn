@@ -11,9 +11,10 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 
 ## Operating rules
 
+- Seed candidate lanes with lexical or semantic cues first, then expand through `registry/skill-graph.json`.
 - Normalize species, jurisdictions, and management-unit systems before deep retrieval.
 - Prefer 1 to 3 evidence lanes at a time.
-- Use the minimum useful number of downstream skills.
+- Use the smallest useful connected subgraph of downstream skills.
 - Parallelize only when the lanes are independent.
 - End with the user's actual answer, not a tool inventory.
 
@@ -36,21 +37,25 @@ Start by assigning the request to one or more lanes:
 - stock status, abundance, and assessment
 - telemetry, migration, and passage
 - habitat, watershed, and connectivity
-- hatchery, harvest, and management
+- hatchery, harvest, management, and coded-wire-tag
 - genetics and stock identification
 - climate and ocean context
+- ontology and semantic resolution
 - literature, reports, and dataset discovery
+- Salmon Data Package and metadata validation
 
-See [references/lanes.md](references/lanes.md) for the first-pass routing table.
+See [references/lanes.md](references/lanes.md) for the stable lane IDs and first-pass routing table.
+See [references/skill-graph-routing.md](references/skill-graph-routing.md) for graph expansion, capability filtering, and governance-aware selection.
 
 ## Recommended workflow
 
 1. Clarify the user objective.
-2. Normalize entities with `salmon-entity-normalizer-skill`.
-3. Select the smallest useful source skills.
-4. Gather evidence.
-5. Reconcile conflicts and caveats.
-6. Return a concise synthesis.
+2. Seed 1 to 3 candidate lanes from the request.
+3. Normalize entities with `salmon-entity-normalizer-skill`.
+4. Expand through the skill graph and select the smallest useful source set.
+5. Gather evidence.
+6. Reconcile conflicts and caveats.
+7. Return a concise synthesis.
 
 ## Upstream foundations
 
@@ -71,6 +76,7 @@ Use subagents only when the work splits naturally, for example:
 - telemetry versus literature
 - StreamNet versus PTAGIS
 - habitat versus climate
+- one seeded lane versus another independent seeded lane
 
 Keep these steps with the coordinating agent:
 

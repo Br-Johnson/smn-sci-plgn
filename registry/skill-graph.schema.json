@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SkillGraph",
+  "type": "object",
+  "required": [
+    "graph_version",
+    "last_updated",
+    "description",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "graph_version": {
+      "type": "string"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date"
+    },
+    "description": {
+      "type": "string"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "label",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "entrypoint": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "input_contract": {
+            "type": "string"
+          },
+          "lane_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "platform_id": {
+            "type": "string"
+          },
+          "platform_card": {
+            "type": "string"
+          },
+          "selection_note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "relation",
+          "target",
+          "rationale",
+          "evidence_refs"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

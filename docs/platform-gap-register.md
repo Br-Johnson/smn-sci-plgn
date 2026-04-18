@@ -55,6 +55,7 @@ The per-platform registry uses these normalized categories:
 | P1 | Composite workflows | Platform + rigor | The repo routes and fetches, but still lacks durable multi-step workflows that reconcile evidence. | Mature parity requires workflows that convert retrieval into reproducible management or research products. | Router guidance exists; composite salmon workflows do not. | Build stock brief, watershed brief, and mixed-stock management workflows with structured outputs. |
 | P1 | Package-first semantic workflows | Platform | `metasalmon` is integrated only through a thin adapter surface. | The strongest current Salmon Data Package engine is not yet fully exposed to the plugin layer. | `metasalmon-skill` now supports runtime, catalog, `sources_for_role()`, `find_terms()`, `fetch_salmon_ontology()`, and `validate_salmon_datapackage()`. | Add safe bridges for package creation, reviewed-package reloads, gap detection, and term-request rendering. |
 | P1 | Provenance and evidence weighting | Rigor | Cross-source conflict handling is mostly narrative. | Parity with deterministic life-science synthesis requires explicit scoring, conflict notes, and reproducible output contracts. | Current source skills return summaries but no shared provenance scorecard. | Define a shared evidence-contract schema and use it in future composite workflows. |
+| P2 | Skill-graph routing maturity | Rigor + maintainability | A typed skill graph now exists, but lane seeding, subgraph scoring, and availability-aware expansion are still heuristic and untested. | Graph topology helps explain routing, but parity still needs fixture-backed route selection and drift detection when real behavior changes. | `registry/skill-graph.json` now models skill, platform, lane, and governance nodes; the router references use seed-then-expand selection, but there is no executable scorer or golden routing suite. | Add fixture-backed route-selection cases, capability-aware ranking, and auth-state-aware graph pruning. |
 | P2 | Change monitoring | Platform + rigor | Skills depend on moving upstream ontologies, package interfaces, and API surfaces. | Without a watchlist, the repo will rot as upstreams evolve. | This register, the platform cards, the wiki log, and live watch-surface checks now exist. | Deepen drift handling from visibility into automated remediation workflows and richer fixture updates. |
 
 ## Upstream Watchlist
@@ -77,6 +78,7 @@ Recent closures or partial closures:
 - the repo now has a machine-readable platform registry
 - the repo now has a maintainer-first in-repo wiki
 - the repo now has an explicit identity/crosswalk schema boundary
+- the repo now has a typed skill graph for lanes, skills, platforms, and governance constraints
 
 Still open at parity-blocking severity:
 - identity graph
