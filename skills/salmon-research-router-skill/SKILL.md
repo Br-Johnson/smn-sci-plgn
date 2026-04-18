@@ -22,6 +22,7 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 - `salmon-entity-normalizer-skill`
 - `streamnet-api-skill`
 - `ptagis-skill`
+- `rmis-skill`
 - `dart-query-skill`
 - `salmon-literature-skill`
 
@@ -47,6 +48,14 @@ See [references/lanes.md](references/lanes.md) for the first-pass routing table.
 4. Gather evidence.
 5. Reconcile conflicts and caveats.
 6. Return a concise synthesis.
+
+## Upstream foundations
+
+Treat these repos as upstream foundations for future skill growth:
+
+- shared ontology: `salmon-data-mobilization/salmon-domain-ontology`
+- DFO-specific ontology: `dfo-pacific-science/dfo-salmon-ontology`
+- data package and semantic workflow engine: `dfo-pacific-science/metasalmon`
 
 ## Subagent guidance
 
