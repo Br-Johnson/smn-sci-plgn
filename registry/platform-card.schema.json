@@ -8,6 +8,7 @@
     "owner",
     "canonical_urls",
     "docs_urls",
+    "access_tier",
     "auth_access_model",
     "data_domains",
     "identifier_systems",
@@ -40,6 +41,9 @@
       "items": {
         "type": "string"
       }
+    },
+    "access_tier": {
+      "type": "string"
     },
     "auth_access_model": {
       "type": "string"

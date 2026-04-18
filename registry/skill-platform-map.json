@@ -39,6 +39,21 @@
       "skill": "metasalmon-skill",
       "platform_id": "metasalmon",
       "kb_page": "kb/platforms/metasalmon.md"
+    },
+    {
+      "skill": "critfc-crosswalk-skill",
+      "platform_id": "critfc-crosswalk",
+      "kb_page": "kb/platforms/critfc-crosswalk.md"
+    },
+    {
+      "skill": "noaa-sps-skill",
+      "platform_id": "noaa-sps",
+      "kb_page": "kb/platforms/noaa-sps.md"
+    },
+    {
+      "skill": "npafc-skill",
+      "platform_id": "npafc",
+      "kb_page": "kb/platforms/npafc.md"
     }
   ]
 }

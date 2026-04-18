@@ -17,11 +17,11 @@ Canonical graph artifacts:
    - Follow `routes_to` edges from the router to seeded lanes, then from lanes to candidate skills.
    - Add `depends_on` skills when the lane needs prerequisite normalization or semantics.
    - Add `compose_with` skills only when the question needs corroboration, mixed-source context, or a known companion surface.
-   - Resolve `uses_platform` edges back to the platform cards when auth, capability status, or governance constraints matter.
+   - Resolve `uses_platform` edges back to the platform cards when auth, access tier, capability status, or governance constraints matter.
 4. Filter the candidate subgraph.
    - Prefer the smallest connected set that answers the actual question.
    - Drop skills whose platform cards are clearly `missing` for the needed capability.
-   - Distinguish `missing`, `gated`, and `unsupported by current credentials`.
+   - Distinguish `missing`, `credentialed`, `project-gated`, and `unsupported by current credentials`.
    - If the graph shows only literature for a lane, say the wrapper coverage is still thin.
 5. Decide on coordination.
    Use subagents only when seeded lanes expand into independent evidence branches.
@@ -30,6 +30,7 @@ Canonical graph artifacts:
 
 - The graph is routing topology, not an identity graph.
 - Platform cards remain the canonical source for capability and auth truth.
+- The executable selector currently reads `access_tier` from the platform cards before falling back to auth prose.
 - The seed normalizer is scaffold-only and must not be treated as authoritative crosswalk coverage.
 - `gcdfo` remains a profile layer and should stay paired with `smn` when the user is not asking for DFO-only semantics.
 

@@ -9,6 +9,7 @@
   "docs_urls": [
     "https://www.ptagis.org/Content/DataSpecification/topics/api.htm"
   ],
+  "access_tier": "credentialed",
   "auth_access_model": "Many useful calls require a bearer token via PTAGIS_API_TOKEN or PTAGIS_API_KEY.",
   "data_domains": [
     "PIT-tag observation access",

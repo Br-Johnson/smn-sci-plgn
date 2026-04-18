@@ -14,3 +14,11 @@
 - Added router guidance for semantic or lexical seeding followed by typed graph expansion.
 - Added wiki pages for the skill-graph method and remaining graph-maturity gap.
 - Extended validation to enforce graph coverage, typed relations, and consistency against the platform map.
+
+## [2026-04-17] expansion | selector-identity-and-sources
+
+- Added an executable selector plus fixture-backed regression cases and CI wiring.
+- Added a bounded Columbia Basin v0 identity slice and normalizer-emitted identity hints.
+- Added CRITFC crosswalk, NOAA SPS, and NPAFC source scaffolds with platform cards and KB pages.
+- Added a stock-brief workflow scaffold and contract helper.
+- Updated the shared docs and gap register so the new routing, identity, access-tier, and workflow layers are first-class.

@@ -6,6 +6,7 @@ Canonical structured truth:
 - [platform gap register](../docs/platform-gap-register.md)
 - [platform registry](../registry/)
 - [skill graph](../registry/skill-graph.json)
+- [bounded Columbia Basin identity slice](../registry/identity/columbia-basin-v0.json)
 - [identity seed records](../registry/identity/seed-crosswalks.json)
 
 ## Concepts
@@ -22,6 +23,9 @@ Canonical structured truth:
 - [PTAGIS](platforms/ptagis.md)
 - [RMIS](platforms/rmis.md)
 - [DART](platforms/dart.md)
+- [CRITFC crosswalk](platforms/critfc-crosswalk.md)
+- [NOAA SPS](platforms/noaa-sps.md)
+- [NPAFC](platforms/npafc.md)
 - [PubMed](platforms/pubmed.md)
 - [SMN ontology](platforms/smn-ontology.md)
 - [GCDFO ontology](platforms/gcdfo-ontology.md)
@@ -40,6 +44,7 @@ Canonical structured truth:
 - [Adding a new platform](workflows/adding-a-new-platform.md)
 - [Verifying a platform skill](workflows/verifying-a-platform-skill.md)
 - [Updating after upstream drift](workflows/updating-after-upstream-drift.md)
+- [Stock brief workflow](workflows/stock-brief-workflow.md)
 
 ## Log
 

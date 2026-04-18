@@ -6,6 +6,13 @@
     "gated",
     "unknown"
   ],
+  "access_tiers": [
+    "public",
+    "credentialed",
+    "project_gated",
+    "mixed",
+    "unknown"
+  ],
   "capability_categories": [
     "discovery_search",
     "metadata_schema",

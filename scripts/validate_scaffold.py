@@ -11,6 +11,7 @@ from urllib import request
 NON_PLATFORM_SKILLS = {
     "salmon-research-router-skill",
     "salmon-entity-normalizer-skill",
+    "salmon-stock-brief-workflow-skill",
 }
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -42,8 +43,10 @@ def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
     vocab = load_json(registry_root / "vocab.json")
     platform_schema = load_json(registry_root / "platform-card.schema.json")
     identity_schema = load_json(registry_root / "identity-record.schema.json")
+    identity_slice_schema = load_json(registry_root / "identity" / "columbia-basin-v0.schema.json")
     skill_map = load_json(registry_root / "skill-platform-map.json")
 
+    access_tiers = set(vocab["access_tiers"])
     capability_categories = set(vocab["capability_categories"])
     capability_statuses = set(vocab["capability_statuses"])
     identity_entity_types = set(vocab["identity_entity_types"])
@@ -61,6 +64,7 @@ def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
         require(isinstance(card["owner"], str) and card["owner"].strip(), f"invalid owner in {path}")
         require_string_list(card["canonical_urls"], f"{path}: canonical_urls")
         require_string_list(card["docs_urls"], f"{path}: docs_urls")
+        require(card["access_tier"] in access_tiers, f"invalid access_tier in {path}")
         require(isinstance(card["auth_access_model"], str) and card["auth_access_model"].strip(), f"invalid auth_access_model in {path}")
         require_string_list(card["data_domains"], f"{path}: data_domains")
         require_string_list(card["identifier_systems"], f"{path}: identifier_systems")
@@ -121,10 +125,45 @@ def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
         for field in identity_schema["required"]:
             require(isinstance(record[field], str) and record[field].strip(), f"{label} field {field} must be a non-empty string")
 
+    bounded_slice = load_json(registry_root / "identity" / "columbia-basin-v0.json")
+    for field in identity_slice_schema["required"]:
+        require(field in bounded_slice, f"registry/identity/columbia-basin-v0.json missing field: {field}")
+    require(isinstance(bounded_slice["slice_id"], str) and bounded_slice["slice_id"].strip(), "bounded identity slice requires slice_id")
+    require(isinstance(bounded_slice["version"], str) and bounded_slice["version"].strip(), "bounded identity slice requires version")
+    if "generated_on" in bounded_slice:
+        require(isinstance(bounded_slice["generated_on"], str) and DATE_RE.fullmatch(bounded_slice["generated_on"]), "bounded identity slice generated_on must be a date")
+    scope = bounded_slice["scope"]
+    require(isinstance(scope, dict), "bounded identity slice scope must be an object")
+    for field in identity_slice_schema["properties"]["scope"]["required"]:
+        require(isinstance(scope.get(field), str) and scope[field].strip(), f"bounded identity slice scope missing {field}")
+    scheme_definitions = bounded_slice["scheme_definitions"]
+    require(isinstance(scheme_definitions, list) and scheme_definitions, "bounded identity slice requires scheme_definitions")
+    for index, scheme in enumerate(scheme_definitions):
+        label = f"identity scheme definition {index}"
+        require(isinstance(scheme, dict), f"{label} must be an object")
+        require(isinstance(scheme.get("scheme"), str) and scheme["scheme"].strip(), f"{label} missing scheme")
+        require(isinstance(scheme.get("definition"), str) and scheme["definition"].strip(), f"{label} missing definition")
+    bounded_records = bounded_slice["records"]
+    require(isinstance(bounded_records, list) and bounded_records, "bounded identity slice requires records")
+    for index, record in enumerate(bounded_records):
+        label = f"bounded identity record {index}"
+        require(isinstance(record, dict), f"{label} must be an object")
+        for field in identity_slice_schema["$defs"]["record"]["required"]:
+            require(field in record, f"{label} missing field: {field}")
+        require(record["entity_type"] in identity_entity_types, f"{label} has invalid entity_type")
+        require(record["mapping_relation"] in mapping_relations, f"{label} has invalid mapping_relation")
+        require(record["confidence"] in confidence_levels, f"{label} has invalid confidence")
+        require(record["record_status"] in identity_record_statuses, f"{label} has invalid record_status")
+        require_string_list(record["aliases"], f"{label} aliases")
+        require(isinstance(record["provenance"], list) and record["provenance"], f"{label} requires provenance entries")
+        require(isinstance(record["valid_from"], str) and DATE_RE.fullmatch(record["valid_from"]), f"{label} valid_from must be a date")
+        require(isinstance(record["valid_time_or_version"], str) and record["valid_time_or_version"].strip(), f"{label} missing valid_time_or_version")
+
     return {
         "platform_card_count": len(platform_cards),
         "mapped_external_skills": len(seen_mapped_skills),
         "identity_record_count": len(identity_records),
+        "bounded_identity_record_count": len(bounded_records),
     }
 
 
@@ -254,6 +293,37 @@ def validate_skill_graph(repo_root: Path, skill_names: list[str]) -> dict:
         "node_count": len(nodes),
         "edge_count": len(edges),
         "lane_count": len(lane_node_ids),
+    }
+
+
+def validate_regression_assets(repo_root: Path) -> dict:
+    selector_script = repo_root / "scripts" / "skill_graph_selector.py"
+    fixture_path = repo_root / "tests" / "fixtures" / "skill_graph_selector_cases.json"
+    test_path = repo_root / "tests" / "test_skill_graph_selector.py"
+    workflow_path = repo_root / ".github" / "workflows" / "scaffold-validation.yml"
+
+    for path in (selector_script, fixture_path, test_path, workflow_path):
+        require(path.exists(), f"regression asset missing: {path}")
+
+    cases = load_json(fixture_path)
+    require(isinstance(cases, list) and len(cases) >= 20, "selector fixture file must contain at least 20 cases")
+    for index, case in enumerate(cases):
+        label = f"selector fixture case {index}"
+        require(isinstance(case, dict), f"{label} must be an object")
+        require(isinstance(case.get("request"), str) and case["request"].strip(), f"{label} missing request")
+        expected = case.get("expected")
+        require(isinstance(expected, dict), f"{label} missing expected block")
+        for field in ("seeded_lanes", "selected_skills", "blocked_skills", "unsupported_lanes", "reason_contains"):
+            require(field in expected, f"{label} missing expected field {field}")
+            require(isinstance(expected[field], list), f"{label} expected field {field} must be a list")
+
+    workflow_text = workflow_path.read_text(encoding="utf-8")
+    require("python3 scripts/validate_scaffold.py" in workflow_text, "CI workflow must run scaffold validation")
+    require("python3 -m unittest discover -s tests -p 'test_*.py'" in workflow_text, "CI workflow must run unittest discovery")
+
+    return {
+        "selector_fixture_case_count": len(cases),
+        "ci_workflow": str(workflow_path),
     }
 
 
@@ -418,6 +488,7 @@ def main() -> None:
 
     registry_stats = validate_platform_registry(repo_root, skill_names)
     skill_graph_stats = validate_skill_graph(repo_root, skill_names)
+    regression_stats = validate_regression_assets(repo_root)
     kb_stats = validate_kb(repo_root)
     vocab = load_json(repo_root / "registry" / "vocab.json")
     validate_gap_register(repo_root, vocab["capability_categories"])
@@ -448,6 +519,7 @@ def main() -> None:
         "python_files_compiled": len(python_files),
         "registry": registry_stats,
         "skill_graph": skill_graph_stats,
+        "regression": regression_stats,
         "kb": kb_stats,
         "watch_surface_checks": watch_surface_checks,
         "warnings": warnings,

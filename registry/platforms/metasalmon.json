@@ -10,6 +10,7 @@
     "https://dfo-pacific-science.github.io/metasalmon/",
     "https://github.com/dfo-pacific-science/metasalmon"
   ],
+  "access_tier": "mixed",
   "auth_access_model": "The package is locally executable when installed; some optional LLM or remote-source actions depend on external credentials.",
   "data_domains": [
     "Salmon Data Package creation",

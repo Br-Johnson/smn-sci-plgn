@@ -13,11 +13,12 @@ What is closed:
 - typed edge relations with evidence references
 - router guidance for seed-first then graph-expansion selection
 - validation that the graph covers the current skills and platform map
+- an executable selector with fixture-backed routing cases
+- basic auth-state pruning for no-auth requests via platform `access_tier`
 
 What is still open:
-- fixture-backed lane seeding and subgraph-selection tests
 - capability-aware ranking instead of purely heuristic selection
-- auth-state-aware graph pruning for gated sources
+- richer auth-state-aware pruning for project-gated or mixed-access sources
 - graph updates triggered by new skills before they drift from the router instructions
 
 This is no longer a missing concept, but it is still a maturity gap.

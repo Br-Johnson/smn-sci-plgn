@@ -9,6 +9,7 @@
   "docs_urls": [
     "https://www.cbr.washington.edu/dart/overview"
   ],
+  "access_tier": "public",
   "auth_access_model": "The current scaffold uses public page surfaces with no auth requirement.",
   "data_domains": [
     "adult passage counts",

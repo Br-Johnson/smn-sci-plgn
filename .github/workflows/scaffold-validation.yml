@@ -1,0 +1,26 @@
+name: Scaffold Validation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate scaffold
+        run: python3 scripts/validate_scaffold.py
+
+      - name: Run selector regression tests
+        if: always()
+        run: python3 -m unittest discover -s tests -p 'test_*.py'

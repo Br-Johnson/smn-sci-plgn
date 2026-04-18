@@ -1,0 +1,98 @@
+{
+  "platform_id": "npafc",
+  "platform_name": "NPAFC Data Catalogue",
+  "owner": "NPAFC",
+  "canonical_urls": [
+    "https://data.npafc.org/en/",
+    "https://data.npafc.org/dataset",
+    "https://www.npafc.org/statistics/"
+  ],
+  "docs_urls": [
+    "https://docs.ckan.org/en/latest/api/",
+    "https://www.npafc.org/statistics/"
+  ],
+  "access_tier": "public",
+  "auth_access_model": "The public CKAN catalogue and statistics pages are openly readable; the scaffold does not assume auth for the surfaced actions.",
+  "data_domains": [
+    "public salmon and ocean research datasets",
+    "Pacific salmonid catch and hatchery release statistics",
+    "metadata catalogue and downloadable resources"
+  ],
+  "identifier_systems": [
+    "dataset DOIs",
+    "CKAN dataset names",
+    "resource IDs"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "supported",
+      "note": "The CKAN package search API provides a public dataset search surface."
+    },
+    "metadata_schema": {
+      "status": "supported",
+      "note": "Package and resource metadata are exposed through CKAN."
+    },
+    "entity_lookup": {
+      "status": "partial",
+      "note": "Datasets, resources, and statistics pages can be resolved, but there is no canonical salmon entity service."
+    },
+    "identifier_crosswalks": {
+      "status": "missing",
+      "note": "The catalogue is metadata-oriented and does not provide operational crosswalks."
+    },
+    "abundance_assessment": {
+      "status": "partial",
+      "note": "The statistics pages expose catch and hatchery release time series, but not a full assessment engine."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "Telemetry and passage workflows are not the focus of this catalogue wrapper."
+    },
+    "hatchery": {
+      "status": "partial",
+      "note": "Hatchery release statistics are public, but the catalogue is not a hatchery operations system."
+    },
+    "harvest_fishery": {
+      "status": "partial",
+      "note": "Catch statistics are public, but the surface is still a catalogue and stats archive rather than a fishery operations platform."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Genetics/GSI workflows are not surfaced as a first-class capability."
+    },
+    "package_metadata_export": {
+      "status": "partial",
+      "note": "Datasets expose downloadable resources, but the wrapper does not automate file export."
+    },
+    "provenance_versioning": {
+      "status": "supported",
+      "note": "CKAN metadata plus dataset/resource identifiers provide stable provenance context."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "supported",
+      "note": "The public CKAN API is straightforward to query with a stdlib helper."
+    }
+  },
+  "blockers": [
+    "The scaffold covers catalogue metadata and statistics pages, not every downloadable file format.",
+    "Dataset content is heterogeneous and should be treated as source-specific."
+  ],
+  "governance_constraints": [
+    "Keep catalogue metadata separate from the underlying research datasets and downloads."
+  ],
+  "related_skills": [
+    "npafc-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://data.npafc.org/en/",
+    "https://data.npafc.org/",
+    "https://www.npafc.org/statistics/",
+    "https://docs.ckan.org/en/latest/api/"
+  ],
+  "watch_fields": [
+    "CKAN API contract",
+    "catalogue dataset count",
+    "statistics page URLs"
+  ]
+}

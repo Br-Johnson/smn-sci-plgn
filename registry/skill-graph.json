@@ -1,7 +1,7 @@
 {
   "graph_version": "0.0.1",
   "last_updated": "2026-04-17",
-  "description": "Typed skill graph for the salmon scaffold. Seed candidate lanes lexically or semantically, normalize the entities, then expand through typed skill, platform, and governance edges.",
+  "description": "Typed skill graph for the salmon scaffold. Seed candidate lanes lexically or semantically, normalize the entities, then expand through typed skill, platform, and governance edges while respecting access tiers and scaffold boundaries.",
   "nodes": [
     {
       "id": "skill:salmon-research-router-skill",
@@ -13,6 +13,7 @@
       "input_contract": "Broad, ambiguous, or multi-source salmon questions.",
       "lane_tags": [
         "lane:stock-assessment",
+        "lane:crosswalk-harmonization",
         "lane:telemetry-passage",
         "lane:watershed-connectivity",
         "lane:hatchery-harvest-management",
@@ -35,6 +36,7 @@
       "input_contract": "Species aliases, jurisdictions, management-unit systems, and common identifier tokens.",
       "lane_tags": [
         "lane:stock-assessment",
+        "lane:crosswalk-harmonization",
         "lane:telemetry-passage",
         "lane:watershed-connectivity",
         "lane:hatchery-harvest-management",
@@ -154,6 +156,55 @@
       ]
     },
     {
+      "id": "skill:critfc-crosswalk-skill",
+      "type": "skill",
+      "label": "critfc-crosswalk-skill",
+      "description": "Public CRITFC crosswalk and ArcGIS REST wrapper for Columbia Basin pop or unit reconciliation context.",
+      "entrypoint": "skills/critfc-crosswalk-skill/SKILL.md",
+      "role": "source",
+      "input_contract": "CRITFC crosswalk page reads, REST-root fetches, and bounded public request passthroughs.",
+      "lane_tags": [
+        "lane:crosswalk-harmonization"
+      ]
+    },
+    {
+      "id": "skill:noaa-sps-skill",
+      "type": "skill",
+      "label": "noaa-sps-skill",
+      "description": "Public NOAA Salmon Population Summary page and help-doc wrapper for recovery-planning context.",
+      "entrypoint": "skills/noaa-sps-skill/SKILL.md",
+      "role": "source",
+      "input_contract": "SPS home/help page reads and bounded public request passthroughs.",
+      "lane_tags": [
+        "lane:stock-assessment"
+      ]
+    },
+    {
+      "id": "skill:npafc-skill",
+      "type": "skill",
+      "label": "npafc-skill",
+      "description": "Public NPAFC CKAN catalogue and statistics wrapper for North Pacific dataset discovery and time-series context.",
+      "entrypoint": "skills/npafc-skill/SKILL.md",
+      "role": "source",
+      "input_contract": "Dataset search/show, resource metadata, statistics page reads, and bounded public requests.",
+      "lane_tags": [
+        "lane:literature-reports-dataset-discovery"
+      ]
+    },
+    {
+      "id": "skill:salmon-stock-brief-workflow-skill",
+      "type": "skill",
+      "label": "salmon-stock-brief-workflow-skill",
+      "description": "Composite workflow scaffold for structured salmon stock briefs with fixed provenance-aware output sections.",
+      "entrypoint": "skills/salmon-stock-brief-workflow-skill/SKILL.md",
+      "role": "workflow",
+      "input_contract": "Requests for structured stock briefs or reusable brief contracts over existing evidence lanes.",
+      "lane_tags": [
+        "lane:stock-assessment"
+      ],
+      "selection_note": "Use when the user explicitly asks for a structured stock brief rather than raw retrieval."
+    },
+    {
       "id": "platform:streamnet",
       "type": "platform",
       "label": "StreamNet",
@@ -226,10 +277,44 @@
       "platform_card": "registry/platforms/metasalmon.json"
     },
     {
+      "id": "platform:critfc-crosswalk",
+      "type": "platform",
+      "label": "CRITFC Crosswalk Project",
+      "description": "Platform card-backed crosswalk node for Columbia Basin pop or unit reconciliation and HUC6 context.",
+      "entrypoint": "registry/platforms/critfc-crosswalk.json",
+      "platform_id": "critfc-crosswalk",
+      "platform_card": "registry/platforms/critfc-crosswalk.json"
+    },
+    {
+      "id": "platform:noaa-sps",
+      "type": "platform",
+      "label": "NOAA SPS",
+      "description": "Platform card-backed NOAA population-summary node for legacy recovery-planning context.",
+      "entrypoint": "registry/platforms/noaa-sps.json",
+      "platform_id": "noaa-sps",
+      "platform_card": "registry/platforms/noaa-sps.json"
+    },
+    {
+      "id": "platform:npafc",
+      "type": "platform",
+      "label": "NPAFC",
+      "description": "Platform card-backed public CKAN and statistics node for North Pacific dataset discovery.",
+      "entrypoint": "registry/platforms/npafc.json",
+      "platform_id": "npafc",
+      "platform_card": "registry/platforms/npafc.json"
+    },
+    {
       "id": "lane:stock-assessment",
       "type": "lane",
       "label": "stock-assessment",
       "description": "Stock status, abundance, trend, and assessment-oriented questions.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "lane:crosswalk-harmonization",
+      "type": "lane",
+      "label": "crosswalk-harmonization",
+      "description": "Crosswalk, reconciliation, stock-unit harmonization, and HUC-linked mapping questions.",
       "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
     },
     {
@@ -343,6 +428,15 @@
     {
       "source": "skill:salmon-research-router-skill",
       "relation": "routes_to",
+      "target": "lane:crosswalk-harmonization",
+      "rationale": "Crosswalk and harmonization questions are now a first-class router lane.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
       "target": "lane:telemetry-passage",
       "rationale": "Telemetry and passage are first-class router lanes.",
       "evidence_refs": [
@@ -437,6 +531,26 @@
       "rationale": "Literature is the default corroboration path for stock and assessment questions.",
       "evidence_refs": [
         "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "lane:stock-assessment",
+      "relation": "routes_to",
+      "target": "skill:noaa-sps-skill",
+      "rationale": "NOAA SPS complements stock-assessment work when the question is about ESA population summaries or recovery planning.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md",
+        "registry/platforms/noaa-sps.json"
+      ]
+    },
+    {
+      "source": "lane:crosswalk-harmonization",
+      "relation": "routes_to",
+      "target": "skill:critfc-crosswalk-skill",
+      "rationale": "CRITFC crosswalk is the current explicit wrapper for Columbia Basin pop or unit reconciliation.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md",
+        "registry/platforms/critfc-crosswalk.json"
       ]
     },
     {
@@ -560,6 +674,16 @@
       ]
     },
     {
+      "source": "lane:literature-reports-dataset-discovery",
+      "relation": "routes_to",
+      "target": "skill:npafc-skill",
+      "rationale": "NPAFC adds public dataset catalogue and statistics coverage to discovery-oriented requests.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md",
+        "registry/platforms/npafc.json"
+      ]
+    },
+    {
       "source": "lane:package-metadata-validation",
       "relation": "routes_to",
       "target": "skill:metasalmon-skill",
@@ -581,6 +705,16 @@
     {
       "source": "skill:salmon-entity-normalizer-skill",
       "relation": "compose_with",
+      "target": "skill:critfc-crosswalk-skill",
+      "rationale": "Bounded identity hints and CRITFC crosswalk context are natural companions for Columbia Basin harmonization work.",
+      "evidence_refs": [
+        "registry/identity/columbia-basin-v0.json",
+        "registry/platforms/critfc-crosswalk.json"
+      ]
+    },
+    {
+      "source": "skill:salmon-entity-normalizer-skill",
+      "relation": "compose_with",
       "target": "skill:gcdfo-ontology-skill",
       "rationale": "DFO-specific semantic questions can require the profile ontology alongside seed normalization.",
       "evidence_refs": [
@@ -594,6 +728,56 @@
       "target": "skill:salmon-literature-skill",
       "rationale": "Assessment retrieval often needs literature corroboration or context.",
       "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:noaa-sps-skill",
+      "relation": "compose_with",
+      "target": "skill:streamnet-api-skill",
+      "rationale": "NOAA SPS is complementary stock-assessment context rather than a replacement for StreamNet coordinated-assessment data.",
+      "evidence_refs": [
+        "registry/platforms/noaa-sps.json",
+        "registry/platforms/streamnet.json"
+      ]
+    },
+    {
+      "source": "skill:npafc-skill",
+      "relation": "compose_with",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "NPAFC catalogue and statistics requests often benefit from literature context or report corroboration.",
+      "evidence_refs": [
+        "registry/platforms/npafc.json",
+        "skills/salmon-research-router-skill/references/lanes.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-stock-brief-workflow-skill",
+      "relation": "depends_on",
+      "target": "skill:salmon-entity-normalizer-skill",
+      "rationale": "The stock-brief workflow starts from a normalized target, even if the resolution remains ambiguous.",
+      "evidence_refs": [
+        "skills/salmon-stock-brief-workflow-skill/SKILL.md",
+        "skills/salmon-entity-normalizer-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-stock-brief-workflow-skill",
+      "relation": "compose_with",
+      "target": "skill:streamnet-api-skill",
+      "rationale": "Structured stock briefs need at least one assessment-oriented source lane.",
+      "evidence_refs": [
+        "skills/salmon-stock-brief-workflow-skill/SKILL.md",
+        "registry/platforms/streamnet.json"
+      ]
+    },
+    {
+      "source": "skill:salmon-stock-brief-workflow-skill",
+      "relation": "compose_with",
+      "target": "skill:salmon-literature-skill",
+      "rationale": "The workflow expects literature or report context to support caveats and contradictions.",
+      "evidence_refs": [
+        "skills/salmon-stock-brief-workflow-skill/SKILL.md",
         "skills/salmon-research-router-skill/references/lanes.md"
       ]
     },
@@ -727,6 +911,36 @@
       ]
     },
     {
+      "source": "skill:critfc-crosswalk-skill",
+      "relation": "uses_platform",
+      "target": "platform:critfc-crosswalk",
+      "rationale": "The skill is the repo wrapper for the CRITFC crosswalk surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/critfc-crosswalk.json"
+      ]
+    },
+    {
+      "source": "skill:noaa-sps-skill",
+      "relation": "uses_platform",
+      "target": "platform:noaa-sps",
+      "rationale": "The skill is the repo wrapper for the public NOAA SPS surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/noaa-sps.json"
+      ]
+    },
+    {
+      "source": "skill:npafc-skill",
+      "relation": "uses_platform",
+      "target": "platform:npafc",
+      "rationale": "The skill is the repo wrapper for the NPAFC catalogue and statistics surface.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/npafc.json"
+      ]
+    },
+    {
       "source": "skill:salmon-entity-normalizer-skill",
       "relation": "constrained_by",
       "target": "governance:seed-identity-only",
@@ -791,6 +1005,26 @@
       "evidence_refs": [
         "registry/platforms/dart.json",
         "skills/dart-query-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "platform:critfc-crosswalk",
+      "relation": "constrained_by",
+      "target": "governance:portal-export-first",
+      "rationale": "The public CRITFC crosswalk surfaces are legacy project pages and ArcGIS endpoints rather than a modern general API.",
+      "evidence_refs": [
+        "registry/platforms/critfc-crosswalk.json",
+        "skills/critfc-crosswalk-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "platform:noaa-sps",
+      "relation": "constrained_by",
+      "target": "governance:portal-export-first",
+      "rationale": "NOAA SPS remains a browser-first legacy population-summary surface rather than a documented JSON API.",
+      "evidence_refs": [
+        "registry/platforms/noaa-sps.json",
+        "skills/noaa-sps-skill/SKILL.md"
       ]
     },
     {

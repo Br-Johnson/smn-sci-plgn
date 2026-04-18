@@ -9,6 +9,7 @@
   "docs_urls": [
     "https://www.streamnet.org/resources/exchange-tools/rest-api-documentation/"
   ],
+  "access_tier": "credentialed",
   "auth_access_model": "The scaffold expects an API key for most real REST calls via STREAMNET_API_KEY.",
   "data_domains": [
     "coordinated assessment metadata",

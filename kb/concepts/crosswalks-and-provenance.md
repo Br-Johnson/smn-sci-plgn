@@ -4,18 +4,23 @@ Crosswalks need more than a pair of identifiers.
 
 ## Minimum fields
 
-The seed schema in [registry/identity-record.schema.json](../../registry/identity-record.schema.json) requires:
+The bounded Columbia Basin v0 slice in [registry/identity/columbia-basin-v0.json](../../registry/identity/columbia-basin-v0.json) adds a local identity layer on top of the existing crosswalk scaffold. At minimum, a useful record needs:
 
-- canonical local ID
+- stable local ID
 - entity type
+- label
+- aliases
+- scheme definitions
 - identifier scheme and value
 - mapped target ID
 - mapping relation
+- provenance
 - source
 - confidence
 - record status
 - valid time or version
 - notes
+- optional `valid_from` and `valid_to` for temporal windows
 
 ## Why provenance matters
 
@@ -26,9 +31,11 @@ The seed schema in [registry/identity-record.schema.json](../../registry/identit
 
 ## Current posture
 
-- seed records in [registry/identity/seed-crosswalks.json](../../registry/identity/seed-crosswalks.json) are schema scaffolding only
+- [registry/identity/columbia-basin-v0.json](../../registry/identity/columbia-basin-v0.json) provides a bounded, non-authoritative Columbia Basin v0 slice
+- [registry/identity/seed-crosswalks.json](../../registry/identity/seed-crosswalks.json) remains the compatibility crosswalk view
+- the normalizer can surface slice-backed hints, but those hints are not production truth
 - authoritative production mappings do not exist in this repo yet
-- the identity graph remains an open parity blocker
+- the identity graph remains an open parity blocker outside the bounded slice
 
 Related:
 - [Ontology vs identity](ontology-vs-identity.md)

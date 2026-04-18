@@ -32,6 +32,8 @@ This repo now treats the skill graph as a router-adjacent topology layer.
 4. Inspect the platform cards before committing to a source skill when auth, capability, or governance matters.
 5. Prefer the smallest connected subgraph that still answers the question.
 
+The repo now also ships an executable selector in [scripts/skill_graph_selector.py](../../scripts/skill_graph_selector.py) with fixture-backed regression cases under [tests/fixtures/skill_graph_selector_cases.json](../../tests/fixtures/skill_graph_selector_cases.json).
+
 ## Design boundary
 
 - `registry/skill-graph.json` is topology.
@@ -41,4 +43,4 @@ This repo now treats the skill graph as a router-adjacent topology layer.
 
 ## Current limit
 
-The graph is curated and useful now, but route scoring and drift detection are still heuristic. See [skill graph maturity gap](../gaps/skill-graph-maturity-gap.md).
+The graph is curated, executable, and useful now, but route scoring and drift detection are still heuristic. See [skill graph maturity gap](../gaps/skill-graph-maturity-gap.md).

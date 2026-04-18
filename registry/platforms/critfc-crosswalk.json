@@ -1,0 +1,96 @@
+{
+  "platform_id": "critfc-crosswalk",
+  "platform_name": "CRITFC Crosswalk Project",
+  "owner": "CRITFC",
+  "canonical_urls": [
+    "https://critfc.org/fish-and-watersheds/fishery-science/data-resources/columbia-basin-salmon-and-steelhead-crosswalk-project/",
+    "https://gis.critfc.org/arcgis/rest/services"
+  ],
+  "docs_urls": [
+    "https://critfc.org/wp-content/uploads/2013/07/crosswalk_user_guide.pdf",
+    "https://critfc.org/fish-and-watersheds/fishery-science/data-resources/columbia-basin-salmon-and-steelhead-crosswalk-project/"
+  ],
+  "access_tier": "public",
+  "auth_access_model": "The project page and ArcGIS REST services are public; the scaffold only wraps read-only fetches and does not assume credentials.",
+  "data_domains": [
+    "Columbia Basin salmon and steelhead pop/unit crosswalks",
+    "HUC6 spatial extents",
+    "agency and tribal source metadata"
+  ],
+  "identifier_systems": [
+    "population/unit names",
+    "HUC6 subwatershed identifiers",
+    "source acronyms"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "partial",
+      "note": "The project offers a population query tool and legacy map surfaces, but no broad public search API is documented."
+    },
+    "metadata_schema": {
+      "status": "partial",
+      "note": "The crosswalk project publishes reports and REST services, but not a modern schema contract."
+    },
+    "entity_lookup": {
+      "status": "partial",
+      "note": "Population/unit lookups exist by fish manager and HUC6 context, but they are project-scoped."
+    },
+    "identifier_crosswalks": {
+      "status": "supported",
+      "note": "The source is explicitly a crosswalk project for pop/unit boundary and naming reconciliation."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "The source is about crosswalks and spatial context, not abundance assessment."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "Telemetry/passage workflows are not part of this source."
+    },
+    "hatchery": {
+      "status": "partial",
+      "note": "Some source datasets reflect hatchery or supplementation programs, but the platform is not a hatchery system."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "Harvest and fishery workflows are not exposed as a first-class surface."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Genetics and GSI workflows are not part of the crosswalk surface."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "No package/export workflow is implemented."
+    },
+    "provenance_versioning": {
+      "status": "partial",
+      "note": "Reports and metadata pages provide provenance context, but not a versioned operational record model."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "The public surface is usable, but the wrapper is intentionally narrow and legacy-oriented."
+    }
+  },
+  "blockers": [
+    "The public tools are legacy and unevenly documented.",
+    "The current scaffold does not model the full population query UI."
+  ],
+  "governance_constraints": [
+    "Treat the project as source-specific crosswalk context, not a universal salmon identity authority."
+  ],
+  "related_skills": [
+    "critfc-crosswalk-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://critfc.org/fish-and-watersheds/fishery-science/data-resources/columbia-basin-salmon-and-steelhead-crosswalk-project/",
+    "https://critfc.org/wp-content/uploads/2013/07/crosswalk_user_guide.pdf",
+    "https://gis.critfc.org/arcgis/rest/services"
+  ],
+  "watch_fields": [
+    "population query tool availability",
+    "ArcGIS REST service layout",
+    "legacy map/report surface changes"
+  ]
+}

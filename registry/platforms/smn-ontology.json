@@ -10,6 +10,7 @@
     "https://salmon-data-mobilization.github.io/salmon-domain-ontology/smn.jsonld",
     "https://github.com/salmon-data-mobilization/salmon-domain-ontology"
   ],
+  "access_tier": "public",
   "auth_access_model": "The published ontology artifacts are currently public and readable without credentials.",
   "data_domains": [
     "shared salmon semantics",

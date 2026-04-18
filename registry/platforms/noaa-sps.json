@@ -1,0 +1,97 @@
+{
+  "platform_id": "noaa-sps",
+  "platform_name": "NOAA SPS",
+  "owner": "NOAA/NWFSC",
+  "canonical_urls": [
+    "https://www.webapps.nwfsc.noaa.gov/sps/",
+    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm"
+  ],
+  "docs_urls": [
+    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm",
+    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/map_query.htm"
+  ],
+  "access_tier": "public",
+  "auth_access_model": "The visible SPS web application is public, but the surfaced material is legacy and browser-oriented rather than a documented JSON API.",
+  "data_domains": [
+    "ESA-listed salmonid population summaries",
+    "spawning abundance and related demographic parameters",
+    "archived population data selections"
+  ],
+  "identifier_systems": [
+    "Recovery Domain",
+    "ESU",
+    "Major Population Group",
+    "population names"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "partial",
+      "note": "The site offers data and map query flows, but not a documented public search API."
+    },
+    "metadata_schema": {
+      "status": "partial",
+      "note": "The site describes population-summary fields, but not a formal machine-readable schema."
+    },
+    "entity_lookup": {
+      "status": "partial",
+      "note": "Populations can be selected by recovery domain, ESU, and population group in the UI."
+    },
+    "identifier_crosswalks": {
+      "status": "missing",
+      "note": "The site is not a crosswalk service."
+    },
+    "abundance_assessment": {
+      "status": "supported",
+      "note": "The site exists to provide salmon population summary and demographic data used in recovery planning."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "Telemetry and passage workflows are not part of SPS."
+    },
+    "hatchery": {
+      "status": "missing",
+      "note": "Hatchery data are not the core surface here, even though some fields reference hatchery-origin fish."
+    },
+    "harvest_fishery": {
+      "status": "partial",
+      "note": "The public description includes harvest reduction fields, but not a broader fishery platform."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Genetics and GSI workflows are not exposed."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "No package/export workflow is documented on the public page."
+    },
+    "provenance_versioning": {
+      "status": "partial",
+      "note": "The site keeps archived database selections, but not a rich version contract."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "The information is accessible, but the surface is legacy web UI rather than a clean API."
+    }
+  },
+  "blockers": [
+    "The public surface is a legacy web app, not a modern documented API.",
+    "The scaffold only fetches page/help content and does not reverse-engineer private query endpoints."
+  ],
+  "governance_constraints": [
+    "Treat SPS as browser-first recovery-planning context rather than a general-purpose machine API."
+  ],
+  "related_skills": [
+    "noaa-sps-skill"
+  ],
+  "last_verified_date": "2026-04-17",
+  "evidence_links": [
+    "https://www.webapps.nwfsc.noaa.gov/sps/",
+    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm",
+    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/map_query.htm"
+  ],
+  "watch_fields": [
+    "public home-page layout",
+    "help-document URLs",
+    "archive/data-query page behavior"
+  ]
+}

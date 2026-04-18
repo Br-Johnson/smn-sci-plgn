@@ -9,6 +9,7 @@
   "docs_urls": [
     "https://www.ncbi.nlm.nih.gov/books/NBK25501/"
   ],
+  "access_tier": "public",
   "auth_access_model": "The current literature wrapper uses public E-utilities without a private auth requirement.",
   "data_domains": [
     "salmon-related literature discovery",

@@ -10,6 +10,7 @@
     "https://www.rmpc.org/submission/api/",
     "https://github.com/PSMFC-Streamnet-RMPC/api-docs"
   ],
+  "access_tier": "credentialed",
   "auth_access_model": "The public announcement page is open, but data endpoints require an API key or authorization token.",
   "data_domains": [
     "coded-wire-tag release and recovery data",

@@ -1,0 +1,219 @@
+{
+  "slice_id": "columbia-basin-v0",
+  "version": "v0",
+  "generated_on": "2026-04-17",
+  "scope": {
+    "region": "Columbia Basin",
+    "status": "bounded",
+    "authority": "non-authoritative",
+    "assumption": "This slice is a local routing aid only and does not represent basin-wide production truth."
+  },
+  "scheme_definitions": [
+    {
+      "scheme": "cb_local_id",
+      "definition": "Stable repository-local identity key for the Columbia Basin v0 slice.",
+      "example": "cb:site:bonneville-dam"
+    },
+    {
+      "scheme": "source_label",
+      "definition": "Label observed in source notes or legacy scaffolding. Useful for matching, not truth.",
+      "example": "Upper Columbia Spring Chinook ESU"
+    },
+    {
+      "scheme": "routing_hint",
+      "definition": "Non-authoritative downstream label used only for routing and normalization hints.",
+      "example": "route-hint:Bonneville Dam"
+    }
+  ],
+  "records": [
+    {
+      "canonical_local_id": "cb:management-unit:upper-columbia-spring-chinook-esu",
+      "entity_type": "management_unit",
+      "label": "Upper Columbia Spring Chinook ESU",
+      "aliases": [
+        "Upper Columbia Spring Chinook ESU",
+        "upper columbia spring chinook",
+        "upper columbia chinook",
+        "UCS chinook"
+      ],
+      "identifier_scheme": "cb_local_id",
+      "identifier_value": "cb:management-unit:upper-columbia-spring-chinook-esu",
+      "mapped_target_id": "route-hint:Upper Columbia Spring Chinook ESU",
+      "mapping_relation": "close_match",
+      "source": "bounded Columbia Basin v0 local curation",
+      "confidence": "medium",
+      "record_status": "provisional",
+      "valid_from": "2026-04-17",
+      "valid_to": null,
+      "valid_time_or_version": "columbia-basin-v0@2026-04-17",
+      "notes": "Non-authoritative Columbia Basin routing hint for Upper Columbia spring Chinook.",
+      "provenance": [
+        {
+          "source": "local curation",
+          "basis": "bounded Columbia Basin v0 routing slice"
+        },
+        {
+          "source": "legacy seed scaffold",
+          "basis": "expanded from the prior placeholder crosswalk view"
+        }
+      ]
+    },
+    {
+      "canonical_local_id": "cb:management-unit:snake-river-spring-summer-chinook-esu",
+      "entity_type": "management_unit",
+      "label": "Snake River Spring/Summer Chinook ESU",
+      "aliases": [
+        "Snake River Spring/Summer Chinook ESU",
+        "snake river spring chinook",
+        "snake river spring summer chinook",
+        "snake river chinook"
+      ],
+      "identifier_scheme": "cb_local_id",
+      "identifier_value": "cb:management-unit:snake-river-spring-summer-chinook-esu",
+      "mapped_target_id": "route-hint:Snake River Spring/Summer Chinook ESU",
+      "mapping_relation": "close_match",
+      "source": "bounded Columbia Basin v0 local curation",
+      "confidence": "medium",
+      "record_status": "provisional",
+      "valid_from": "2026-04-17",
+      "valid_to": null,
+      "valid_time_or_version": "columbia-basin-v0@2026-04-17",
+      "notes": "Non-authoritative Columbia Basin routing hint for Snake River spring/summer Chinook.",
+      "provenance": [
+        {
+          "source": "local curation",
+          "basis": "bounded Columbia Basin v0 routing slice"
+        },
+        {
+          "source": "legacy seed scaffold",
+          "basis": "expanded from the prior placeholder crosswalk view"
+        }
+      ]
+    },
+    {
+      "canonical_local_id": "cb:management-unit:upper-columbia-steelhead-dps",
+      "entity_type": "management_unit",
+      "label": "Upper Columbia Steelhead DPS",
+      "aliases": [
+        "Upper Columbia Steelhead DPS",
+        "upper columbia steelhead",
+        "upper columbia rainbow trout",
+        "upper columbia steelhead run"
+      ],
+      "identifier_scheme": "cb_local_id",
+      "identifier_value": "cb:management-unit:upper-columbia-steelhead-dps",
+      "mapped_target_id": "route-hint:Upper Columbia Steelhead DPS",
+      "mapping_relation": "close_match",
+      "source": "bounded Columbia Basin v0 local curation",
+      "confidence": "medium",
+      "record_status": "provisional",
+      "valid_from": "2026-04-17",
+      "valid_to": null,
+      "valid_time_or_version": "columbia-basin-v0@2026-04-17",
+      "notes": "Non-authoritative Columbia Basin routing hint for the Upper Columbia steelhead management unit.",
+      "provenance": [
+        {
+          "source": "local curation",
+          "basis": "bounded Columbia Basin v0 routing slice"
+        },
+        {
+          "source": "legacy seed scaffold",
+          "basis": "expanded from the prior placeholder crosswalk view"
+        }
+      ]
+    },
+    {
+      "canonical_local_id": "cb:site:bonneville-dam",
+      "entity_type": "site",
+      "label": "Bonneville Dam",
+      "aliases": [
+        "Bonneville Dam",
+        "Bonneville",
+        "Bonneville lock and dam"
+      ],
+      "identifier_scheme": "cb_local_id",
+      "identifier_value": "cb:site:bonneville-dam",
+      "mapped_target_id": "route-hint:Bonneville Dam",
+      "mapping_relation": "same_as",
+      "source": "bounded Columbia Basin v0 local curation",
+      "confidence": "high",
+      "record_status": "provisional",
+      "valid_from": "2026-04-17",
+      "valid_to": null,
+      "valid_time_or_version": "columbia-basin-v0@2026-04-17",
+      "notes": "Local site identity used only as a routing hint, not an authoritative site registry row.",
+      "provenance": [
+        {
+          "source": "local curation",
+          "basis": "bounded Columbia Basin v0 routing slice"
+        },
+        {
+          "source": "legacy seed scaffold",
+          "basis": "expanded from the prior placeholder crosswalk view"
+        }
+      ]
+    },
+    {
+      "canonical_local_id": "cb:site:the-dalles-dam",
+      "entity_type": "site",
+      "label": "The Dalles Dam",
+      "aliases": [
+        "The Dalles Dam",
+        "The Dalles",
+        "The Dalles lock and dam"
+      ],
+      "identifier_scheme": "cb_local_id",
+      "identifier_value": "cb:site:the-dalles-dam",
+      "mapped_target_id": "route-hint:The Dalles Dam",
+      "mapping_relation": "same_as",
+      "source": "bounded Columbia Basin v0 local curation",
+      "confidence": "high",
+      "record_status": "provisional",
+      "valid_from": "2026-04-17",
+      "valid_to": null,
+      "valid_time_or_version": "columbia-basin-v0@2026-04-17",
+      "notes": "Local site identity used only as a routing hint, not an authoritative site registry row.",
+      "provenance": [
+        {
+          "source": "local curation",
+          "basis": "bounded Columbia Basin v0 routing slice"
+        },
+        {
+          "source": "legacy seed scaffold",
+          "basis": "expanded from the prior placeholder crosswalk view"
+        }
+      ]
+    },
+    {
+      "canonical_local_id": "cb:hatchery:little-white-salmon-hatchery",
+      "entity_type": "hatchery",
+      "label": "Little White Salmon Hatchery",
+      "aliases": [
+        "Little White Salmon Hatchery",
+        "Little White Salmon",
+        "LWS hatchery"
+      ],
+      "identifier_scheme": "cb_local_id",
+      "identifier_value": "cb:hatchery:little-white-salmon-hatchery",
+      "mapped_target_id": "route-hint:Little White Salmon Hatchery",
+      "mapping_relation": "same_as",
+      "source": "bounded Columbia Basin v0 local curation",
+      "confidence": "high",
+      "record_status": "provisional",
+      "valid_from": "2026-04-17",
+      "valid_to": null,
+      "valid_time_or_version": "columbia-basin-v0@2026-04-17",
+      "notes": "Local hatchery identity used only as a routing hint, not an authoritative hatchery registry row.",
+      "provenance": [
+        {
+          "source": "local curation",
+          "basis": "bounded Columbia Basin v0 routing slice"
+        },
+        {
+          "source": "legacy seed scaffold",
+          "basis": "expanded from the prior placeholder crosswalk view"
+        }
+      ]
+    }
+  ]
+}

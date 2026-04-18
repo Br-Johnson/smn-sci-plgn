@@ -29,12 +29,17 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 - `rmis-skill`
 - `dart-query-skill`
 - `salmon-literature-skill`
+- `critfc-crosswalk-skill`
+- `noaa-sps-skill`
+- `npafc-skill`
+- `salmon-stock-brief-workflow-skill`
 
 ## Lane classification
 
 Start by assigning the request to one or more lanes:
 
 - stock status, abundance, and assessment
+- crosswalks, reconciliation, and stock-unit harmonization
 - telemetry, migration, and passage
 - habitat, watershed, and connectivity
 - hatchery, harvest, management, and coded-wire-tag
@@ -43,6 +48,7 @@ Start by assigning the request to one or more lanes:
 - ontology and semantic resolution
 - literature, reports, and dataset discovery
 - Salmon Data Package and metadata validation
+- composite stock briefs
 
 See [references/lanes.md](references/lanes.md) for the stable lane IDs and first-pass routing table.
 See [references/skill-graph-routing.md](references/skill-graph-routing.md) for graph expansion, capability filtering, and governance-aware selection.
@@ -52,7 +58,7 @@ See [references/skill-graph-routing.md](references/skill-graph-routing.md) for g
 1. Clarify the user objective.
 2. Seed 1 to 3 candidate lanes from the request.
 3. Normalize entities with `salmon-entity-normalizer-skill`.
-4. Expand through the skill graph and select the smallest useful source set.
+4. Expand through the skill graph and select the smallest useful source set, using access tiers to distinguish public from credentialed routes.
 5. Gather evidence.
 6. Reconcile conflicts and caveats.
 7. Return a concise synthesis.

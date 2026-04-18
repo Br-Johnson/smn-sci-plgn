@@ -27,6 +27,7 @@ What is real now:
 - MIT license
 - Claude and Codex install scripts
 - validation script
+- CI workflow and selector regression tests
 - first core skills and script entrypoints
 - an authenticated RMIS skill scaffold
 - shared and DFO ontology lookup skills
@@ -34,15 +35,19 @@ What is real now:
 - a living parity-gap register in `docs/platform-gap-register.md`
 - a machine-readable platform registry in `registry/`
 - a typed router-adjacent skill graph in `registry/skill-graph.json`
+- an executable graph selector with fixture-backed routing cases
+- a bounded Columbia Basin v0 identity slice with non-authoritative identity hints
 - a seed identity/crosswalk data layer with explicit schemas
+- three new source scaffolds: `CRITFC`, `NOAA SPS`, and `NPAFC`
+- a scaffolded stock-brief composite workflow
 - a maintainer-first in-repo knowledge base in `kb/`
 
 What is still intentionally thin:
 - authoritative cross-jurisdiction identity graph coverage
 - full API coverage for salmon portals
 - hatchery, genetics, and management-data harmonization
-- composite workflows beyond router guidance
-- behavioral test fixtures and golden prompts
+- composite workflows beyond the stock-brief scaffold
+- golden prompts and broader behavior fixtures beyond the selector layer
 
 ## Quick Start
 
@@ -75,6 +80,12 @@ Validate the scaffold:
 python3 scripts/validate_scaffold.py
 ```
 
+Run the selector regression tests:
+
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py'
+```
+
 ## Repo Layout
 
 ```text
@@ -88,6 +99,8 @@ smn-sci-plgn/
 │   ├── skill-graph.schema.json
 │   ├── platforms/
 │   └── identity/
+├── tests/
+│   └── fixtures/
 ├── kb/
 │   ├── AGENTS.md
 │   ├── platforms/
@@ -104,9 +117,16 @@ smn-sci-plgn/
 │   ├── ptagis-skill/
 │   ├── rmis-skill/
 │   ├── dart-query-skill/
-│   └── salmon-literature-skill/
+│   ├── salmon-literature-skill/
+│   ├── critfc-crosswalk-skill/
+│   ├── noaa-sps-skill/
+│   ├── npafc-skill/
+│   └── salmon-stock-brief-workflow-skill/
+├── .github/
+│   └── workflows/
 ├── scripts/
 │   ├── _common.py
+│   ├── skill_graph_selector.py
 │   ├── install_codex_plugin.py
 │   ├── install_claude_skills.py
 │   └── validate_scaffold.py
@@ -211,6 +231,44 @@ Current coverage:
 - compact article summaries
 - optional raw JSON persistence
 
+### `critfc-crosswalk-skill`
+
+CRITFC crosswalk and ArcGIS REST helper for Columbia Basin pop or unit reconciliation.
+
+Current coverage:
+- project-page fetch
+- REST-root fetch
+- bounded public request path
+
+### `noaa-sps-skill`
+
+Legacy NOAA Salmon Population Summary page and help-doc wrapper.
+
+Current coverage:
+- home page fetch
+- help page fetch
+- bounded public request path
+
+### `npafc-skill`
+
+Public NPAFC CKAN catalogue and statistics wrapper.
+
+Current coverage:
+- dataset search
+- dataset show
+- resource show
+- statistics page fetch
+- bounded public request path
+
+### `salmon-stock-brief-workflow-skill`
+
+Structured workflow scaffold for provenance-aware salmon stock briefs.
+
+Current coverage:
+- fixed markdown contract
+- template generation
+- contract validation helper
+
 ## Important Upstream Repositories
 
 These repos are foundational to the plugin architecture.
@@ -275,7 +333,9 @@ Near-term workflow:
 - seed 1 to 3 candidate lanes
 - normalize the entities
 - expand through the skill graph
+- prune or explain routes using platform `access_tier`
 - call one or more source skills
+- optionally wrap the evidence in a stock-brief contract
 - synthesize findings with caveats
 
 Canonical repo-maintenance docs:
@@ -318,17 +378,17 @@ The highest-current blockers remain:
 - many important sources are export- or portal-first rather than API-first
 - genetics and telemetry access are partly gated by account or project governance
 - hatchery and management semantics remain fragmented
-- there are still no behavioral regression tests or golden answer fixtures
+- there are still no broad golden answer fixtures across the full skill suite
 
 ## Recommended Next Build Steps
 
 1. Turn the seed identity layer into authoritative cross-system coverage.
-2. Add behavioral tests, sample fixtures, and golden prompts for the skill suite.
-3. Add fixture-backed graph-routing cases and capability-aware subgraph selection.
-4. Expand wrappers for `CRITFC`, `NOAA SPS`, `NPAFC`, `NuSEDS`, `PacFIN`, and `FINS`.
+2. Extend the selector from heuristic lane scoring into capability-aware subgraph ranking and richer auth-state pruning.
+3. Add golden prompts and per-skill smoke fixtures beyond the selector suite.
+4. Expand wrappers for `NuSEDS`, `PacFIN`, and `FINS`.
 5. Deepen `metasalmon` coverage to package creation and post-review publication flows.
-6. Add composite workflows for stock briefs, watershed risk briefs, and mixed-stock management briefs.
-7. Add governance-aware access metadata for gated sources and credential scopes.
+6. Add watershed-risk and mixed-stock management workflows alongside the stock-brief scaffold.
+7. Turn access tiers into a fuller policy layer for credentials, project gating, and partial-public surfaces.
 
 ## Sources Used For This Scaffold
 

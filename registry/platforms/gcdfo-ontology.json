@@ -10,6 +10,7 @@
     "https://dfo-pacific-science.github.io/dfo-salmon-ontology/gcdfo.jsonld",
     "https://github.com/dfo-pacific-science/dfo-salmon-ontology"
   ],
+  "access_tier": "public",
   "auth_access_model": "The published ontology artifacts are currently public and readable without credentials.",
   "data_domains": [
     "DFO-specific salmon semantics",

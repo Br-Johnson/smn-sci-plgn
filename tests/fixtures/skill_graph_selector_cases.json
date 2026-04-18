@@ -1,0 +1,454 @@
+[
+  {
+    "request": "What is known about this stock status and abundance?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:stock-assessment"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "streamnet-api-skill",
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "stock-assessment",
+        "streamnet-api-skill",
+        "salmon-literature-skill"
+      ]
+    }
+  },
+  {
+    "request": "Compare PIT-tag passage and survival by river reach.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:telemetry-passage"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "ptagis-skill",
+        "dart-query-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "telemetry-passage",
+        "ptagis-skill",
+        "dart-query-skill"
+      ]
+    }
+  },
+  {
+    "request": "Which watersheds and basins are connected by these barriers?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:watershed-connectivity"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "dart-query-skill",
+        "streamnet-api-skill",
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "watershed-connectivity",
+        "dart-query-skill",
+        "streamnet-api-skill"
+      ]
+    }
+  },
+  {
+    "request": "What do coded-wire-tag recoveries suggest here?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:coded-wire-tag-recovery"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "rmis-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "coded-wire-tag-recovery",
+        "rmis-skill"
+      ]
+    }
+  },
+  {
+    "request": "What do hatchery and harvest records say about these populations?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:hatchery-harvest-management"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "rmis-skill",
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "hatchery-harvest-management",
+        "rmis-skill",
+        "salmon-literature-skill"
+      ]
+    }
+  },
+  {
+    "request": "Summarize the genetics or GSI signals for this group.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:genetics-stock-identification"
+      ],
+      "selected_skills": [
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "genetics-stock-identification",
+        "salmon-literature-skill"
+      ]
+    }
+  },
+  {
+    "request": "What climate and ocean context matters for this return?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:climate-ocean-context"
+      ],
+      "selected_skills": [
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "climate-ocean-context",
+        "salmon-literature-skill"
+      ]
+    }
+  },
+  {
+    "request": "Use the CRITFC crosswalk to harmonize HUC6 unit names.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:crosswalk-harmonization"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "critfc-crosswalk-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "crosswalk-harmonization",
+        "critfc-crosswalk-skill"
+      ]
+    }
+  },
+  {
+    "request": "Find the ontology term for this salmon concept.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:ontology-semantic-resolution"
+      ],
+      "selected_skills": [
+        "smn-ontology-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "ontology-semantic-resolution",
+        "smn-ontology-skill"
+      ]
+    }
+  },
+  {
+    "request": "Is there a DFO-specific ontology term for this concept?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:ontology-semantic-resolution"
+      ],
+      "selected_skills": [
+        "smn-ontology-skill",
+        "gcdfo-ontology-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "ontology-semantic-resolution",
+        "gcdfo-ontology-skill"
+      ]
+    }
+  },
+  {
+    "request": "Show the NOAA SPS population summary for this ESA-listed Chinook stock.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:stock-assessment"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "streamnet-api-skill",
+        "salmon-literature-skill",
+        "noaa-sps-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "stock-assessment",
+        "noaa-sps-skill"
+      ]
+    }
+  },
+  {
+    "request": "Find papers or reports on this salmon topic.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:literature-reports-dataset-discovery"
+      ],
+      "selected_skills": [
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "literature-reports-dataset-discovery",
+        "salmon-literature-skill"
+      ]
+    }
+  },
+  {
+    "request": "Find NPAFC catalogue datasets and statistics for salmon catch.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:literature-reports-dataset-discovery"
+      ],
+      "selected_skills": [
+        "salmon-literature-skill",
+        "npafc-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "literature-reports-dataset-discovery",
+        "npafc-skill"
+      ]
+    }
+  },
+  {
+    "request": "How do I build or validate a Salmon Data Package?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:package-metadata-validation"
+      ],
+      "selected_skills": [
+        "smn-ontology-skill",
+        "metasalmon-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "package-metadata-validation",
+        "metasalmon-skill"
+      ]
+    }
+  },
+  {
+    "request": "What Salmon Data Package terms are DFO-specific?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:package-metadata-validation"
+      ],
+      "selected_skills": [
+        "smn-ontology-skill",
+        "metasalmon-skill",
+        "gcdfo-ontology-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "package-metadata-validation",
+        "gcdfo-ontology-skill"
+      ]
+    }
+  },
+  {
+    "request": "Can I use PTAGIS observations without a bearer token?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:telemetry-passage"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "dart-query-skill"
+      ],
+      "blocked_skills": [
+        "ptagis-skill"
+      ],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "telemetry-passage",
+        "Blocked ptagis-skill"
+      ]
+    }
+  },
+  {
+    "request": "Can I use RMIS recovery endpoints without credentials?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:coded-wire-tag-recovery"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill"
+      ],
+      "blocked_skills": [
+        "rmis-skill"
+      ],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "coded-wire-tag-recovery",
+        "Blocked rmis-skill"
+      ]
+    }
+  },
+  {
+    "request": "What can StreamNet tell me about stock assessment?",
+    "expected": {
+      "seeded_lanes": [
+        "lane:stock-assessment"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "streamnet-api-skill",
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "stock-assessment",
+        "streamnet-api-skill"
+      ]
+    }
+  },
+  {
+    "request": "Compare telemetry passage and coded-wire-tag recovery signals.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:telemetry-passage",
+        "lane:coded-wire-tag-recovery"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "ptagis-skill",
+        "dart-query-skill",
+        "rmis-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "telemetry-passage",
+        "coded-wire-tag-recovery",
+        "rmis-skill"
+      ]
+    }
+  },
+  {
+    "request": "Compare stock assessment with climate and ocean context.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:stock-assessment",
+        "lane:climate-ocean-context"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "streamnet-api-skill",
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "stock-assessment",
+        "climate-ocean-context",
+        "streamnet-api-skill"
+      ]
+    }
+  },
+  {
+    "request": "Prepare a structured stock brief for Upper Columbia spring Chinook.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:stock-assessment"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "streamnet-api-skill",
+        "salmon-literature-skill",
+        "salmon-stock-brief-workflow-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "stock-assessment",
+        "salmon-stock-brief-workflow-skill"
+      ]
+    }
+  },
+  {
+    "request": "What is still missing from the salmon platform?",
+    "expected": {
+      "seeded_lanes": [],
+      "selected_skills": [],
+      "blocked_skills": [],
+      "unsupported_lanes": [
+        "lane:identity-graph",
+        "lane:nuseeds-wrapper",
+        "lane:hatchery-registry",
+        "lane:behavioral-validation",
+        "lane:composite-workflows"
+      ],
+      "reason_contains": [
+        "gap",
+        "missing-coverage"
+      ]
+    }
+  },
+  {
+    "request": "Normalize this salmon species alias and management-unit name.",
+    "expected": {
+      "seeded_lanes": [],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "normalization-only",
+        "salmon-entity-normalizer-skill"
+      ]
+    }
+  },
+  {
+    "request": "Find the shared term and supporting literature for this concept.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:ontology-semantic-resolution",
+        "lane:literature-reports-dataset-discovery"
+      ],
+      "selected_skills": [
+        "smn-ontology-skill",
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "ontology-semantic-resolution",
+        "literature-reports-dataset-discovery"
+      ]
+    }
+  }
+]
