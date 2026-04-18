@@ -1,0 +1,48 @@
+{
+  "name": "salmon-science-research",
+  "version": "0.0.1",
+  "description": "Open-source salmon ecology, conservation, and management-science workflows with routing, normalization, and source-specific skills.",
+  "author": {
+    "name": "Brett Johnson and contributors",
+    "url": "https://github.com/Br-Johnson"
+  },
+  "homepage": "https://github.com/Br-Johnson/smn-sci-plgn",
+  "repository": "https://github.com/Br-Johnson/smn-sci-plgn",
+  "license": "MIT",
+  "keywords": [
+    "salmon",
+    "ecology",
+    "conservation",
+    "fisheries",
+    "management-science",
+    "streamnet",
+    "ptagis",
+    "dart",
+    "salmonid",
+    "research",
+    "evidence-synthesis",
+    "skill-routing"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Salmon Science Research",
+    "shortDescription": "Open-source salmon ecology, conservation, and management research workflows",
+    "longDescription": "Open-source salmon research workflows that help Codex interpret salmon ecology, conservation, and management questions, normalize salmon entities, route to source-specific skills, and synthesize evidence-backed answers across public salmon-science platforms.",
+    "developerName": "Brett Johnson and contributors",
+    "category": "Research",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/Br-Johnson/smn-sci-plgn",
+    "privacyPolicyURL": "https://github.com/Br-Johnson/smn-sci-plgn/blob/main/README.md",
+    "termsOfServiceURL": "https://github.com/Br-Johnson/smn-sci-plgn/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Summarize the current evidence for this salmon stock or unit.",
+      "Find the best salmon data sources for telemetry, status, and habitat.",
+      "Route this salmon research question to the right public platforms."
+    ],
+    "brandColor": "#14532D"
+  }
+}
