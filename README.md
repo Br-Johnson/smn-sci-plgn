@@ -29,18 +29,23 @@ What is real now:
 - validation script
 - first core skills and script entrypoints
 - an authenticated RMIS skill scaffold
+- shared and DFO ontology lookup skills
+- a thin `metasalmon` execution skill
+- a living parity-gap register in `docs/platform-gap-register.md`
 
 What is still intentionally thin:
 - cross-jurisdiction identity graph
 - full API coverage for salmon portals
 - hatchery, genetics, and management-data harmonization
 - composite workflows beyond router guidance
+- behavioral test fixtures and golden prompts
 
 ## Quick Start
 
 Requirements:
 - Python 3.10+
 - no third-party Python dependencies
+- optional: `Rscript` plus installed `metasalmon` for `metasalmon-skill`
 
 Install for Codex / OpenAI:
 
@@ -71,9 +76,15 @@ python3 scripts/validate_scaffold.py
 ```text
 smn-sci-plgn/
 ├── .codex-plugin/plugin.json
+├── docs/
+│   ├── entrypoints.md
+│   └── platform-gap-register.md
 ├── skills/
 │   ├── salmon-research-router-skill/
 │   ├── salmon-entity-normalizer-skill/
+│   ├── smn-ontology-skill/
+│   ├── gcdfo-ontology-skill/
+│   ├── metasalmon-skill/
 │   ├── streamnet-api-skill/
 │   ├── ptagis-skill/
 │   ├── rmis-skill/
@@ -106,6 +117,36 @@ Seed normalization layer for:
 - jurisdiction names
 - management-unit systems such as `CU`, `SMU`, `DU`, `ESU`, `DPS`
 - common identifier tokens such as `HUC`, `PIT`, and `CWT`
+
+### `smn-ontology-skill`
+
+Lookup skill for the shared Salmon Domain Ontology.
+
+Current coverage:
+- ontology metadata and version lookup
+- label / definition / IRI search over published `smn.jsonld`
+- exact term fetch by local name, prefixed id, or full IRI
+
+### `gcdfo-ontology-skill`
+
+Lookup skill for the DFO-specific Salmon Ontology.
+
+Current coverage:
+- ontology metadata and version lookup
+- label / definition / IRI search over published `gcdfo.jsonld`
+- exact term fetch by local name, prefixed id, or full IRI
+
+### `metasalmon-skill`
+
+Thin execution wrapper around the installed `metasalmon` R package.
+
+Current coverage:
+- runtime and package-version inspection
+- function catalog for current supported workflows
+- `sources_for_role()`
+- `find_terms()`
+- `fetch_salmon_ontology()`
+- `validate_salmon_datapackage()`
 
 ### `streamnet-api-skill`
 
@@ -167,7 +208,7 @@ Role:
 - right upstream for organization-neutral normalization and interoperability
 
 How it factors in:
-- future `smn` ontology lookup skill
+- current `smn-ontology-skill`
 - shared semantic normalization
 - cross-organization entity alignment
 
@@ -182,7 +223,7 @@ Role:
 - already wired to import the shared `smn` layer
 
 How it factors in:
-- future `gcdfo` ontology lookup skill
+- current `gcdfo-ontology-skill`
 - DFO-aware normalization
 - shared-vs-DFO term-boundary decisions
 
@@ -197,7 +238,7 @@ Role:
 - something this plugin should integrate with rather than replace
 
 How it factors in:
-- future `metasalmon` execution skill
+- current `metasalmon-skill` as a thin execution adapter
 - data-package authoring and validation workflows
 - term retrieval, semantic QA, and publication helpers
 
@@ -215,6 +256,10 @@ Near-term workflow:
 - normalize the entities
 - call one or more source skills
 - synthesize findings with caveats
+
+Canonical repo-maintenance docs:
+- [docs/entrypoints.md](./docs/entrypoints.md)
+- [docs/platform-gap-register.md](./docs/platform-gap-register.md)
 
 ## Open-Source Strategy
 
@@ -238,22 +283,25 @@ That also keeps responsibilities clean:
 
 This repo does not solve the deeper salmon-platform problems yet.
 
-The biggest blockers to full parity with the Life Science Research plugin remain:
+The maintained register now lives here:
+- [docs/platform-gap-register.md](./docs/platform-gap-register.md)
+
+The highest-current blockers remain:
 - no universal salmon identity graph across `CU`, `SMU`, `DU`, `ESU`, `DPS`, stock, site, hatchery, and tag systems
-- inconsistent ontology and measurement semantics across salmon platforms
+- ontology lookup now exists, but ontology-backed crosswalk resolution is still thin
 - many important sources are export- or portal-first rather than API-first
 - genetics and telemetry access are partly gated by account or project governance
 - hatchery and management semantics remain fragmented
-- RMIS is accessible, but mainly through authenticated API or account-gated reporting workflows
+- there are still no behavioral regression tests or golden answer fixtures
 
 ## Recommended Next Build Steps
 
 1. Add a first-class salmon identity graph and crosswalk registry.
-2. Add ontology-facing skills for `smn` and `gcdfo`.
-3. Add a `metasalmon` integration skill instead of re-implementing SDP logic locally.
-4. Expand wrappers for `CRITFC`, `NOAA SPS`, `NPAFC`, `NuSEDS`, `PacFIN`, and `FINS`.
+2. Add behavioral tests, sample fixtures, and golden prompts for the skill suite.
+3. Expand wrappers for `CRITFC`, `NOAA SPS`, `NPAFC`, `NuSEDS`, `PacFIN`, and `FINS`.
+4. Deepen `metasalmon` coverage to package creation and post-review publication flows.
 5. Add composite workflows for stock briefs, watershed risk briefs, and mixed-stock management briefs.
-6. Publish stable sample datasets and golden test prompts.
+6. Add governance-aware access metadata for gated sources and credential scopes.
 
 ## Sources Used For This Scaffold
 

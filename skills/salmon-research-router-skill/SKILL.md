@@ -20,6 +20,9 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 ## Initial bundled skills
 
 - `salmon-entity-normalizer-skill`
+- `smn-ontology-skill`
+- `gcdfo-ontology-skill`
+- `metasalmon-skill`
 - `streamnet-api-skill`
 - `ptagis-skill`
 - `rmis-skill`
@@ -56,6 +59,10 @@ Treat these repos as upstream foundations for future skill growth:
 - shared ontology: `salmon-data-mobilization/salmon-domain-ontology`
 - DFO-specific ontology: `dfo-pacific-science/dfo-salmon-ontology`
 - data package and semantic workflow engine: `dfo-pacific-science/metasalmon`
+
+## Gap awareness
+
+When the user asks what the salmon domain still lacks, or whether the repo is at parity with the Life Science Research plugin, consult `docs/platform-gap-register.md` first and answer from that maintained register instead of improvising.
 
 ## Subagent guidance
 
