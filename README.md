@@ -8,8 +8,8 @@ Canonical repository:
 
 This repository is scaffolded to work in two modes:
 
-- Codex / OpenAI plugin mode via [.codex-plugin/plugin.json](/Users/brettjohnson/code/smn-sci-plgn/.codex-plugin/plugin.json)
-- Claude skill-bundle mode via [skills/](/Users/brettjohnson/code/smn-sci-plgn/skills)
+- Codex / OpenAI plugin mode via [.codex-plugin/plugin.json](./.codex-plugin/plugin.json)
+- Claude skill-bundle mode via [skills/](./skills/)
 
 The design follows the same high-level pattern as the Life Science Research plugin:
 
@@ -188,7 +188,7 @@ The biggest blockers to full parity with the Life Science Research plugin remain
 
 ## Sources Used For This Scaffold
 
-- [Life Science Research plugin pattern](https://github.com/openai/openai/tree/master/plugins/life-science-research)
+- Router-plus-skill-family pattern adapted from the Life Science Research plugin design
 - [StreamNet REST API docs](https://www.streamnet.org/resources/exchange-tools/rest-api-documentation/)
 - [PTAGIS API docs](https://www.ptagis.org/Content/DataSpecification/topics/api.htm)
 - [DART overview](https://www.cbr.washington.edu/dart/overview)
