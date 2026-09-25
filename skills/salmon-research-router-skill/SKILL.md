@@ -21,8 +21,7 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 ## Initial bundled skills
 
 - `salmon-entity-normalizer-skill`
-- `smn-ontology-skill`
-- `gcdfo-ontology-skill`
+- `salmon-terms`
 - `metasalmon-skill`
 - `streamnet-api-skill`
 - `ptagis-skill`
@@ -69,7 +68,7 @@ Treat these repos as upstream foundations for future skill growth:
 
 - shared ontology: `salmon-data-mobilization/salmon-domain-ontology`
 - DFO-specific ontology: `dfo-pacific-science/dfo-salmon-ontology`
-- data package and semantic workflow engine: `dfo-pacific-science/metasalmon`
+- data package and semantic workflow engine: `salmon-data-mobilization/metasalmon` and its Python mirror `salmon-data-mobilization/metasalmonpy`, both pinned at `v0.5.0`
 
 ## Gap awareness
 

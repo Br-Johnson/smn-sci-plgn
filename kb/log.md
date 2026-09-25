@@ -22,3 +22,12 @@
 - Added CRITFC crosswalk, NOAA SPS, and NPAFC source scaffolds with platform cards and KB pages.
 - Added a stock-brief workflow scaffold and contract helper.
 - Updated the shared docs and gap register so the new routing, identity, access-tier, and workflow layers are first-class.
+
+## [2026-09-25] retirement | thin-front-door
+
+- Retired the plugin's own JSON-LD term search, `scripts/ontology_lookup_common.py`, together with the two skills built on it, `smn-ontology-skill` and `gcdfo-ontology-skill`. The new `salmon-terms` skill calls metasalmonpy's `find_terms()` and `sources_for_role()` at the `v0.5.0` tag instead.
+- Repointed the metasalmon platform card, wiki page, and skill from the retired `dfo-pacific-science/metasalmon` fork at 0.1.2 to `salmon-data-mobilization/metasalmon` and `salmon-data-mobilization/metasalmonpy`, both pinned at `v0.5.0`.
+- Rewrote `metasalmon-skill` as a Python-first adapter to metasalmonpy with the R route documented as the alternative, and moved its term-search actions to `salmon-terms`.
+- Added `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` beside `.codex-plugin/plugin.json`. Validation now checks that the manifests agree, that every referenced skill exists, that the package pins agree, and that no skill script reimplements term search.
+- Collapsed the two ontology skills into `salmon-terms` in the skill graph, the skill-platform map, the selector, and its fixtures. A DFO-specific request now keeps `gcdfo` in the term search's sources instead of adding a second skill.
+- Measured the watch surfaces the same day: `smn` publishes version 0.0.3 (modified 2026-08-14) and `gcdfo` version 0.0.9 (modified 2026-08-16).

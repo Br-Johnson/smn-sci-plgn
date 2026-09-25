@@ -1,0 +1,15 @@
+{
+  "name": "smn-sci-plgn",
+  "description": "Brett Johnson's salmon science plugin: routing, entity normalization, source-specific skills, and thin adapters to the metasalmon packages.",
+  "owner": {
+    "name": "Brett Johnson",
+    "url": "https://github.com/Br-Johnson"
+  },
+  "plugins": [
+    {
+      "name": "salmon-science-research",
+      "source": "./",
+      "description": "Open-source salmon ecology, conservation, and management-science workflows with routing, normalization, and source-specific skills."
+    }
+  ]
+}

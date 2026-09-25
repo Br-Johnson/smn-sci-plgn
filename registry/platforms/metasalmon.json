@@ -1,17 +1,19 @@
 {
   "platform_id": "metasalmon",
-  "platform_name": "metasalmon",
-  "owner": "DFO Pacific Science",
+  "platform_name": "metasalmon and metasalmonpy",
+  "owner": "salmon-data-mobilization",
   "canonical_urls": [
-    "https://github.com/dfo-pacific-science/metasalmon",
-    "https://dfo-pacific-science.github.io/metasalmon/"
+    "https://github.com/salmon-data-mobilization/metasalmon",
+    "https://github.com/salmon-data-mobilization/metasalmonpy"
   ],
   "docs_urls": [
-    "https://dfo-pacific-science.github.io/metasalmon/",
-    "https://github.com/dfo-pacific-science/metasalmon"
+    "https://salmon-data-mobilization.github.io/metasalmon/",
+    "https://salmon-data-mobilization.github.io/metasalmonpy/",
+    "https://github.com/salmon-data-mobilization/metasalmon/releases/tag/v0.5.0",
+    "https://github.com/salmon-data-mobilization/metasalmonpy/releases/tag/v0.5.0"
   ],
   "access_tier": "mixed",
-  "auth_access_model": "The package is locally executable when installed; some optional LLM or remote-source actions depend on external credentials.",
+  "auth_access_model": "Both packages are public and install from their v0.5.0 tags without credentials. Term search reaches public vocabulary services except BioPortal, which needs BIOPORTAL_APIKEY; optional LLM review and KNB publication need provider credentials.",
   "data_domains": [
     "Salmon Data Package creation",
     "semantic term search",
@@ -27,7 +29,7 @@
   "capabilities": {
     "discovery_search": {
       "status": "supported",
-      "note": "Role-aware term search is implemented through `find_terms()`."
+      "note": "Role-aware term search through `find_terms()` and `sources_for_role()`, exposed by the `salmon-terms` skill."
     },
     "metadata_schema": {
       "status": "supported",
@@ -51,49 +53,54 @@
     },
     "hatchery": {
       "status": "missing",
-      "note": "No hatchery-specific workflow is exposed in the current skill."
+      "note": "No hatchery-specific workflow is exposed by the plugin's adapters."
     },
     "harvest_fishery": {
       "status": "missing",
-      "note": "No harvest or fishery-specific workflow is exposed in the current skill."
+      "note": "No harvest or fishery-specific workflow is exposed by the plugin's adapters."
     },
     "genetics_gsi": {
       "status": "missing",
-      "note": "No genetics or GSI-specific workflow is exposed in the current skill."
+      "note": "No genetics or GSI-specific workflow is exposed by the plugin's adapters."
     },
     "package_metadata_export": {
       "status": "supported",
-      "note": "Package validation and package-oriented workflows are the core value of `metasalmon`."
+      "note": "Package validation is exposed through `metasalmon-skill`; package creation, review, and publication are core package features the plugin does not bridge yet."
     },
     "provenance_versioning": {
       "status": "partial",
-      "note": "Ontology fetch caching and package checks help, but the plugin does not yet expose the full provenance and publication workflow."
+      "note": "Both packages are pinned to the v0.5.0 tag and every adapter response reports the package version that produced it, but the plugin does not expose the provenance and publication workflow."
     },
     "bulk_access_api_ergonomics": {
       "status": "partial",
-      "note": "The current adapter is local-R based rather than a full external API wrapper."
+      "note": "The plugin reaches the packages through thin JSON adapters that run metasalmonpy under uv; the R route is documented rather than wrapped."
     }
   },
   "blockers": [
-    "The plugin only exposes a thin adapter surface today.",
-    "Some advanced workflows depend on local package installation and optional credentials."
+    "The plugin bridges term search, package validation, and ontology fetch; package creation, the 0.5.0 review flow, and publication are not bridged yet.",
+    "The adapters need uv, and network access on first use, to install metasalmonpy from its tag."
   ],
   "governance_constraints": [
-    "LLM-assisted features and publication helpers may depend on external provider setup and human review."
+    "LLM-assisted features and publication helpers may depend on external provider setup and human review.",
+    "Term-request submission files GitHub issues, so it stays a dry run until the user approves the rendered text."
   ],
   "related_skills": [
-    "metasalmon-skill"
+    "metasalmon-skill",
+    "salmon-terms"
   ],
-  "last_verified_date": "2026-04-17",
+  "last_verified_date": "2026-09-25",
   "evidence_links": [
-    "https://dfo-pacific-science.github.io/metasalmon/",
-    "https://github.com/dfo-pacific-science/metasalmon",
+    "https://github.com/salmon-data-mobilization/metasalmon/releases/tag/v0.5.0",
+    "https://github.com/salmon-data-mobilization/metasalmonpy/releases/tag/v0.5.0",
     "skills/metasalmon-skill/SKILL.md",
-    "skills/metasalmon-skill/scripts/metasalmon_api.py"
+    "skills/metasalmon-skill/scripts/metasalmon_api.py",
+    "skills/salmon-terms/SKILL.md",
+    "skills/salmon-terms/scripts/salmon_terms.py"
   ],
   "watch_fields": [
-    "package version",
+    "pinned release tag for both packages",
     "exported function signatures",
+    "find_terms() default sources and ranking",
     "runtime dependency requirements"
   ]
 }

@@ -5,13 +5,17 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 ## Run
 
 - Validate the scaffold: `python3 scripts/validate_scaffold.py`
-- Run the selector regression suite: `python3 -m unittest discover -s tests -p 'test_*.py'`
+- Run the offline regression suite (selector routes, validator guards, adapter startup): `python3 -m unittest discover -s tests -p 'test_*.py'`
+- Run the live package-adapter tests, which need uv and network access: `SMN_PLUGIN_LIVE_ADAPTERS=1 python3 -m unittest discover -s tests -p 'test_package_adapters.py'`
 - Install for Codex / OpenAI: `python3 scripts/install_codex_plugin.py`
-- Install for Claude: `python3 scripts/install_claude_skills.py`
+- Install for Claude Code as a plugin: `claude plugin marketplace add Br-Johnson/smn-sci-plgn`, then `claude plugin install salmon-science-research@smn-sci-plgn`
+- Link the skills into `~/.claude/skills/` for local development: `python3 scripts/install_claude_skills.py`
+- Official Claude Code checks, when the `claude` CLI is installed: `claude plugin validate --strict .` for the marketplace, and `claude plugin validate --strict .claude-plugin/plugin.json` for the plugin and its skills. Run both, because at the repository root the CLI reads only the marketplace.
 
 ## Canonical Docs
 
 - Repo overview and setup: `README.md`
+- Plugin manifests, which must agree: `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`
 - Living parity-gap register: `docs/platform-gap-register.md`
 - Machine-readable platform truth: `registry/platforms/`
 - Machine-readable routing topology: `registry/skill-graph.json`
@@ -23,8 +27,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Broad salmon questions: `skills/salmon-research-router-skill/SKILL.md`
 - Entity normalization: `skills/salmon-entity-normalizer-skill/SKILL.md`
 - Crosswalk and harmonization lookups: `skills/critfc-crosswalk-skill/SKILL.md`
-- Shared ontology lookup: `skills/smn-ontology-skill/SKILL.md`
-- DFO ontology lookup: `skills/gcdfo-ontology-skill/SKILL.md`
+- Ontology term search, shared `smn` and DFO `gcdfo` alike: `skills/salmon-terms/SKILL.md`
 - Salmon Data Package workflows: `skills/metasalmon-skill/SKILL.md`
 - Structured stock briefs: `skills/salmon-stock-brief-workflow-skill/SKILL.md`
 - StreamNet access: `skills/streamnet-api-skill/SKILL.md`
@@ -37,7 +40,8 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 
 ## Canonical Scripts
 
-- Shared JSON-LD ontology lookup helper: `scripts/ontology_lookup_common.py`
+- Package adapters, which only marshal JSON to metasalmonpy `v0.5.0`: `skills/salmon-terms/scripts/salmon_terms.py` and `skills/metasalmon-skill/scripts/metasalmon_api.py`
+- Plumbing the two adapters share, including the package pin: `scripts/_package_adapter.py`
 - Shared stdlib helper utilities: `scripts/_common.py`
 - Executable graph selector: `scripts/skill_graph_selector.py`
 - Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`
@@ -66,3 +70,5 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Update seed identity/crosswalk scaffolding: `registry/identity/seed-crosswalks.json`
 - Update narrative platform knowledge: `kb/platforms/` and `kb/concepts/`
 - Change user-facing repo scope or setup: `README.md`
+- Change plugin metadata: `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json` together, since validation fails until they agree
+- Move the metasalmon or metasalmonpy pin: every copy in one change, meaning `scripts/_package_adapter.py`, the inline metadata block of both adapter scripts, and the docs that name the tag. Validation fails until they agree.

@@ -157,13 +157,13 @@
         "lane:ontology-semantic-resolution"
       ],
       "selected_skills": [
-        "smn-ontology-skill"
+        "salmon-terms"
       ],
       "blocked_skills": [],
       "unsupported_lanes": [],
       "reason_contains": [
         "ontology-semantic-resolution",
-        "smn-ontology-skill"
+        "salmon-terms"
       ]
     }
   },
@@ -174,14 +174,14 @@
         "lane:ontology-semantic-resolution"
       ],
       "selected_skills": [
-        "smn-ontology-skill",
-        "gcdfo-ontology-skill"
+        "salmon-terms"
       ],
       "blocked_skills": [],
       "unsupported_lanes": [],
       "reason_contains": [
         "ontology-semantic-resolution",
-        "gcdfo-ontology-skill"
+        "salmon-terms",
+        "Kept gcdfo in scope"
       ]
     }
   },
@@ -247,7 +247,7 @@
         "lane:package-metadata-validation"
       ],
       "selected_skills": [
-        "smn-ontology-skill",
+        "salmon-terms",
         "metasalmon-skill"
       ],
       "blocked_skills": [],
@@ -265,15 +265,14 @@
         "lane:package-metadata-validation"
       ],
       "selected_skills": [
-        "smn-ontology-skill",
-        "metasalmon-skill",
-        "gcdfo-ontology-skill"
+        "salmon-terms",
+        "metasalmon-skill"
       ],
       "blocked_skills": [],
       "unsupported_lanes": [],
       "reason_contains": [
         "package-metadata-validation",
-        "gcdfo-ontology-skill"
+        "Kept gcdfo in scope"
       ]
     }
   },
@@ -440,7 +439,7 @@
         "lane:literature-reports-dataset-discovery"
       ],
       "selected_skills": [
-        "smn-ontology-skill",
+        "salmon-terms",
         "salmon-literature-skill"
       ],
       "blocked_skills": [],

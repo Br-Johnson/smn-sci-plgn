@@ -1,7 +1,7 @@
 # SMN Ontology
 
 - Platform card: [registry/platforms/smn-ontology.json](../../registry/platforms/smn-ontology.json)
-- Related skill: [smn-ontology-skill](../../skills/smn-ontology-skill/SKILL.md)
+- Related skill: [salmon-terms](../../skills/salmon-terms/SKILL.md), which searches smn through metasalmonpy's `find_terms()`
 
 ## Current role
 

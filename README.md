@@ -6,10 +6,14 @@ Canonical repository:
 
 - [Br-Johnson/smn-sci-plgn](https://github.com/Br-Johnson/smn-sci-plgn)
 
-This repository is scaffolded to work in two modes:
+This repository is one plugin with two manifests, plus plain skill directories:
 
 - Codex / OpenAI plugin mode via [.codex-plugin/plugin.json](./.codex-plugin/plugin.json)
-- Claude skill-bundle mode via [skills/](./skills/)
+- Claude Code plugin mode via [.claude-plugin/plugin.json](./.claude-plugin/plugin.json) and [.claude-plugin/marketplace.json](./.claude-plugin/marketplace.json)
+- Agent Skills directories under [skills/](./skills/), which both manifests load
+
+The two manifests describe the same plugin and the same skills, and
+`scripts/validate_scaffold.py` fails when they drift apart.
 
 The design follows the same high-level pattern as the Life Science Research plugin:
 
@@ -23,15 +27,15 @@ The design follows the same high-level pattern as the Life Science Research plug
 This is a scaffolded `0.0.1` repo, not a complete salmon platform.
 
 What is real now:
-- plugin manifest
+- Codex and Claude Code plugin manifests, checked for agreement
 - MIT license
 - Claude and Codex install scripts
 - validation script
-- CI workflow and selector regression tests
+- CI workflow with offline regression tests and live package-adapter tests
 - first core skills and script entrypoints
 - an authenticated RMIS skill scaffold
-- shared and DFO ontology lookup skills
-- a thin `metasalmon` execution skill
+- ontology term search through metasalmonpy (`salmon-terms`)
+- a thin `metasalmon-skill` adapter to metasalmonpy, with R as the documented alternative
 - a living parity-gap register in `docs/platform-gap-register.md`
 - a machine-readable platform registry in `registry/`
 - a typed router-adjacent skill graph in `registry/skill-graph.json`
@@ -53,8 +57,9 @@ What is still intentionally thin:
 
 Requirements:
 - Python 3.10+
-- no third-party Python dependencies
-- optional: `Rscript` plus installed `metasalmon` for `metasalmon-skill`
+- the source skills use the Python standard library only
+- [uv](https://docs.astral.sh/uv/) for `salmon-terms` and `metasalmon-skill`, whose scripts declare `metasalmonpy` `v0.5.0` inline, so uv installs it on first use
+- optional: R with `metasalmon` `v0.5.0` for the documented R route
 
 Install for Codex / OpenAI:
 
@@ -66,13 +71,25 @@ This script:
 - symlinks the repo into `~/plugins/salmon-science-research`
 - adds or updates an entry in `~/.agents/plugins/marketplace.json`
 
-Install the skills for Claude:
+Install for Claude Code as a plugin:
+
+```bash
+claude plugin marketplace add Br-Johnson/smn-sci-plgn
+claude plugin install salmon-science-research@smn-sci-plgn
+```
+
+Inside Claude Code the same two steps are `/plugin marketplace add Br-Johnson/smn-sci-plgn`
+and `/plugin install salmon-science-research@smn-sci-plgn`. Skills then appear as
+`salmon-science-research:<skill-name>`.
+
+For local development you can instead link the skills into Claude's personal skills:
 
 ```bash
 python3 scripts/install_claude_skills.py
 ```
 
-This script symlinks each directory under `skills/` into `~/.claude/skills/`.
+This script symlinks each directory under `skills/` into `~/.claude/skills/`. Use
+the plugin or the links, not both, or every skill will be listed twice.
 
 Validate the scaffold:
 
@@ -80,10 +97,16 @@ Validate the scaffold:
 python3 scripts/validate_scaffold.py
 ```
 
-Run the selector regression tests:
+Run the offline regression tests, which cover selector routes, the validator's guards, and adapter startup:
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
+```
+
+Run the live package-adapter tests, which install metasalmonpy from its pinned tag and need uv and network access:
+
+```bash
+SMN_PLUGIN_LIVE_ADAPTERS=1 python3 -m unittest discover -s tests -p 'test_package_adapters.py'
 ```
 
 ## Repo Layout
@@ -91,6 +114,9 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 ```text
 smn-sci-plgn/
 ├── .codex-plugin/plugin.json
+├── .claude-plugin/
+│   ├── plugin.json
+│   └── marketplace.json
 ├── docs/
 │   ├── entrypoints.md
 │   └── platform-gap-register.md
@@ -110,8 +136,7 @@ smn-sci-plgn/
 ├── skills/
 │   ├── salmon-research-router-skill/
 │   ├── salmon-entity-normalizer-skill/
-│   ├── smn-ontology-skill/
-│   ├── gcdfo-ontology-skill/
+│   ├── salmon-terms/
 │   ├── metasalmon-skill/
 │   ├── streamnet-api-skill/
 │   ├── ptagis-skill/
@@ -126,6 +151,7 @@ smn-sci-plgn/
 │   └── workflows/
 ├── scripts/
 │   ├── _common.py
+│   ├── _package_adapter.py
 │   ├── skill_graph_selector.py
 │   ├── install_codex_plugin.py
 │   ├── install_claude_skills.py
@@ -153,35 +179,27 @@ Seed normalization layer for:
 - management-unit systems such as `CU`, `SMU`, `DU`, `ESU`, `DPS`
 - common identifier tokens such as `HUC`, `PIT`, and `CWT`
 
-### `smn-ontology-skill`
+### `salmon-terms`
 
-Lookup skill for the shared Salmon Domain Ontology.
-
-Current coverage:
-- ontology metadata and version lookup
-- label / definition / IRI search over published `smn.jsonld`
-- exact term fetch by local name, prefixed id, or full IRI
-
-### `gcdfo-ontology-skill`
-
-Lookup skill for the DFO-specific Salmon Ontology.
+Ontology term search through metasalmonpy `v0.5.0`. The skill has no search
+logic of its own; the package searches the shared `smn` ontology, the DFO
+`gcdfo` profile, and external vocabularies, and ranks the results.
 
 Current coverage:
-- ontology metadata and version lookup
-- label / definition / IRI search over published `gcdfo.jsonld`
-- exact term fetch by local name, prefixed id, or full IRI
+- `find_terms()`: role-aware search returning labels, IRIs, definitions, scores, and per-source diagnostics
+- `sources_for_role()`: which sources each semantic role searches by default
+- runtime and package-version inspection
 
 ### `metasalmon-skill`
 
-Thin execution wrapper around the installed `metasalmon` R package.
+Thin adapter to metasalmonpy `v0.5.0`, the Python mirror of the `metasalmon` R
+package. The R route is documented in the skill as the alternative.
 
 Current coverage:
-- runtime and package-version inspection
-- function catalog for current supported workflows
-- `sources_for_role()`
-- `find_terms()`
+- runtime and package-version inspection, including whether the R route is available
+- function catalog
+- `validate_salmon_datapackage()`, including the strict `require_iris` check
 - `fetch_salmon_ontology()`
-- `validate_salmon_datapackage()`
 
 ### `streamnet-api-skill`
 
@@ -281,7 +299,7 @@ Role:
 - right upstream for organization-neutral normalization and interoperability
 
 How it factors in:
-- current `smn-ontology-skill`
+- searched by `salmon-terms` through metasalmonpy
 - shared semantic normalization
 - cross-organization entity alignment
 
@@ -296,27 +314,28 @@ Role:
 - already wired to import the shared `smn` layer
 
 How it factors in:
-- current `gcdfo-ontology-skill`
+- searched by `salmon-terms` through metasalmonpy when a concept is DFO-specific
 - DFO-aware normalization
 - shared-vs-DFO term-boundary decisions
 
 Repo:
 - [dfo-pacific-science/dfo-salmon-ontology](https://github.com/dfo-pacific-science/dfo-salmon-ontology)
 
-### `dfo-pacific-science/metasalmon`
+### `salmon-data-mobilization/metasalmon` and `salmon-data-mobilization/metasalmonpy`
 
 Role:
-- operational Salmon Data Package engine
-- strongest current implementation of package creation, semantic suggestion, ontology retrieval, and validation
-- something this plugin should integrate with rather than replace
+- operational Salmon Data Package engine, in R and in a Python mirror kept at the same release
+- strongest current implementation of package creation, semantic suggestion, term search, ontology retrieval, and validation
+- something this plugin integrates with rather than replaces
 
 How it factors in:
-- current `metasalmon-skill` as a thin execution adapter
-- data-package authoring and validation workflows
-- term retrieval, semantic QA, and publication helpers
+- the plugin pins both packages at `v0.5.0`
+- `salmon-terms` and `metasalmon-skill` are thin adapters to metasalmonpy
+- data-package authoring, validation, semantic QA, and publication helpers stay in the packages
 
-Repo:
-- [dfo-pacific-science/metasalmon](https://github.com/dfo-pacific-science/metasalmon)
+Repos:
+- [salmon-data-mobilization/metasalmon](https://github.com/salmon-data-mobilization/metasalmon) ([v0.5.0](https://github.com/salmon-data-mobilization/metasalmon/releases/tag/v0.5.0))
+- [salmon-data-mobilization/metasalmonpy](https://github.com/salmon-data-mobilization/metasalmonpy) ([v0.5.0](https://github.com/salmon-data-mobilization/metasalmonpy/releases/tag/v0.5.0))
 
 ## Architecture
 
@@ -348,17 +367,18 @@ Canonical repo-maintenance docs:
 This scaffold is intentionally vendor-light:
 
 - skills are plain `SKILL.md` directories with local scripts
-- scripts use Python stdlib only
+- source scripts use the Python standard library only
+- the two package adapters declare their one dependency, metasalmonpy pinned by tag, inline and run under uv
 - no private MCP servers are required
 - no vendor-specific app connectors are required
 
 That makes the repo portable:
 - Codex/OpenAI can consume it as a plugin bundle
-- Claude can consume the same skill directories directly
+- Claude Code can install it as a plugin, or consume the same skill directories directly
 
 That also keeps responsibilities clean:
 - ontologies stay authoritative in the ontology repos
-- data-package logic stays authoritative in `metasalmon`
+- data-package and term-search logic stays authoritative in `metasalmon` and `metasalmonpy`
 - this plugin becomes the orchestration and synthesis layer over those assets
 
 ## Known Platform Gaps
@@ -386,7 +406,7 @@ The highest-current blockers remain:
 2. Extend the selector from heuristic lane scoring into capability-aware subgraph ranking and richer auth-state pruning.
 3. Add golden prompts and per-skill smoke fixtures beyond the selector suite.
 4. Expand wrappers for `NuSEDS`, `PacFIN`, and `FINS`.
-5. Deepen `metasalmon` coverage to package creation and post-review publication flows.
+5. Bridge the packages' creation (`create_sdp()`), 0.5.0 review flow, and publication helpers, still as thin adapters.
 6. Add watershed-risk and mixed-stock management workflows alongside the stock-brief scaffold.
 7. Turn access tiers into a fuller policy layer for credentials, project gating, and partial-public surfaces.
 
@@ -402,4 +422,5 @@ The highest-current blockers remain:
 - [NCBI E-utilities docs](https://www.ncbi.nlm.nih.gov/books/NBK25501/)
 - [salmon-data-mobilization/salmon-domain-ontology](https://github.com/salmon-data-mobilization/salmon-domain-ontology)
 - [dfo-pacific-science/dfo-salmon-ontology](https://github.com/dfo-pacific-science/dfo-salmon-ontology)
-- [dfo-pacific-science/metasalmon](https://github.com/dfo-pacific-science/metasalmon)
+- [salmon-data-mobilization/metasalmon](https://github.com/salmon-data-mobilization/metasalmon)
+- [salmon-data-mobilization/metasalmonpy](https://github.com/salmon-data-mobilization/metasalmonpy)

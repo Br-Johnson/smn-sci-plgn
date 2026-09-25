@@ -1,0 +1,27 @@
+{
+  "name": "salmon-science-research",
+  "displayName": "Salmon Science Research",
+  "version": "0.0.1",
+  "description": "Open-source salmon ecology, conservation, and management-science workflows with routing, normalization, and source-specific skills.",
+  "author": {
+    "name": "Brett Johnson and contributors",
+    "url": "https://github.com/Br-Johnson"
+  },
+  "homepage": "https://github.com/Br-Johnson/smn-sci-plgn",
+  "repository": "https://github.com/Br-Johnson/smn-sci-plgn",
+  "license": "MIT",
+  "keywords": [
+    "salmon",
+    "ecology",
+    "conservation",
+    "fisheries",
+    "management-science",
+    "streamnet",
+    "ptagis",
+    "dart",
+    "salmonid",
+    "research",
+    "evidence-synthesis",
+    "skill-routing"
+  ]
+}

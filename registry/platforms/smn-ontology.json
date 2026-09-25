@@ -24,11 +24,11 @@
   "capabilities": {
     "discovery_search": {
       "status": "supported",
-      "note": "The current skill searches and fetches published JSON-LD terms."
+      "note": "The `salmon-terms` skill searches smn terms through metasalmonpy's `find_terms()`."
     },
     "metadata_schema": {
       "status": "supported",
-      "note": "Ontology metadata, labels, definitions, and term IRIs are exposed."
+      "note": "Term labels, definitions, and IRIs are exposed through `find_terms()`; ontology-level metadata is read from the published artifact."
     },
     "entity_lookup": {
       "status": "partial",
@@ -79,14 +79,14 @@
     "Shared-term promotion should stay conservative and evidence-based."
   ],
   "related_skills": [
-    "smn-ontology-skill"
+    "salmon-terms"
   ],
-  "last_verified_date": "2026-04-17",
+  "last_verified_date": "2026-09-25",
   "evidence_links": [
     "https://salmon-data-mobilization.github.io/salmon-domain-ontology/smn.jsonld",
     "https://github.com/salmon-data-mobilization/salmon-domain-ontology",
-    "skills/smn-ontology-skill/SKILL.md",
-    "skills/smn-ontology-skill/scripts/smn_ontology_lookup.py"
+    "skills/salmon-terms/SKILL.md",
+    "skills/salmon-terms/references/source-notes.md"
   ],
   "watch_fields": [
     "version metadata",

@@ -11,8 +11,8 @@ Use `gcdfo` for DFO-specific, program-scoped, or policy-scoped semantics.
 
 ## What this means for the plugin
 
-- the ontology lookup skills should check shared `smn` first for reusable concepts
-- DFO-only workflows should fall back to `gcdfo` when shared terms do not exist
+- `salmon-terms` searches both through metasalmonpy, which ranks `smn` above `gcdfo` for otherwise equal candidates, so shared terms surface first
+- DFO-only workflows can restrict the search to `gcdfo`, or fall back to it when shared terms do not exist
 - a future identity graph can use both ontologies as semantic anchors without collapsing their boundary
 
 ## Why this matters

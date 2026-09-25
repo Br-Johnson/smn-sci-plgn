@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import py_compile
 import re
 import subprocess
+import sys
 from pathlib import Path
 from urllib import request
 
@@ -14,6 +16,98 @@ NON_PLATFORM_SKILLS = {
     "salmon-stock-brief-workflow-skill",
 }
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+# Text files the reference, pin, and retired-name checks read.
+TEXT_SUFFIXES = {".md", ".json", ".py", ".yml", ".yaml", ".toml", ".txt"}
+SKIPPED_DIRS = {".git", "__pycache__", ".pytest_cache", ".venv", "node_modules"}
+# The append-only history is the one place that may still name what was
+# retired, because recording that is its job.
+HISTORY_FILES = {"kb/log.md"}
+# This file, which necessarily spells out the markers it searches for.
+VALIDATOR_PATH = "scripts/validate_scaffold.py"
+
+# The fields a Codex manifest and a Claude Code manifest both carry. For one
+# plugin they must say the same thing.
+SHARED_MANIFEST_FIELDS = (
+    "name",
+    "version",
+    "description",
+    "author",
+    "homepage",
+    "repository",
+    "license",
+    "keywords",
+)
+# Component keys and files Claude Code loads from a plugin and Codex does not.
+# Any of them would give one harness something the other never sees, so the
+# plugin has none.
+CLAUDE_ONLY_MANIFEST_KEYS = ("skills", "commands", "agents", "hooks", "mcpServers", "lspServers", "outputStyles")
+CLAUDE_ONLY_ROOT_PATHS = ("commands", "agents", "hooks", "output-styles", ".mcp.json", ".lsp.json", "SKILL.md")
+
+# Agent Skills specification: https://agentskills.io/specification
+SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SKILL_NAME_MAX = 64
+SKILL_DESCRIPTION_MAX = 1024
+
+# The ways this repository names a skill in text: a path into skills/, a
+# backticked or quoted `<name>-skill`, a bare `<name>-skill/` directory in a
+# tree listing, and a `skill:<name>` graph id. Prose that merely contains the
+# word, as in per-skill smoke fixtures, matches none of them.
+SKILL_PATH_RE = re.compile(r"(?<!\.claude/)(?<!\.agents/)(?<!\.codex/)skills/([a-z0-9][a-z0-9-]*)/")
+SKILL_NAME_RES = (
+    re.compile(r"[`\"']([a-z0-9]+(?:-[a-z0-9]+)*-skill)[`\"']"),
+    re.compile(r"(?<![a-z0-9./-])([a-z0-9]+(?:-[a-z0-9]+)*-skill)/"),
+    re.compile(r"\bskill:([a-z0-9]+(?:-[a-z0-9]+)*)"),
+)
+
+# Every pin-shaped mention of the two packages: an install spec, a release
+# link, or a "pinned at vX.Y.Z" statement. The plugin pins ONE release for both
+# packages, because they share release numbers and each skill documents the R
+# route as an equivalent of the Python one; if that ever stops being true, this
+# check has to learn two pins instead of one.
+PIN_PATTERNS = (
+    re.compile(r"salmon-data-mobilization/metasalmon(?:py)?(?:\.git)?@v(\d+\.\d+\.\d+)"),
+    re.compile(r"salmon-data-mobilization/metasalmon(?:py)?/releases/tag/v(\d+\.\d+\.\d+)"),
+    re.compile(r"pinned (?:at|to) (?:tag )?`?v(\d+\.\d+\.\d+)"),
+    re.compile(r'^METASALMONPY_VERSION = "(\d+\.\d+\.\d+)"', re.MULTILINE),
+)
+RETIRED_REFERENCES = (
+    "dfo-pacific-science/metasalmon",
+    "dfo-pacific-science.github.io/metasalmon",
+)
+
+# Markers of a local term-search implementation in a skill script. See
+# check_no_local_term_search() for what they catch, what they miss, and when
+# the list retires.
+TERM_SEARCH_MARKERS = (
+    # Published ontology artifacts, which only a term index needs to read.
+    ".jsonld",
+    ".ttl",
+    ".owl",
+    "w3id.org/smn",
+    "w3id.org/gcdfo",
+    "salmon-domain-ontology",
+    "dfo-salmon-ontology",
+    # The RDF, SKOS, and IAO predicates a term index is built from.
+    "rdf-schema#label",
+    "rdf-schema#comment",
+    "skos/core#",
+    "IAO_0000115",
+    "rdfs:label",
+    "skos:prefLabel",
+    # The vocabulary services metasalmonpy's find_terms() searches.
+    "ebi.ac.uk/ols",
+    "ebi.ac.uk/spot/zooma",
+    "vocab.nerc.ac.uk",
+    "data.bioontology.org",
+    "qudt.org",
+    "api.gbif.org",
+    "marinespecies.org",
+)
+LOCAL_SEARCH_DEFINITION_RE = re.compile(
+    r"^\s*def\s+(find_terms|search_terms|sources_for_role|get_term|_?score_\w*|_?rank_\w*)\s*\(",
+    re.MULTILINE,
+)
 
 
 def load_json(path: Path):
@@ -36,6 +130,309 @@ def require_existing_path_or_url(repo_root: Path, value: str, label: str) -> Non
     if value.startswith("http://") or value.startswith("https://"):
         return
     require((repo_root / value).exists(), f"{label} references a missing path: {value}")
+
+
+def iter_text_files(repo_root: Path):
+    """Yield (repo-relative posix path, text) for every text file in the repo."""
+    for path in sorted(repo_root.rglob("*")):
+        relative = path.relative_to(repo_root)
+        if any(part in SKIPPED_DIRS for part in relative.parts):
+            continue
+        if not path.is_file() or path.suffix not in TEXT_SUFFIXES:
+            continue
+        yield relative.as_posix(), path.read_text(encoding="utf-8", errors="replace")
+
+
+def validate_manifests(repo_root: Path) -> dict:
+    """The Codex and Claude Code manifests must describe one plugin with one skill set.
+
+    Decision: the two files are checked for agreement rather than generated one
+    from the other. They carry different harness-specific fields (Codex's
+    `interface` block, Claude Code's marketplace), a generator would be one more
+    script to keep honest, and a check fails CI on exactly the drift that
+    matters.
+    """
+    codex_path = repo_root / ".codex-plugin" / "plugin.json"
+    claude_path = repo_root / ".claude-plugin" / "plugin.json"
+    marketplace_path = repo_root / ".claude-plugin" / "marketplace.json"
+    for path in (codex_path, claude_path, marketplace_path):
+        require(path.exists(), f"plugin manifest missing: {path.relative_to(repo_root)}")
+    codex = load_json(codex_path)
+    claude = load_json(claude_path)
+    marketplace = load_json(marketplace_path)
+
+    missing = [key for key in ("name", "version", "description", "skills", "interface") if key not in codex]
+    require(not missing, f".codex-plugin/plugin.json missing keys: {missing}")
+    missing = [key for key in ("name", "version", "description", "author") if key not in claude]
+    require(not missing, f".claude-plugin/plugin.json missing keys: {missing}")
+
+    for key in SHARED_MANIFEST_FIELDS:
+        require(
+            codex.get(key) == claude.get(key),
+            f"plugin manifests disagree on {key!r}: Codex has {codex.get(key)!r}, Claude Code has {claude.get(key)!r}",
+        )
+    display_name = codex.get("interface", {}).get("displayName")
+    require(
+        claude.get("displayName") in (None, display_name),
+        f"Claude Code displayName {claude.get('displayName')!r} differs from Codex interface.displayName {display_name!r}",
+    )
+
+    # Same skills. Codex loads the directory its `skills` key names. Claude Code
+    # always scans `skills/`, and a `skills` key there ADDS directories to that
+    # scan, so the Claude Code manifest must not carry one.
+    require(
+        str(codex.get("skills", "")).rstrip("/") in {"./skills", "skills"},
+        ".codex-plugin/plugin.json must load skills from ./skills/, the directory Claude Code scans",
+    )
+    for key in CLAUDE_ONLY_MANIFEST_KEYS:
+        require(
+            key not in claude,
+            f".claude-plugin/plugin.json must not declare {key!r}: Claude Code would load components Codex never sees",
+        )
+    for relative in CLAUDE_ONLY_ROOT_PATHS:
+        require(
+            not (repo_root / relative).exists(),
+            f"{relative} at the plugin root would load in Claude Code only; keep the two harnesses on one component set",
+        )
+
+    # The marketplace is how a GitHub repository installs in Claude Code: one
+    # entry, this plugin, rooted at the repository root.
+    require(isinstance(marketplace.get("name"), str) and marketplace["name"].strip(), "marketplace.json requires name")
+    owner = marketplace.get("owner")
+    require(isinstance(owner, dict) and str(owner.get("name", "")).strip(), "marketplace.json requires owner.name")
+    entries = marketplace.get("plugins")
+    require(isinstance(entries, list) and len(entries) == 1, "marketplace.json must list exactly one plugin, this one")
+    entry = entries[0]
+    require(entry.get("name") == claude["name"], "marketplace.json plugin name must match .claude-plugin/plugin.json")
+    require(entry.get("source") in {"./", "."}, 'marketplace.json plugin source must be "./", the repository root')
+    require(
+        "version" not in entry,
+        "marketplace.json must not set version: plugin.json wins and `claude plugin validate` warns",
+    )
+    require(
+        entry.get("description", claude["description"]) == claude["description"],
+        "marketplace.json plugin description must match the plugin manifests",
+    )
+    return {
+        "plugin": claude["name"],
+        "version": claude["version"],
+        "marketplace": marketplace["name"],
+        "manifests": [
+            str(path.relative_to(repo_root)) for path in (codex_path, claude_path, marketplace_path)
+        ],
+    }
+
+
+def read_frontmatter(path: Path) -> dict[str, str]:
+    """Read the single-line `key: value` fields of a SKILL.md frontmatter block.
+
+    Deliberately small and stdlib-only. A folded or block YAML value would be
+    read as its indicator character, so validate_skill_frontmatter() rejects
+    those and asks for the value on one line.
+    """
+    lines = path.read_text(encoding="utf-8").splitlines()
+    require(bool(lines) and lines[0].strip() == "---", f"{path} must start with a YAML frontmatter block")
+    fields: dict[str, str] = {}
+    for line in lines[1:]:
+        if line.strip() == "---":
+            return fields
+        key, sep, value = line.partition(":")
+        if sep and key.strip() and not key.startswith((" ", "\t")):
+            fields[key.strip()] = value.strip()
+    raise SystemExit(f"{path} frontmatter block is never closed")
+
+
+def validate_skill_frontmatter(repo_root: Path, skill_names: list[str]) -> dict:
+    """Each skill's frontmatter must follow the Agent Skills spec both harnesses read.
+
+    `name` must equal the directory name. Claude Code takes a plugin skill's
+    command from `name`, the spec requires the match, and the registry, the
+    graph, and the selector all use the directory name as the skill's id, so a
+    mismatch would give one skill two names. `claude plugin validate` checks
+    neither the match nor the naming rule.
+    """
+    for skill_name in skill_names:
+        path = repo_root / "skills" / skill_name / "SKILL.md"
+        fields = read_frontmatter(path)
+        name = fields.get("name", "")
+        require(name == skill_name, f"{path}: frontmatter name {name!r} must equal the directory name {skill_name!r}")
+        require(
+            len(name) <= SKILL_NAME_MAX and SKILL_NAME_RE.fullmatch(name) is not None,
+            f"{path}: name must be 1-{SKILL_NAME_MAX} lowercase letters, digits, and single hyphens",
+        )
+        description = fields.get("description", "")
+        require(
+            description and description not in {">", "|", ">-", "|-", ">+", "|+"},
+            f"{path}: description must be present and written on one line",
+        )
+        require(
+            len(description) <= SKILL_DESCRIPTION_MAX,
+            f"{path}: description is {len(description)} characters; the limit is {SKILL_DESCRIPTION_MAX}",
+        )
+    return {"skills_checked": len(skill_names)}
+
+
+def validate_skill_references(repo_root: Path, skill_names: list[str]) -> dict:
+    """Nothing may name a skill that does not exist.
+
+    The registry cards, skill-platform map, and graph nodes are checked where
+    they are validated below. This adds the three places those checks never
+    read: the selector's hard-coded skill tables, the selector fixtures, and the
+    prose and paths across the repository. The history file is exempt because
+    naming retired skills is its job.
+    """
+    known = set(skill_names)
+
+    # Load the selector from this repo_root by path. A plain import would be
+    # cached in sys.modules and answer for whichever copy was imported first.
+    # The module is registered only while it executes, because its dataclass
+    # looks its own module up in sys.modules.
+    module_name = "_validated_skill_graph_selector"
+    spec = importlib.util.spec_from_file_location(module_name, repo_root / "scripts" / "skill_graph_selector.py")
+    selector = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = selector
+    try:
+        spec.loader.exec_module(selector)
+    finally:
+        sys.modules.pop(module_name, None)
+    named: set[str] = set()
+    for skills in selector.LANE_SKILL_MAP.values():
+        named.update(skills)
+    for skill, companions in selector.SPECIAL_SKILL_COMPANIONS.items():
+        named.add(skill)
+        named.update(companions)
+    named.update(selector.OPTIONAL_SKILL_PATTERNS)
+    unknown = sorted(named - known)
+    require(not unknown, f"scripts/skill_graph_selector.py names skills that do not exist: {unknown}")
+
+    cases = load_json(repo_root / "tests" / "fixtures" / "skill_graph_selector_cases.json")
+    fixture_skills = {
+        skill
+        for case in cases
+        for field in ("selected_skills", "blocked_skills")
+        for skill in case["expected"].get(field, [])
+    }
+    unknown = sorted(fixture_skills - known)
+    require(not unknown, f"selector fixtures expect skills that do not exist: {unknown}")
+
+    problems: list[str] = []
+    files_scanned = 0
+    for relative, text in iter_text_files(repo_root):
+        if relative in HISTORY_FILES:
+            continue
+        files_scanned += 1
+        for name in sorted(set(SKILL_PATH_RE.findall(text))):
+            if name not in known:
+                problems.append(f"{relative}: path skills/{name}/ does not exist")
+        names = {name for pattern in SKILL_NAME_RES for name in pattern.findall(text)}
+        for name in sorted(names - known):
+            problems.append(f"{relative}: names skill {name!r}, which does not exist")
+    require(not problems, "references to missing skills:\n  " + "\n  ".join(problems))
+    return {"text_files_scanned": files_scanned, "selector_skills": len(named), "fixture_skills": len(fixture_skills)}
+
+
+def check_package_pins(repo_root: Path) -> dict:
+    """Every copy of the package pin must agree, and nothing may point at the retired fork.
+
+    The pin lives in several places that cannot import each other: the
+    constants in scripts/_package_adapter.py, the PEP 723 block of each adapter
+    script, and the docs and registry that link the release. Moving it means
+    editing every copy in one change; this check is what enforces that.
+    """
+    found: dict[str, set[str]] = {}
+    retired: list[str] = []
+    for relative, text in iter_text_files(repo_root):
+        if relative in HISTORY_FILES:
+            continue
+        for pattern in PIN_PATTERNS:
+            for version in pattern.findall(text):
+                found.setdefault(version, set()).add(relative)
+        if relative == VALIDATOR_PATH:
+            continue  # this file holds the list of retired references
+        for marker in RETIRED_REFERENCES:
+            if marker in text:
+                retired.append(f"{relative}: {marker}")
+    require(not retired, "references to the retired metasalmon fork remain:\n  " + "\n  ".join(sorted(retired)))
+    require(found, "no metasalmon or metasalmonpy pin found")
+    require(
+        len(found) == 1,
+        "package pins disagree:\n  "
+        + "\n  ".join(f"v{version}: {', '.join(sorted(paths))}" for version, paths in sorted(found.items())),
+    )
+    (pin,) = found
+
+    requirement = f"metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v{pin}"
+    adapters: list[str] = []
+    for script in sorted((repo_root / "skills").glob("*/scripts/*.py")):
+        text = script.read_text(encoding="utf-8")
+        if "_package_adapter" not in text:
+            continue
+        relative = script.relative_to(repo_root).as_posix()
+        block = re.search(r"^# /// script\n(.*?)^# ///$", text, flags=re.MULTILINE | re.DOTALL)
+        require(block is not None, f"{relative} imports the package adapter but has no PEP 723 script block for uv")
+        require(requirement in block.group(1), f"{relative}: its script block must require {requirement!r}")
+        adapters.append(relative)
+    require(adapters, "no package adapter scripts found")
+    return {"pin": f"v{pin}", "files": len(found[pin]), "adapters": adapters}
+
+
+def check_no_local_term_search(repo_root: Path) -> dict:
+    """No skill script may reimplement ontology term search.
+
+    Term search belongs to metasalmonpy (Brett, 2026-09-25: the plugin's own
+    implementation retires in favour of it). This is a static check over every
+    file under skills/*/scripts/ and every script in scripts/ except this
+    validator, which fetches the published ontologies only to report their
+    versions and which holds the marker list itself.
+
+    What it catches: a script that reads the published ontology artifacts
+    (JSON-LD, Turtle, OWL, the w3id namespaces or the ontology repositories),
+    parses RDF, SKOS, or IAO label predicates, calls one of the vocabulary
+    services find_terms() searches, or defines its own find_terms,
+    search_terms, sources_for_role, get_term, or scoring or ranking function.
+    Measured against the retired implementation on 2026-09-25:
+    scripts/ontology_lookup_common.py fails on four predicate markers and three
+    local definitions (search_terms, get_term, _score_record), and the lookup
+    scripts built on it fail on the published-artifact URLs they fetched.
+
+    What it misses: search against a source not on the list; a URL assembled
+    at runtime from fragments; matching or ranking over terms already in
+    memory, such as a vendored term list; and instructions in a SKILL.md that
+    tell the harness to fetch and grep an ontology itself, which is prose, not
+    a script.
+
+    Maintenance: when metasalmonpy's find_terms() gains a vocabulary source,
+    add its host to TERM_SEARCH_MARKERS.
+
+    Retires when the plugin reaches term search only through a command-line
+    tool or generated adapter that the packages ship, leaving no Python import
+    surface to police, or when a behavioural test shows that every term the
+    plugin returns carries the package's provenance.
+    """
+    targets = [
+        path
+        for path in sorted((repo_root / "skills").glob("*/scripts/**/*"))
+        if path.is_file() and "__pycache__" not in path.parts
+    ]
+    targets += [
+        path
+        for path in sorted((repo_root / "scripts").glob("*.py"))
+        if path.relative_to(repo_root).as_posix() != VALIDATOR_PATH
+    ]
+    problems: list[str] = []
+    for path in targets:
+        relative = path.relative_to(repo_root).as_posix()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for marker in TERM_SEARCH_MARKERS:
+            if marker in text:
+                problems.append(f"{relative}: contains {marker!r}")
+        for name in LOCAL_SEARCH_DEFINITION_RE.findall(text):
+            problems.append(f"{relative}: defines {name}()")
+    require(
+        not problems,
+        "skill scripts must call metasalmonpy for term search, not reimplement it:\n  " + "\n  ".join(problems),
+    )
+    return {"scripts_checked": len(targets)}
 
 
 def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
@@ -320,6 +717,10 @@ def validate_regression_assets(repo_root: Path) -> dict:
     workflow_text = workflow_path.read_text(encoding="utf-8")
     require("python3 scripts/validate_scaffold.py" in workflow_text, "CI workflow must run scaffold validation")
     require("python3 -m unittest discover -s tests -p 'test_*.py'" in workflow_text, "CI workflow must run unittest discovery")
+    require(
+        'SMN_PLUGIN_LIVE_ADAPTERS: "1"' in workflow_text and "test_package_adapters.py" in workflow_text,
+        "CI workflow must run the live package-adapter tests against the pinned release",
+    )
 
     return {
         "selector_fixture_case_count": len(cases),
@@ -413,26 +814,44 @@ def check_ontology_surface(url: str, root_iri: str) -> dict:
         return {"ok": False, "url": url, "error": str(exc)}
 
 
-def check_metasalmon_surface() -> dict:
+def _version_key(tag: str) -> tuple[int, ...]:
+    match = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)", tag)
+    return tuple(int(part) for part in match.groups()) if match else ()
+
+
+def check_package_tag(repository: str, pin: str) -> dict:
+    """Does the pinned tag still exist upstream, and is there a newer one?
+
+    `ok` is false only when the pinned tag is gone. A newer tag is reported as a
+    drift warning, because moving the pin is a deliberate change, not a fix.
+    """
+    url = f"https://github.com/salmon-data-mobilization/{repository}.git"
     try:
         proc = subprocess.run(
-            [
-                "Rscript",
-                "-e",
-                "if (requireNamespace('metasalmon', quietly = TRUE)) { cat(as.character(utils::packageVersion('metasalmon'))) } else { cat('NOT_INSTALLED') }",
-            ],
+            ["git", "ls-remote", "--tags", url],
             capture_output=True,
             text=True,
             check=False,
+            timeout=30,
         )
-        version = proc.stdout.strip()
-        if proc.returncode != 0:
-            return {"ok": False, "error": proc.stderr.strip() or "Rscript failed"}
-        if version == "NOT_INSTALLED" or not version:
-            return {"ok": False, "error": "metasalmon is not installed"}
-        return {"ok": True, "version": version}
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": str(exc)}
+        return {"ok": False, "url": url, "error": str(exc)}
+    if proc.returncode != 0:
+        return {"ok": False, "url": url, "error": proc.stderr.strip() or "git ls-remote failed"}
+    tags = {
+        line.split("refs/tags/", 1)[1].removesuffix("^{}")
+        for line in proc.stdout.splitlines()
+        if "refs/tags/" in line
+    }
+    releases = sorted((tag for tag in tags if _version_key(tag)), key=_version_key)
+    latest = releases[-1] if releases else None
+    return {
+        "ok": pin in tags,
+        "url": url,
+        "pinned": pin,
+        "latest": latest,
+        "newer_release": latest is not None and _version_key(latest) > _version_key(pin),
+    }
 
 
 def check_rmis_surface() -> dict:
@@ -458,14 +877,9 @@ def check_rmis_surface() -> dict:
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    manifest_path = repo_root / ".codex-plugin" / "plugin.json"
     skills_root = repo_root / "skills"
 
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    required_top = ["name", "version", "description", "skills", "interface"]
-    missing = [key for key in required_top if key not in manifest]
-    if missing:
-        raise SystemExit(f"plugin manifest missing keys: {missing}")
+    manifest_stats = validate_manifests(repo_root)
 
     skill_names: list[str] = []
     python_files: list[Path] = []
@@ -486,6 +900,10 @@ def main() -> None:
     for path in python_files:
         py_compile.compile(str(path), doraise=True)
 
+    frontmatter_stats = validate_skill_frontmatter(repo_root, skill_names)
+    reference_stats = validate_skill_references(repo_root, skill_names)
+    pin_stats = check_package_pins(repo_root)
+    term_search_stats = check_no_local_term_search(repo_root)
     registry_stats = validate_platform_registry(repo_root, skill_names)
     skill_graph_stats = validate_skill_graph(repo_root, skill_names)
     regression_stats = validate_regression_assets(repo_root)
@@ -502,7 +920,8 @@ def main() -> None:
             "https://dfo-pacific-science.github.io/dfo-salmon-ontology/gcdfo.jsonld",
             "https://w3id.org/gcdfo/salmon",
         ),
-        "metasalmon": check_metasalmon_surface(),
+        "metasalmon": check_package_tag("metasalmon", pin_stats["pin"]),
+        "metasalmonpy": check_package_tag("metasalmonpy", pin_stats["pin"]),
         "rmis": check_rmis_surface(),
     }
     warnings = [
@@ -510,13 +929,22 @@ def main() -> None:
         for name, detail in watch_surface_checks.items()
         if not detail.get("ok")
     ]
+    warnings += [
+        f"watch surface {name}: {detail['latest']} is newer than the pinned {detail['pinned']}"
+        for name, detail in watch_surface_checks.items()
+        if detail.get("newer_release")
+    ]
 
     print(json.dumps({
         "ok": True,
-        "manifest": str(manifest_path),
+        "manifests": manifest_stats,
         "skill_count": len(skill_names),
         "skills": skill_names,
         "python_files_compiled": len(python_files),
+        "skill_frontmatter": frontmatter_stats,
+        "skill_references": reference_stats,
+        "package_pins": pin_stats,
+        "term_search_guard": term_search_stats,
         "registry": registry_stats,
         "skill_graph": skill_graph_stats,
         "regression": regression_stats,
