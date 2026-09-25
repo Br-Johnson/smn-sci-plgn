@@ -8,6 +8,7 @@
 6. Add or update the skill-to-platform entry in `registry/skill-platform-map.json`.
 7. Add or update the related node and `uses_platform` edges in `registry/skill-graph.json`.
 8. Update router references and selector fixtures if the new source changes lane coverage.
+   Add an eval case for the new skill under `evals/<skill-name>/` (a `prompt.md` and `graders/`), and add its script to the router case's `no-data-source` grader. Validation fails until both exist.
 9. Update [docs/platform-gap-register.md](../../docs/platform-gap-register.md) if parity meaning changes.
 10. Append a log entry in [kb/log.md](../log.md).
 11. Run `python3 scripts/validate_scaffold.py`.

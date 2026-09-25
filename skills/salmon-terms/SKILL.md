@@ -15,6 +15,9 @@ The adapter needs [uv](https://docs.astral.sh/uv/) and network access. Its
 script declares one dependency inline,
 `metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.5.0`,
 and uv installs it into a cached, isolated environment on first use.
+uv keeps that environment in its user cache. Where the cache directory isn't
+writable, as in some sandboxed runs, set `UV_CACHE_DIR` to a writable
+directory first.
 
 ```bash
 echo '{"action":"find_terms","query":"escapement","role":"variable"}' | uv run -q "${CLAUDE_SKILL_DIR}/scripts/salmon_terms.py"

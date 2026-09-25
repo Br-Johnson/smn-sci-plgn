@@ -17,7 +17,9 @@ The adapter needs [uv](https://docs.astral.sh/uv/). Its script declares one
 dependency inline,
 `metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.5.0`,
 and uv installs it into a cached, isolated environment on first use. No R
-installation is needed.
+installation is needed. uv keeps that environment in its user cache. Where
+the cache directory isn't writable, as in some sandboxed runs, set
+`UV_CACHE_DIR` to a writable directory first.
 
 ```bash
 echo '{"action":"runtime"}' | uv run -q "${CLAUDE_SKILL_DIR}/scripts/metasalmon_api.py"

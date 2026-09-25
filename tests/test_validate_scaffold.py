@@ -172,6 +172,63 @@ class PluginChecksTests(unittest.TestCase):
         )
         self.assert_rejected(vs.check_no_local_term_search, self.root, fragment="rdf-schema#label")
 
+    # Eval cases ------------------------------------------------------------------------
+
+    def assert_evals_rejected(self, fragment: str) -> None:
+        self.assert_rejected(vs.validate_evals, self.root, skill_names(self.root), fragment=fragment)
+
+    def test_current_evals_pass(self) -> None:
+        stats = vs.validate_evals(self.root, skill_names(self.root))
+        self.assertEqual(stats["cases"], len(skill_names(self.root)))
+
+    def test_eval_prompt_with_an_unknown_key_is_rejected(self) -> None:
+        self.edit_text("evals/rmis-skill/prompt.md", "tags: [smoke]", "tags: [smoke]\nengine: r")
+        self.assert_evals_rejected("unknown frontmatter keys ['engine']")
+
+    def test_eval_naming_a_retired_skill_is_rejected(self) -> None:
+        self.edit_text("evals/salmon-terms/graders/skill-fired.md", "salmon-terms", RETIRED_SKILL)
+        self.assert_evals_rejected("must name exactly one existing skill, and it names none")
+
+    def test_eval_naming_a_missing_script_is_rejected(self) -> None:
+        self.edit_text(
+            "evals/salmon-terms/graders/adapter-called.md",
+            r"salmon_terms\.py",
+            r"smn_ontology_lookup\.py",
+        )
+        self.assert_evals_rejected("names a script the plugin does not ship")
+
+    def test_skill_without_an_eval_is_rejected(self) -> None:
+        shutil.rmtree(self.root / "evals" / "dart-query-skill")
+        self.assert_evals_rejected("skills with no eval case: ['dart-query-skill']")
+
+    def test_unknown_grader_type_is_rejected(self) -> None:
+        self.edit_text("evals/npafc-skill/graders/results-summarised.md", "type: llm", "type: judge")
+        self.assert_evals_rejected("type must be one of")
+
+    def test_grader_expecting_a_tool_the_case_does_not_allow_is_rejected(self) -> None:
+        self.edit_text(
+            "evals/dart-query-skill/prompt.md",
+            "allowed_tools: [Read, Glob, Grep, Skill, Bash]",
+            "allowed_tools: [Read, Glob, Grep, Skill]",
+        )
+        self.assert_evals_rejected("expects Bash but evals/dart-query-skill/prompt.md does not allow it")
+
+    def test_rubric_naming_a_missing_skill_is_rejected(self) -> None:
+        self.edit_text(
+            "evals/salmon-research-router-skill/graders/route-quality.md",
+            "such as streamnet-api-skill",
+            f"such as {RETIRED_SKILL}",
+        )
+        self.assert_evals_rejected("criteria name skills that do not exist")
+
+    def test_unignored_eval_results_are_rejected(self) -> None:
+        self.edit_text(".gitignore", "evals/results/\n", "")
+        self.assert_evals_rejected("must ignore evals/results/")
+
+    def test_out_of_range_run_limit_is_rejected(self) -> None:
+        self.edit_text("evals/ptagis-skill/prompt.md", "max_turns: 12", "max_turns: 9999")
+        self.assert_evals_rejected("max_turns must be an integer from 1 to 200")
+
 
 if __name__ == "__main__":
     unittest.main()

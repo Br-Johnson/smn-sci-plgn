@@ -32,6 +32,7 @@ What is real now:
 - Claude and Codex install scripts
 - validation script
 - CI workflow with offline regression tests and live package-adapter tests
+- an eval case for every skill under `evals/`, checked offline in CI but not yet scored against a live model
 - first core skills and script entrypoints
 - an authenticated RMIS skill scaffold
 - ontology term search through metasalmonpy (`salmon-terms`)
@@ -51,7 +52,7 @@ What is still intentionally thin:
 - full API coverage for salmon portals
 - hatchery, genetics, and management-data harmonization
 - composite workflows beyond the stock-brief scaffold
-- golden prompts and broader behavior fixtures beyond the selector layer
+- scored behaviour: the eval cases have not yet been run against a live model
 
 ## Quick Start
 
@@ -109,6 +110,21 @@ Run the live package-adapter tests, which install metasalmonpy from its pinned t
 SMN_PLUGIN_LIVE_ADAPTERS=1 python3 -m unittest discover -s tests -p 'test_package_adapters.py'
 ```
 
+Run an eval case against a live model. The cases need Claude Code 2.1.269 or
+later, and every run counts against your plan or API bill, so start with one
+case and one run:
+
+```bash
+claude plugin eval . --no-publish --ablation none --runs 1 --case salmon-terms \
+  --allow-tools Bash "WebFetch(domain:github.com)" "WebFetch(domain:api.github.com)" \
+  "WebFetch(domain:raw.githubusercontent.com)" "WebFetch(domain:pypi.org)" \
+  "WebFetch(domain:files.pythonhosted.org)" "WebFetch(domain:w3id.org)"
+```
+
+Each case's `description` names the tools and hosts it needs, because a run's
+shell commands can reach only the domains you grant. `--no-publish` keeps the
+report on your machine rather than publishing it to claude.ai.
+
 ## Repo Layout
 
 ```text
@@ -125,6 +141,8 @@ smn-sci-plgn/
 │   ├── skill-graph.schema.json
 │   ├── platforms/
 │   └── identity/
+├── evals/
+│   └── <skill-name>/
 ├── tests/
 │   └── fixtures/
 ├── kb/

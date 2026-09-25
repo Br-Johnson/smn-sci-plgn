@@ -31,3 +31,12 @@
 - Added `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` beside `.codex-plugin/plugin.json`. Validation now checks that the manifests agree, that every referenced skill exists, that the package pins agree, and that no skill script reimplements term search.
 - Collapsed the two ontology skills into `salmon-terms` in the skill graph, the skill-platform map, the selector, and its fixtures. A DFO-specific request now keeps `gcdfo` in the term search's sources instead of adding a second skill.
 - Measured the watch surfaces the same day: `smn` publishes version 0.0.3 (modified 2026-08-14) and `gcdfo` version 0.0.9 (modified 2026-08-16).
+
+## [2026-09-25] evals | per-skill-cases
+
+- Ported the per-skill eval cases from the parallel draft (Br-Johnson/smn-sci-plgn#1) into `evals/`, one case per skill in the `claude plugin eval` format, on Brett's ruling that #2 goes forward with #1's evals.
+- Adapted two cases. The router case no longer grades a call to `scripts/skill_graph_selector.py`, which its SKILL.md never asks for; it now grades that no source adapter runs, the prompt's own "plan, don't fetch" constraint. The metasalmon case's engine grader now needs `metasalmonpy` and a version rather than any mention of metasalmon.
+- Added `validate_evals()` to `scripts/validate_scaffold.py`, because `claude plugin validate` does not read eval files. It checks the documented case format, requires an eval case for every skill, and fails when a case names a skill or script that no longer exists.
+- Added `tests/test_eval_cases.py`, which feeds four cases' deterministic graders the offline output of their skills' scripts. It scores no case.
+- No case has been scored. `claude plugin eval` needs Claude Code 2.1.269 or later, and the installed 2.1.267 answers that the command is in early access.
+- Measured 2026-09-25: `gis.critfc.org`, the CRITFC skill's REST root, does not resolve, and the NOAA SPS skill's home URL returns 404. Both cases can still pass by reporting the failure honestly.

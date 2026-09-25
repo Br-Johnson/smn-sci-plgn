@@ -109,6 +109,31 @@ LOCAL_SEARCH_DEFINITION_RE = re.compile(
     re.MULTILINE,
 )
 
+# Eval cases for `claude plugin eval`, in the published case format
+# (https://code.claude.com/docs/en/plugin-evals, read 2026-09-25). Running a
+# case needs Claude Code 2.1.269 or later and a live model, and `claude plugin
+# validate` does not read eval files at all (checked on 2.1.267), so
+# validate_evals() is the only offline check they get.
+EVAL_DIR_DEFAULT = "evals"
+EVAL_PROMPT_KEYS = frozenset({
+    "schema_version", "name", "description", "tags", "plugins", "runs", "expected_outcome",
+    "model", "max_turns", "timeout_seconds", "allowed_tools", "append_system_prompt", "env",
+})
+EVAL_GRADER_COMMON_KEYS = frozenset({"type", "weight", "arm"})
+EVAL_GRADER_OPTIONS = {
+    "regex": frozenset({"pattern", "flags", "match", "target"}),
+    "tool_used": frozenset({"tool", "input_match", "min", "max"}),
+    "tool_order": frozenset({"before", "after"}),
+    "file_exists": frozenset({"path", "exists"}),
+    "llm": frozenset({"criteria", "focus"}),
+    "baseline": frozenset({"baseline_file", "criteria"}),
+}
+EVAL_PAID_GRADER_TYPES = frozenset({"llm", "baseline"})
+EVAL_TARGETS = frozenset({"last_message", "trace", "files", "mock_calls"})
+EVAL_FILE_CREATING_TOOLS = frozenset({"Write", "Edit", "Bash"})
+JS_REGEX_FLAGS = frozenset("dgimsuvy")
+EVAL_ENV_KEY_RE = re.compile(r"^EVAL_[A-Z0-9_]*$")
+
 
 def load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
@@ -433,6 +458,316 @@ def check_no_local_term_search(repo_root: Path) -> dict:
         "skill scripts must call metasalmonpy for term search, not reimplement it:\n  " + "\n  ".join(problems),
     )
     return {"scripts_checked": len(targets)}
+
+
+def _split_flow_items(inner: str, where: str) -> list[str]:
+    """Split the inside of a YAML flow collection on its top-level commas."""
+    items: list[str] = []
+    current: list[str] = []
+    depth = 0
+    quote = None
+    escaped = False
+    for char in inner:
+        current.append(char)
+        if quote == '"' and escaped:
+            escaped = False
+        elif quote == '"' and char == "\\":
+            escaped = True
+        elif quote:
+            if char == quote:
+                quote = None
+        elif char in "'\"":
+            quote = char
+        elif char in "[{":
+            depth += 1
+        elif char in "]}":
+            depth -= 1
+        elif char == "," and depth == 0:
+            current.pop()
+            items.append("".join(current))
+            current = []
+    require(quote is None and depth == 0, f"{where}: unbalanced quotes or brackets")
+    items.append("".join(current))
+    return [item.strip() for item in items if item.strip()]
+
+
+def parse_yaml_scalar(text: str, where: str):
+    """Read one value from the small YAML subset the eval files use.
+
+    Supported: single- and double-quoted strings, flow sequences, flow
+    mappings, integers, floats, booleans, null, and plain strings. Anything
+    else, such as a block scalar or an anchor, is rejected by name rather than
+    misread, so extend this deliberately if a case ever needs more.
+    """
+    value = text.strip()
+    if not value:
+        return None
+    if value[0] == "'":
+        require(len(value) >= 2 and value.endswith("'"), f"{where}: unterminated single-quoted value")
+        inner = value[1:-1]
+        require("'" not in inner.replace("''", ""), f"{where}: stray quote inside a single-quoted value")
+        return inner.replace("''", "'")
+    if value[0] == '"':
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"{where}: double-quoted value outside the JSON-compatible subset: {exc}") from exc
+    if value[0] == "[":
+        require(value.endswith("]"), f"{where}: unterminated flow sequence")
+        return [parse_yaml_scalar(item, where) for item in _split_flow_items(value[1:-1], where)]
+    if value[0] == "{":
+        require(value.endswith("}"), f"{where}: unterminated flow mapping")
+        mapping: dict = {}
+        for item in _split_flow_items(value[1:-1], where):
+            key, sep, rest = item.partition(":")
+            require(bool(sep) and bool(key.strip()), f"{where}: flow mapping entry {item!r} needs key: value")
+            mapping[key.strip()] = parse_yaml_scalar(rest, where)
+        return mapping
+    require(value[0] not in "|>&*!%@`", f"{where}: {value[0]!r} values are outside the YAML subset this validator reads")
+    value = value.split(" #", 1)[0].rstrip()
+    if re.fullmatch(r"[-+]?\d+", value):
+        return int(value)
+    if re.fullmatch(r"[-+]?\d+\.\d+", value):
+        return float(value)
+    if value.lower() in {"true", "false"}:
+        return value.lower() == "true"
+    if value.lower() in {"null", "~"}:
+        return None
+    return value
+
+
+def read_eval_file(path: Path) -> tuple[dict, str]:
+    """Return (frontmatter fields, body) for a prompt.md or grader file."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    require(bool(lines) and lines[0].strip() == "---", f"{path}: must start with a --- frontmatter block")
+    end = next((index for index in range(1, len(lines)) if lines[index].strip() == "---"), None)
+    require(end is not None, f"{path}: frontmatter block is never closed")
+    fields: dict = {}
+    for number, line in enumerate(lines[1:end], start=2):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        where = f"{path}:{number}"
+        require(not line[0].isspace(), f"{where}: nested or continued values are outside the YAML subset this validator reads")
+        key, sep, value = line.partition(":")
+        require(bool(sep) and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key) is not None, f"{where}: expected key: value")
+        require(key not in fields, f"{where}: duplicate key {key!r}")
+        fields[key] = parse_yaml_scalar(value, where)
+    return fields, "\n".join(lines[end + 1:]).strip()
+
+
+def _compile_eval_regex(pattern, flags, where: str) -> re.Pattern:
+    """Compile a grader regex with Python's re, as a proxy for JavaScript's.
+
+    The runner uses JavaScript regex syntax. The two agree on everything these
+    cases use (classes, groups, alternation, \\b, \\d, \\s, \\w on ASCII text);
+    a JavaScript-only construct would fail here and need a look.
+    """
+    require(isinstance(pattern, str) and pattern != "", f"{where}: needs a non-empty pattern")
+    flags = flags or ""
+    require(isinstance(flags, str) and set(flags) <= JS_REGEX_FLAGS, f"{where}: flags {flags!r} are not JavaScript regex flags")
+    try:
+        return re.compile(pattern, re.IGNORECASE if "i" in flags else 0)
+    except re.error as exc:
+        raise SystemExit(f"{where}: pattern {pattern!r} does not compile: {exc}") from exc
+
+
+def validate_evals(repo_root: Path, skill_names: list[str]) -> dict:
+    """Check every eval case offline, since nothing else does before a live run.
+
+    Schema: prompt.md frontmatter keys, value ranges, grader types, and each
+    type's options, all as documented; an unknown key is an error there too.
+
+    Drift, which is the reason this exists: every skill must be the subject of
+    at least one case; each case's `tool_used: Skill` grader must name exactly
+    one skill that exists; a Bash grader that names a `.py` script must match a
+    script the plugin ships; skills an llm rubric names must exist; and every
+    tool a grader expects must be in the case's allowed_tools. Renaming or
+    deleting a skill or script without updating its eval fails here, not at
+    the next paid run. Not caught: a stale name inside a regex alternation
+    that still matches another script, and anything about whether a case
+    passes, which only a live run can say.
+    """
+    claude = load_json(repo_root / ".claude-plugin" / "plugin.json")
+    eval_dir = (claude.get("experimental") or {}).get("evals") or EVAL_DIR_DEFAULT
+    eval_root = repo_root / eval_dir
+    require(eval_root.is_dir(), f"{eval_dir}/ is missing: every skill needs an eval case")
+    plugin_name = claude["name"]
+
+    gitignore = (repo_root / ".gitignore").read_text(encoding="utf-8").splitlines()
+    require(
+        f"{eval_dir}/results/" in {line.strip() for line in gitignore},
+        f".gitignore must ignore {eval_dir}/results/, where every eval run writes its report",
+    )
+
+    skill_inputs = {
+        skill: (json.dumps({"skill": f"{plugin_name}:{skill}"}), json.dumps({"skill": skill}))
+        for skill in skill_names
+    }
+    script_inputs = {
+        path.relative_to(repo_root).as_posix(): (
+            json.dumps({"command": f"python3 {path}"}),
+            json.dumps({"command": f'uv run -q "{path}"'}),
+        )
+        for path in sorted((repo_root / "skills").glob("*/scripts/*.py")) + sorted((repo_root / "scripts").glob("*.py"))
+    }
+
+    case_dirs: list[Path] = []
+    pending = [eval_root]
+    while pending:
+        directory = pending.pop()
+        for child in sorted(directory.iterdir()):
+            if not child.is_dir() or child.name in {"results", "mocks"} or child.name.startswith("."):
+                continue
+            if (child / "prompt.md").exists() or (child / "case.yaml").exists():
+                case_dirs.append(child)
+            else:
+                pending.append(child)
+    require(case_dirs, f"{eval_dir}/ holds no eval cases")
+
+    covered: dict[str, list[str]] = {skill: [] for skill in skill_names}
+    grader_count = 0
+    paid_count = 0
+    for case_dir in sorted(case_dirs):
+        case = case_dir.relative_to(repo_root).as_posix()
+        require(
+            not (case_dir / "case.yaml").exists(),
+            f"{case}/case.yaml is not read by this validator; keep the case in prompt.md, or extend validate_evals first",
+        )
+        fields, prompt = read_eval_file(case_dir / "prompt.md")
+        unknown = sorted(set(fields) - EVAL_PROMPT_KEYS)
+        require(not unknown, f"{case}/prompt.md: unknown frontmatter keys {unknown}; the runner rejects them")
+        require(bool(prompt), f"{case}/prompt.md: the body is the prompt and must not be empty")
+        require(fields.get("name", case_dir.name) == case_dir.name, f"{case}/prompt.md: name must equal the directory name")
+        require(fields.get("schema_version", "1.1") == "1.1", f"{case}/prompt.md: schema_version must be \"1.1\"")
+        for key, low, high in (("runs", 1, 50), ("max_turns", 1, 200), ("timeout_seconds", 1, 3600)):
+            if key in fields:
+                value = fields[key]
+                require(
+                    isinstance(value, int) and not isinstance(value, bool) and low <= value <= high,
+                    f"{case}/prompt.md: {key} must be an integer from {low} to {high}",
+                )
+        for key in ("tags", "allowed_tools", "plugins"):
+            if key in fields:
+                require_string_list(fields[key], f"{case}/prompt.md: {key}")
+        env = fields.get("env") or {}
+        require(isinstance(env, dict), f"{case}/prompt.md: env must be a mapping")
+        bad_env = sorted(key for key in env if not EVAL_ENV_KEY_RE.match(key))
+        require(not bad_env, f"{case}/prompt.md: env keys must match EVAL_[A-Z0-9_]*, not {bad_env}")
+        allowed = set(fields.get("allowed_tools") or [])
+
+        grader_paths = sorted((case_dir / "graders").glob("*.md"))
+        require(grader_paths, f"{case}: needs at least one grader under graders/")
+        subjects: set[str] = set()
+        for grader_path in grader_paths:
+            where = grader_path.relative_to(repo_root).as_posix()
+            grader, body = read_eval_file(grader_path)
+            kind = grader.get("type")
+            require(kind in EVAL_GRADER_OPTIONS, f"{where}: type must be one of {sorted(EVAL_GRADER_OPTIONS)}")
+            unknown = sorted(set(grader) - EVAL_GRADER_COMMON_KEYS - EVAL_GRADER_OPTIONS[kind])
+            require(not unknown, f"{where}: unknown keys {unknown} for a {kind} grader")
+            if "weight" in grader:
+                weight = grader["weight"]
+                require(
+                    isinstance(weight, (int, float)) and not isinstance(weight, bool) and weight > 0,
+                    f"{where}: weight must be a positive number",
+                )
+            require(grader.get("arm") in (None, "with-only", "both"), f"{where}: arm must be with-only or both")
+            grader_count += 1
+            paid_count += kind in EVAL_PAID_GRADER_TYPES
+
+            if kind == "regex":
+                _compile_eval_regex(grader.get("pattern"), grader.get("flags"), where)
+                match = grader.get("match", "contains")
+                require(
+                    match in {"contains", "not_contains"} or re.fullmatch(r"count:\d+", str(match)) is not None,
+                    f"{where}: match must be contains, not_contains, or count:N",
+                )
+                target = grader.get("target", "last_message")
+                if isinstance(target, dict):
+                    require(target.get("source") == "file", f"{where}: a mapping target needs source: file")
+                    path = target.get("path")
+                    require(
+                        isinstance(path, str) and path and not path.startswith("/") and ".." not in path.split("/"),
+                        f"{where}: target path must be relative to the run's workspace",
+                    )
+                else:
+                    require(target in EVAL_TARGETS, f"{where}: target must be one of {sorted(EVAL_TARGETS)} or a file")
+            elif kind == "tool_used":
+                tool = grader.get("tool")
+                require(isinstance(tool, str) and tool.strip(), f"{where}: needs tool")
+                low = grader.get("min", 1)
+                high = grader.get("max")
+                require(isinstance(low, int) and low >= 0, f"{where}: min must be a non-negative integer")
+                require(high is None or (isinstance(high, int) and high >= low), f"{where}: max must be an integer no smaller than min")
+                pattern = None
+                if "input_match" in grader:
+                    pattern = _compile_eval_regex(grader["input_match"], None, where)
+                if low >= 1:
+                    require(tool in allowed, f"{where}: expects {tool} but {case}/prompt.md does not allow it")
+                if tool == "Skill":
+                    require(pattern is not None, f"{where}: a Skill grader must name its skill with input_match")
+                    named = [skill for skill, inputs in skill_inputs.items() if any(pattern.search(text) for text in inputs)]
+                    require(
+                        len(named) == 1,
+                        f"{where}: input_match must name exactly one existing skill, and it names {named or 'none'}",
+                    )
+                    if low >= 1:
+                        subjects.add(named[0])
+                elif tool == "Bash" and pattern is not None and ".py" in pattern.pattern.replace("\\.", "."):
+                    require(
+                        any(pattern.search(text) for inputs in script_inputs.values() for text in inputs),
+                        f"{where}: input_match names a script the plugin does not ship",
+                    )
+            elif kind == "tool_order":
+                for key in ("before", "after"):
+                    step = grader.get(key)
+                    tool = step.get("tool") if isinstance(step, dict) else step
+                    require(isinstance(tool, str) and tool.strip(), f"{where}: {key} needs a tool")
+                    require(tool in allowed, f"{where}: expects {tool} but {case}/prompt.md does not allow it")
+                    if isinstance(step, dict) and "input_match" in step:
+                        _compile_eval_regex(step["input_match"], None, where)
+            elif kind == "file_exists":
+                path = grader.get("path")
+                require(isinstance(path, str) and path.strip(), f"{where}: needs path")
+                if grader.get("exists", True):
+                    require(allowed & EVAL_FILE_CREATING_TOOLS, f"{where}: expects a file, but the case allows no tool that creates one")
+            elif kind in EVAL_PAID_GRADER_TYPES:
+                criteria = grader.get("criteria") or body
+                require(bool(criteria), f"{where}: an {kind} grader needs criteria")
+                require("PASS" in criteria and "FAIL" in criteria, f"{where}: write the criteria as PASS and FAIL conditions")
+                missing = sorted(set(re.findall(r"\b[a-z0-9]+(?:-[a-z0-9]+)*-skill\b", criteria)) - set(skill_names))
+                require(not missing, f"{where}: criteria name skills that do not exist: {missing}")
+                if kind == "llm":
+                    focus = grader.get("focus", "last_message")
+                    require(
+                        focus in EVAL_TARGETS or (isinstance(focus, dict) and focus.get("source") == "file"),
+                        f"{where}: focus must be one of {sorted(EVAL_TARGETS)} or a file",
+                    )
+                else:
+                    baseline_file = grader.get("baseline_file")
+                    require(
+                        isinstance(baseline_file, str) and (case_dir / baseline_file).is_file(),
+                        f"{where}: baseline_file must name a transcript in the case directory",
+                    )
+
+        require(subjects, f"{case}: needs a tool_used: Skill grader that expects its skill to fire")
+        if case_dir.name in skill_inputs:
+            require(
+                case_dir.name in subjects,
+                f"{case}: the case is named for skill {case_dir.name!r} but its Skill grader expects {sorted(subjects)}",
+            )
+        for skill in subjects:
+            covered[skill].append(case_dir.name)
+
+    uncovered = sorted(skill for skill, cases in covered.items() if not cases)
+    require(not uncovered, f"skills with no eval case: {uncovered}")
+    return {
+        "eval_dir": eval_dir,
+        "cases": len(case_dirs),
+        "graders": grader_count,
+        "judge_graders": paid_count,
+        "free_graders": grader_count - paid_count,
+    }
 
 
 def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
@@ -904,6 +1239,7 @@ def main() -> None:
     reference_stats = validate_skill_references(repo_root, skill_names)
     pin_stats = check_package_pins(repo_root)
     term_search_stats = check_no_local_term_search(repo_root)
+    eval_stats = validate_evals(repo_root, skill_names)
     registry_stats = validate_platform_registry(repo_root, skill_names)
     skill_graph_stats = validate_skill_graph(repo_root, skill_names)
     regression_stats = validate_regression_assets(repo_root)
@@ -945,6 +1281,7 @@ def main() -> None:
         "skill_references": reference_stats,
         "package_pins": pin_stats,
         "term_search_guard": term_search_stats,
+        "evals": eval_stats,
         "registry": registry_stats,
         "skill_graph": skill_graph_stats,
         "regression": regression_stats,
