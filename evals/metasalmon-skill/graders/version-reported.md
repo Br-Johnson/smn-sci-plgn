@@ -1,4 +1,5 @@
 ---
 type: regex
-pattern: '\b\d+\.\d+\.\d+\b'
+pattern: 'metasalmonpy[\s\S]{0,120}?\b\d+\.\d+\.\d+\b'
+flags: i
 ---

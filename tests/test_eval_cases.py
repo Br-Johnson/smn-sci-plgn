@@ -126,12 +126,27 @@ class OfflineGraderFeasibilityTests(unittest.TestCase):
         for script in sources:
             with self.subTest(script=script.name):
                 self.assertRegex(bash_input(f"python3 {script}"), pattern)
+        for script in sources:
+            with self.subTest(uv=script.name):
+                self.assertRegex(bash_input(f'echo "{{}}" | uv run -q "{script}"'), pattern)
+            with self.subTest(read_only=script.name):
+                # Reading a source script is not calling a data source.
+                self.assertNotRegex(bash_input(f"cat {script}"), pattern)
         for local in (
             REPO_ROOT / "scripts" / "skill_graph_selector.py",
             REPO_ROOT / "skills" / "salmon-entity-normalizer-skill" / "scripts" / "normalize_entities.py",
         ):
             with self.subTest(local=local.name):
                 self.assertNotRegex(bash_input(f"python3 {local}"), pattern)
+
+    def test_metasalmon_version_grader_needs_the_package_version(self) -> None:
+        # The runtime report carries the Python version too, so a bare
+        # version number is not evidence that the package version was
+        # reported. These strings exercise the pattern; they are not replies.
+        pattern = compiled(grader("metasalmon-skill", "version-reported"))
+        self.assertRegex("metasalmonpy 0.5.0 is installed and matches the pin.", pattern)
+        self.assertRegex("| metasalmonpy | 0.5.0 |", pattern)
+        self.assertNotRegex("Python 3.13.11 is available, and metasalmonpy imported.", pattern)
 
 
 if __name__ == "__main__":

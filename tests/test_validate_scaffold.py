@@ -230,5 +230,27 @@ class PluginChecksTests(unittest.TestCase):
         self.assert_evals_rejected("max_turns must be an integer from 1 to 200")
 
 
+class EvalFrontmatterParserTests(unittest.TestCase):
+    """The small YAML subset the eval files are read with."""
+
+    def parse(self, value: str):
+        return vs.parse_yaml_scalar(vs._strip_yaml_comment(value), "test")
+
+    def test_values_and_trailing_comments(self) -> None:
+        self.assertEqual(self.parse("'a''b' # note"), "a'b")
+        self.assertEqual(self.parse("'#kept' # dropped"), "#kept")
+        self.assertEqual(self.parse('"x # kept" # dropped'), "x # kept")
+        self.assertEqual(self.parse("[Read, Bash] # tools"), ["Read", "Bash"])
+        self.assertEqual(self.parse("{ source: file, path: brief.md }"), {"source": "file", "path": "brief.md"})
+        self.assertEqual(self.parse("plain words # comment"), "plain words")
+        self.assertEqual(self.parse("12"), 12)
+        self.assertIsNone(self.parse("# only a comment"))
+
+    def test_constructs_outside_the_subset_are_rejected(self) -> None:
+        for value in ("|", ">-", "&anchor value", "'unterminated"):
+            with self.subTest(value=value), self.assertRaises(SystemExit):
+                self.parse(value)
+
+
 if __name__ == "__main__":
     unittest.main()

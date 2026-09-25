@@ -491,6 +491,33 @@ def _split_flow_items(inner: str, where: str) -> list[str]:
     return [item.strip() for item in items if item.strip()]
 
 
+def _strip_yaml_comment(value: str) -> str:
+    """Drop a trailing `# comment`, which YAML starts at a `#` after whitespace.
+
+    Quoted and flow values are scanned so that a `#` inside quotes is kept.
+    """
+    value = value.strip()
+    if value.startswith("#"):
+        return ""
+    if not value or value[0] not in "'\"[{":
+        return value.split(" #", 1)[0].rstrip()
+    quote = None
+    escaped = False
+    for index, char in enumerate(value):
+        if quote == '"' and escaped:
+            escaped = False
+        elif quote == '"' and char == "\\":
+            escaped = True
+        elif quote:
+            if char == quote:
+                quote = None
+        elif char in "'\"":
+            quote = char
+        elif char == "#" and value[index - 1].isspace():
+            return value[:index].rstrip()
+    return value
+
+
 def parse_yaml_scalar(text: str, where: str):
     """Read one value from the small YAML subset the eval files use.
 
@@ -524,7 +551,6 @@ def parse_yaml_scalar(text: str, where: str):
             mapping[key.strip()] = parse_yaml_scalar(rest, where)
         return mapping
     require(value[0] not in "|>&*!%@`", f"{where}: {value[0]!r} values are outside the YAML subset this validator reads")
-    value = value.split(" #", 1)[0].rstrip()
     if re.fullmatch(r"[-+]?\d+", value):
         return int(value)
     if re.fullmatch(r"[-+]?\d+\.\d+", value):
@@ -551,7 +577,7 @@ def read_eval_file(path: Path) -> tuple[dict, str]:
         key, sep, value = line.partition(":")
         require(bool(sep) and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key) is not None, f"{where}: expected key: value")
         require(key not in fields, f"{where}: duplicate key {key!r}")
-        fields[key] = parse_yaml_scalar(value, where)
+        fields[key] = parse_yaml_scalar(_strip_yaml_comment(value), where)
     return fields, "\n".join(lines[end + 1:]).strip()
 
 
