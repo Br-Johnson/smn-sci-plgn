@@ -26,17 +26,12 @@
       "kb_page": "kb/platforms/pubmed.md"
     },
     {
-      "skill": "smn-ontology-skill",
-      "platform_id": "smn-ontology",
-      "kb_page": "kb/platforms/smn-ontology.md"
-    },
-    {
-      "skill": "gcdfo-ontology-skill",
-      "platform_id": "gcdfo-ontology",
-      "kb_page": "kb/platforms/gcdfo-ontology.md"
-    },
-    {
       "skill": "metasalmon-skill",
+      "platform_id": "metasalmon",
+      "kb_page": "kb/platforms/metasalmon.md"
+    },
+    {
+      "skill": "salmon-terms",
       "platform_id": "metasalmon",
       "kb_page": "kb/platforms/metasalmon.md"
     },

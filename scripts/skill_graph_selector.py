@@ -215,14 +215,12 @@ LANE_SKILL_MAP: dict[str, tuple[str, ...]] = {
     "lane:genetics-stock-identification": ("salmon-literature-skill",),
     "lane:climate-ocean-context": ("salmon-literature-skill",),
     "lane:literature-reports-dataset-discovery": ("salmon-literature-skill",),
-    "lane:ontology-semantic-resolution": ("smn-ontology-skill",),
-    "lane:package-metadata-validation": ("smn-ontology-skill", "metasalmon-skill"),
+    "lane:ontology-semantic-resolution": ("salmon-terms",),
+    "lane:package-metadata-validation": ("salmon-terms", "metasalmon-skill"),
 }
 
 SPECIAL_SKILL_COMPANIONS: dict[str, tuple[str, ...]] = {
-    "smn-ontology-skill": (),
-    "gcdfo-ontology-skill": ("smn-ontology-skill",),
-    "metasalmon-skill": ("smn-ontology-skill",),
+    "metasalmon-skill": ("salmon-terms",),
     "ptagis-skill": ("dart-query-skill",),
     "streamnet-api-skill": ("salmon-literature-skill",),
     "rmis-skill": ("salmon-literature-skill",),
@@ -444,26 +442,14 @@ def expand_selected_skills(text: str, seeded_lanes: list[str], index: GraphIndex
 
     for lane_id in seeded_lanes:
         lane_skills = list(LANE_SKILL_MAP.get(lane_id, ()))
-        if lane_id == "lane:ontology-semantic-resolution" and dfo_specific:
-            lane_skills.append("gcdfo-ontology-skill")
-        elif lane_id == "lane:package-metadata-validation" and dfo_specific:
-            lane_skills.append("gcdfo-ontology-skill")
 
         for skill_name in lane_skills:
-            if skill_name == "gcdfo-ontology-skill" and "smn-ontology-skill" not in selected:
+            if skill_name == "metasalmon-skill" and "salmon-terms" not in selected:
                 add_skill(
-                    "smn-ontology-skill",
+                    "salmon-terms",
                     selected,
                     reasons,
-                    "Selected smn-ontology-skill as the shared-term dependency for DFO-specific ontology or package work.",
-                )
-
-            if skill_name == "metasalmon-skill" and "smn-ontology-skill" not in selected:
-                add_skill(
-                    "smn-ontology-skill",
-                    selected,
-                    reasons,
-                    "Selected smn-ontology-skill first because metasalmon depends on the shared ontology layer.",
+                    "Selected salmon-terms first because Salmon Data Package semantics need ontology term IRIs.",
                 )
 
             add_skill(
@@ -474,7 +460,7 @@ def expand_selected_skills(text: str, seeded_lanes: list[str], index: GraphIndex
             )
 
             for companion in SPECIAL_SKILL_COMPANIONS.get(skill_name, ()):
-                if companion == "smn-ontology-skill" and lane_id == "lane:package-metadata-validation":
+                if companion == "salmon-terms" and lane_id == "lane:package-metadata-validation":
                     continue
                 if companion == "salmon-literature-skill" and lane_id not in {
                     "lane:stock-assessment",
@@ -485,14 +471,21 @@ def expand_selected_skills(text: str, seeded_lanes: list[str], index: GraphIndex
                     continue
                 if companion == "dart-query-skill" and lane_id != "lane:telemetry-passage":
                     continue
-                if companion == "smn-ontology-skill" and skill_name == "gcdfo-ontology-skill":
-                    continue
                 add_skill(
                     companion,
                     selected,
                     reasons,
                     f"Selected {companion} because it is the graph companion for {skill_name}.",
                 )
+
+    # One term-search skill now covers both ontologies, so a DFO-specific
+    # request no longer adds a second skill. It changes which sources
+    # salmon-terms should search, and the reason says so.
+    if dfo_specific and "salmon-terms" in selected:
+        reasons.append(
+            "Kept gcdfo in scope for salmon-terms because the request is DFO-specific: "
+            "include gcdfo in its sources, or restrict them to gcdfo for DFO-only terms."
+        )
 
     optional_patterns = {
         skill: compile_patterns(patterns)

@@ -29,7 +29,7 @@ Canonical structured truth:
 - [PubMed](platforms/pubmed.md)
 - [SMN ontology](platforms/smn-ontology.md)
 - [GCDFO ontology](platforms/gcdfo-ontology.md)
-- [metasalmon](platforms/metasalmon.md)
+- [metasalmon and metasalmonpy](platforms/metasalmon.md)
 
 ## Gaps
 

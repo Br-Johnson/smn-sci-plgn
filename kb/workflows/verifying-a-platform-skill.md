@@ -1,6 +1,6 @@
 # Verifying a Platform Skill
 
-1. Run the narrow smoke calls for the skill.
+1. Run the narrow smoke calls for the skill. With Claude Code 2.1.269 or later, also run its eval case with `claude plugin eval . --no-publish --case <skill-name>` and the grants its `description` names.
 2. Confirm the platform card still matches the skill surface and access model.
 3. Confirm the platform card `access_tier` still matches the real access posture.
 4. Confirm the wiki page still points to the right platform card and skill.

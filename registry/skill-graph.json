@@ -1,6 +1,6 @@
 {
   "graph_version": "0.0.1",
-  "last_updated": "2026-04-17",
+  "last_updated": "2026-09-25",
   "description": "Typed skill graph for the salmon scaffold. Seed candidate lanes lexically or semantically, normalize the entities, then expand through typed skill, platform, and governance edges while respecting access tiers and scaffold boundaries.",
   "nodes": [
     {
@@ -49,41 +49,28 @@
       "selection_note": "Use early, but do not treat this as an authoritative production identity graph."
     },
     {
-      "id": "skill:smn-ontology-skill",
+      "id": "skill:salmon-terms",
       "type": "skill",
-      "label": "smn-ontology-skill",
-      "description": "Shared Salmon Domain Ontology lookup over published smn JSON-LD.",
-      "entrypoint": "skills/smn-ontology-skill/SKILL.md",
+      "label": "salmon-terms",
+      "description": "Term search through metasalmonpy's find_terms() and sources_for_role() at the pinned v0.5.0 release, across smn, gcdfo, and external vocabularies.",
+      "entrypoint": "skills/salmon-terms/SKILL.md",
       "role": "semantic",
-      "input_contract": "Shared salmon concepts, term lookups, labels, definitions, and IRIs.",
+      "input_contract": "Salmon concepts, semantic roles, and optional source lists; returns ranked term IRIs, labels, definitions, and per-source diagnostics.",
       "lane_tags": [
         "lane:ontology-semantic-resolution",
         "lane:package-metadata-validation"
-      ]
-    },
-    {
-      "id": "skill:gcdfo-ontology-skill",
-      "type": "skill",
-      "label": "gcdfo-ontology-skill",
-      "description": "DFO-specific salmon ontology lookup over published gcdfo JSON-LD.",
-      "entrypoint": "skills/gcdfo-ontology-skill/SKILL.md",
-      "role": "semantic",
-      "input_contract": "DFO-specific salmon concepts, term lookups, labels, definitions, and IRIs.",
-      "lane_tags": [
-        "lane:ontology-semantic-resolution",
-        "lane:package-metadata-validation"
-      ]
+      ],
+      "selection_note": "For DFO-specific requests keep gcdfo in the sources; the package ranks smn above gcdfo, so shared terms still come first."
     },
     {
       "id": "skill:metasalmon-skill",
       "type": "skill",
       "label": "metasalmon-skill",
-      "description": "Thin execution wrapper around the installed metasalmon R package.",
+      "description": "Thin adapter to metasalmonpy v0.5.0 for Salmon Data Package validation and ontology fetch, with metasalmon in R documented as the alternative.",
       "entrypoint": "skills/metasalmon-skill/SKILL.md",
       "role": "package",
-      "input_contract": "Salmon Data Package validation, term finding, source role lookup, and ontology fetch helpers.",
+      "input_contract": "Salmon Data Package validation, ontology file fetch, and package runtime checks.",
       "lane_tags": [
-        "lane:ontology-semantic-resolution",
         "lane:package-metadata-validation"
       ]
     },
@@ -253,7 +240,7 @@
       "id": "platform:smn-ontology",
       "type": "platform",
       "label": "SMN ontology",
-      "description": "Platform card-backed shared ontology node for organization-neutral salmon terms.",
+      "description": "Platform card-backed shared ontology node for organization-neutral salmon terms, searched through metasalmonpy.",
       "entrypoint": "registry/platforms/smn-ontology.json",
       "platform_id": "smn-ontology",
       "platform_card": "registry/platforms/smn-ontology.json"
@@ -262,7 +249,7 @@
       "id": "platform:gcdfo-ontology",
       "type": "platform",
       "label": "GCDFO ontology",
-      "description": "Platform card-backed DFO ontology node for program- or profile-specific terms.",
+      "description": "Platform card-backed DFO ontology node for program- or profile-specific terms, searched through metasalmonpy.",
       "entrypoint": "registry/platforms/gcdfo-ontology.json",
       "platform_id": "gcdfo-ontology",
       "platform_card": "registry/platforms/gcdfo-ontology.json"
@@ -270,8 +257,8 @@
     {
       "id": "platform:metasalmon",
       "type": "platform",
-      "label": "metasalmon",
-      "description": "Platform card-backed package engine node for Salmon Data Package workflows.",
+      "label": "metasalmon and metasalmonpy",
+      "description": "Platform card-backed package pair (R and its Python mirror, both pinned at v0.5.0) behind Salmon Data Package validation and term search.",
       "entrypoint": "registry/platforms/metasalmon.json",
       "platform_id": "metasalmon",
       "platform_card": "registry/platforms/metasalmon.json"
@@ -649,19 +636,11 @@
     {
       "source": "lane:ontology-semantic-resolution",
       "relation": "routes_to",
-      "target": "skill:smn-ontology-skill",
-      "rationale": "Shared ontology resolution starts with the shared smn layer.",
+      "target": "skill:salmon-terms",
+      "rationale": "Ontology and term-resolution questions start with the package's role-aware term search, which covers the shared smn layer first and gcdfo for DFO-specific concepts.",
       "evidence_refs": [
-        "skills/salmon-research-router-skill/references/lanes.md"
-      ]
-    },
-    {
-      "source": "lane:ontology-semantic-resolution",
-      "relation": "routes_to",
-      "target": "skill:gcdfo-ontology-skill",
-      "rationale": "DFO-specific concept questions need gcdfo as a paired semantic source.",
-      "evidence_refs": [
-        "skills/salmon-research-router-skill/references/lanes.md"
+        "skills/salmon-research-router-skill/references/lanes.md",
+        "skills/salmon-terms/SKILL.md"
       ]
     },
     {
@@ -695,8 +674,8 @@
     {
       "source": "skill:salmon-entity-normalizer-skill",
       "relation": "compose_with",
-      "target": "skill:smn-ontology-skill",
-      "rationale": "Normalization often needs shared semantic grounding without claiming full identity resolution.",
+      "target": "skill:salmon-terms",
+      "rationale": "Normalization often needs semantic grounding in ontology terms without claiming full identity resolution.",
       "evidence_refs": [
         "README.md",
         "skills/salmon-entity-normalizer-skill/references/normalization-schema.md"
@@ -710,16 +689,6 @@
       "evidence_refs": [
         "registry/identity/columbia-basin-v0.json",
         "registry/platforms/critfc-crosswalk.json"
-      ]
-    },
-    {
-      "source": "skill:salmon-entity-normalizer-skill",
-      "relation": "compose_with",
-      "target": "skill:gcdfo-ontology-skill",
-      "rationale": "DFO-specific semantic questions can require the profile ontology alongside seed normalization.",
-      "evidence_refs": [
-        "kb/concepts/shared-vs-dfo-term-boundary.md",
-        "skills/salmon-entity-normalizer-skill/references/normalization-schema.md"
       ]
     },
     {
@@ -801,33 +770,13 @@
       ]
     },
     {
-      "source": "skill:gcdfo-ontology-skill",
-      "relation": "compose_with",
-      "target": "skill:smn-ontology-skill",
-      "rationale": "DFO-specific term work should stay connected to the shared ontology layer.",
-      "evidence_refs": [
-        "kb/concepts/shared-vs-dfo-term-boundary.md",
-        "README.md"
-      ]
-    },
-    {
       "source": "skill:metasalmon-skill",
       "relation": "depends_on",
-      "target": "skill:smn-ontology-skill",
-      "rationale": "metasalmon package semantics depend on the shared ontology surface.",
+      "target": "skill:salmon-terms",
+      "rationale": "Filling a Salmon Data Package's semantic IRI columns needs term search, which the same package pair exposes through salmon-terms.",
       "evidence_refs": [
         "README.md",
         "skills/metasalmon-skill/SKILL.md"
-      ]
-    },
-    {
-      "source": "skill:metasalmon-skill",
-      "relation": "compose_with",
-      "target": "skill:gcdfo-ontology-skill",
-      "rationale": "DFO-scoped package semantics can require gcdfo context in addition to shared terms.",
-      "evidence_refs": [
-        "README.md",
-        "kb/concepts/shared-vs-dfo-term-boundary.md"
       ]
     },
     {
@@ -881,30 +830,20 @@
       ]
     },
     {
-      "source": "skill:smn-ontology-skill",
+      "source": "skill:salmon-terms",
       "relation": "uses_platform",
-      "target": "platform:smn-ontology",
-      "rationale": "The skill is the repo wrapper for the shared SMN ontology surface.",
+      "target": "platform:metasalmon",
+      "rationale": "The skill is the repo adapter for the package pair's term-search surface; the package reaches smn, gcdfo, and the external vocabularies itself.",
       "evidence_refs": [
         "registry/skill-platform-map.json",
-        "registry/platforms/smn-ontology.json"
-      ]
-    },
-    {
-      "source": "skill:gcdfo-ontology-skill",
-      "relation": "uses_platform",
-      "target": "platform:gcdfo-ontology",
-      "rationale": "The skill is the repo wrapper for the GCDFO ontology surface.",
-      "evidence_refs": [
-        "registry/skill-platform-map.json",
-        "registry/platforms/gcdfo-ontology.json"
+        "registry/platforms/metasalmon.json"
       ]
     },
     {
       "source": "skill:metasalmon-skill",
       "relation": "uses_platform",
       "target": "platform:metasalmon",
-      "rationale": "The skill is the repo wrapper for the metasalmon package surface.",
+      "rationale": "The skill is the repo adapter for the package pair's validation and ontology-fetch surface.",
       "evidence_refs": [
         "registry/skill-platform-map.json",
         "registry/platforms/metasalmon.json"
@@ -951,10 +890,10 @@
       ]
     },
     {
-      "source": "skill:gcdfo-ontology-skill",
+      "source": "skill:salmon-terms",
       "relation": "constrained_by",
       "target": "governance:organization-profile",
-      "rationale": "DFO-specific terms should remain profile-scoped unless explicit promotion criteria are met.",
+      "rationale": "gcdfo results are DFO profile terms and should not be generalized to the shared layer unless explicit promotion criteria are met.",
       "evidence_refs": [
         "kb/concepts/shared-vs-dfo-term-boundary.md",
         "registry/platforms/gcdfo-ontology.json"

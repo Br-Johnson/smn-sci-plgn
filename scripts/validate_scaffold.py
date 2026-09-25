@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import py_compile
 import re
 import subprocess
+import sys
 from pathlib import Path
 from urllib import request
 
@@ -14,6 +16,123 @@ NON_PLATFORM_SKILLS = {
     "salmon-stock-brief-workflow-skill",
 }
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+# Text files the reference, pin, and retired-name checks read.
+TEXT_SUFFIXES = {".md", ".json", ".py", ".yml", ".yaml", ".toml", ".txt"}
+SKIPPED_DIRS = {".git", "__pycache__", ".pytest_cache", ".venv", "node_modules"}
+# The append-only history is the one place that may still name what was
+# retired, because recording that is its job.
+HISTORY_FILES = {"kb/log.md"}
+# This file, which necessarily spells out the markers it searches for.
+VALIDATOR_PATH = "scripts/validate_scaffold.py"
+
+# The fields a Codex manifest and a Claude Code manifest both carry. For one
+# plugin they must say the same thing.
+SHARED_MANIFEST_FIELDS = (
+    "name",
+    "version",
+    "description",
+    "author",
+    "homepage",
+    "repository",
+    "license",
+    "keywords",
+)
+# Component keys and files Claude Code loads from a plugin and Codex does not.
+# Any of them would give one harness something the other never sees, so the
+# plugin has none.
+CLAUDE_ONLY_MANIFEST_KEYS = ("skills", "commands", "agents", "hooks", "mcpServers", "lspServers", "outputStyles")
+CLAUDE_ONLY_ROOT_PATHS = ("commands", "agents", "hooks", "output-styles", ".mcp.json", ".lsp.json", "SKILL.md")
+
+# Agent Skills specification: https://agentskills.io/specification
+SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SKILL_NAME_MAX = 64
+SKILL_DESCRIPTION_MAX = 1024
+
+# The ways this repository names a skill in text: a path into skills/, a
+# backticked or quoted `<name>-skill`, a bare `<name>-skill/` directory in a
+# tree listing, and a `skill:<name>` graph id. Prose that merely contains the
+# word, as in per-skill smoke fixtures, matches none of them.
+SKILL_PATH_RE = re.compile(r"(?<!\.claude/)(?<!\.agents/)(?<!\.codex/)skills/([a-z0-9][a-z0-9-]*)/")
+SKILL_NAME_RES = (
+    re.compile(r"[`\"']([a-z0-9]+(?:-[a-z0-9]+)*-skill)[`\"']"),
+    re.compile(r"(?<![a-z0-9./-])([a-z0-9]+(?:-[a-z0-9]+)*-skill)/"),
+    re.compile(r"\bskill:([a-z0-9]+(?:-[a-z0-9]+)*)"),
+)
+
+# Every pin-shaped mention of the two packages: an install spec, a release
+# link, or a "pinned at vX.Y.Z" statement. The plugin pins ONE release for both
+# packages, because they share release numbers and each skill documents the R
+# route as an equivalent of the Python one; if that ever stops being true, this
+# check has to learn two pins instead of one.
+PIN_PATTERNS = (
+    re.compile(r"salmon-data-mobilization/metasalmon(?:py)?(?:\.git)?@v(\d+\.\d+\.\d+)"),
+    re.compile(r"salmon-data-mobilization/metasalmon(?:py)?/releases/tag/v(\d+\.\d+\.\d+)"),
+    re.compile(r"pinned (?:at|to) (?:tag )?`?v(\d+\.\d+\.\d+)"),
+    re.compile(r'^METASALMONPY_VERSION = "(\d+\.\d+\.\d+)"', re.MULTILINE),
+)
+RETIRED_REFERENCES = (
+    "dfo-pacific-science/metasalmon",
+    "dfo-pacific-science.github.io/metasalmon",
+)
+
+# Markers of a local term-search implementation in a skill script. See
+# check_no_local_term_search() for what they catch, what they miss, and when
+# the list retires.
+TERM_SEARCH_MARKERS = (
+    # Published ontology artifacts, which only a term index needs to read.
+    ".jsonld",
+    ".ttl",
+    ".owl",
+    "w3id.org/smn",
+    "w3id.org/gcdfo",
+    "salmon-domain-ontology",
+    "dfo-salmon-ontology",
+    # The RDF, SKOS, and IAO predicates a term index is built from.
+    "rdf-schema#label",
+    "rdf-schema#comment",
+    "skos/core#",
+    "IAO_0000115",
+    "rdfs:label",
+    "skos:prefLabel",
+    # The vocabulary services metasalmonpy's find_terms() searches.
+    "ebi.ac.uk/ols",
+    "ebi.ac.uk/spot/zooma",
+    "vocab.nerc.ac.uk",
+    "data.bioontology.org",
+    "qudt.org",
+    "api.gbif.org",
+    "marinespecies.org",
+)
+LOCAL_SEARCH_DEFINITION_RE = re.compile(
+    r"^\s*def\s+(find_terms|search_terms|sources_for_role|get_term|_?score_\w*|_?rank_\w*)\s*\(",
+    re.MULTILINE,
+)
+
+# Eval cases for `claude plugin eval`, in the published case format
+# (https://code.claude.com/docs/en/plugin-evals, read 2026-09-25). Running a
+# case needs Claude Code 2.1.269 or later and a live model, and `claude plugin
+# validate` does not read eval files at all (checked on 2.1.267), so
+# validate_evals() is the only offline check they get.
+EVAL_DIR_DEFAULT = "evals"
+EVAL_PROMPT_KEYS = frozenset({
+    "schema_version", "name", "description", "tags", "plugins", "runs", "expected_outcome",
+    "model", "max_turns", "timeout_seconds", "allowed_tools", "append_system_prompt", "env",
+})
+EVAL_GRADER_COMMON_KEYS = frozenset({"type", "weight", "arm"})
+EVAL_GRADER_OPTIONS = {
+    "regex": frozenset({"pattern", "flags", "match", "target"}),
+    "tool_used": frozenset({"tool", "input_match", "min", "max"}),
+    "tool_order": frozenset({"before", "after"}),
+    "file_exists": frozenset({"path", "exists"}),
+    "llm": frozenset({"criteria", "focus"}),
+    "baseline": frozenset({"baseline_file", "criteria"}),
+}
+EVAL_PAID_GRADER_TYPES = frozenset({"llm", "baseline"})
+EVAL_TARGETS = frozenset({"last_message", "trace", "files", "mock_calls"})
+EVAL_FILE_CREATING_TOOLS = frozenset({"Write", "Edit", "Bash"})
+JS_REGEX_FLAGS = frozenset("dgimsuvy")
+EVAL_ENV_KEY_RE = re.compile(r"^EVAL_[A-Z0-9_]*$")
 
 
 def load_json(path: Path):
@@ -36,6 +155,645 @@ def require_existing_path_or_url(repo_root: Path, value: str, label: str) -> Non
     if value.startswith("http://") or value.startswith("https://"):
         return
     require((repo_root / value).exists(), f"{label} references a missing path: {value}")
+
+
+def iter_text_files(repo_root: Path):
+    """Yield (repo-relative posix path, text) for every text file in the repo."""
+    for path in sorted(repo_root.rglob("*")):
+        relative = path.relative_to(repo_root)
+        if any(part in SKIPPED_DIRS for part in relative.parts):
+            continue
+        if not path.is_file() or path.suffix not in TEXT_SUFFIXES:
+            continue
+        yield relative.as_posix(), path.read_text(encoding="utf-8", errors="replace")
+
+
+def validate_manifests(repo_root: Path) -> dict:
+    """The Codex and Claude Code manifests must describe one plugin with one skill set.
+
+    Decision: the two files are checked for agreement rather than generated one
+    from the other. They carry different harness-specific fields (Codex's
+    `interface` block, Claude Code's marketplace), a generator would be one more
+    script to keep honest, and a check fails CI on exactly the drift that
+    matters.
+    """
+    codex_path = repo_root / ".codex-plugin" / "plugin.json"
+    claude_path = repo_root / ".claude-plugin" / "plugin.json"
+    marketplace_path = repo_root / ".claude-plugin" / "marketplace.json"
+    for path in (codex_path, claude_path, marketplace_path):
+        require(path.exists(), f"plugin manifest missing: {path.relative_to(repo_root)}")
+    codex = load_json(codex_path)
+    claude = load_json(claude_path)
+    marketplace = load_json(marketplace_path)
+
+    missing = [key for key in ("name", "version", "description", "skills", "interface") if key not in codex]
+    require(not missing, f".codex-plugin/plugin.json missing keys: {missing}")
+    missing = [key for key in ("name", "version", "description", "author") if key not in claude]
+    require(not missing, f".claude-plugin/plugin.json missing keys: {missing}")
+
+    for key in SHARED_MANIFEST_FIELDS:
+        require(
+            codex.get(key) == claude.get(key),
+            f"plugin manifests disagree on {key!r}: Codex has {codex.get(key)!r}, Claude Code has {claude.get(key)!r}",
+        )
+    display_name = codex.get("interface", {}).get("displayName")
+    require(
+        claude.get("displayName") in (None, display_name),
+        f"Claude Code displayName {claude.get('displayName')!r} differs from Codex interface.displayName {display_name!r}",
+    )
+
+    # Same skills. Codex loads the directory its `skills` key names. Claude Code
+    # always scans `skills/`, and a `skills` key there ADDS directories to that
+    # scan, so the Claude Code manifest must not carry one.
+    require(
+        str(codex.get("skills", "")).rstrip("/") in {"./skills", "skills"},
+        ".codex-plugin/plugin.json must load skills from ./skills/, the directory Claude Code scans",
+    )
+    for key in CLAUDE_ONLY_MANIFEST_KEYS:
+        require(
+            key not in claude,
+            f".claude-plugin/plugin.json must not declare {key!r}: Claude Code would load components Codex never sees",
+        )
+    for relative in CLAUDE_ONLY_ROOT_PATHS:
+        require(
+            not (repo_root / relative).exists(),
+            f"{relative} at the plugin root would load in Claude Code only; keep the two harnesses on one component set",
+        )
+
+    # The marketplace is how a GitHub repository installs in Claude Code: one
+    # entry, this plugin, rooted at the repository root.
+    require(isinstance(marketplace.get("name"), str) and marketplace["name"].strip(), "marketplace.json requires name")
+    owner = marketplace.get("owner")
+    require(isinstance(owner, dict) and str(owner.get("name", "")).strip(), "marketplace.json requires owner.name")
+    entries = marketplace.get("plugins")
+    require(isinstance(entries, list) and len(entries) == 1, "marketplace.json must list exactly one plugin, this one")
+    entry = entries[0]
+    require(entry.get("name") == claude["name"], "marketplace.json plugin name must match .claude-plugin/plugin.json")
+    require(entry.get("source") in {"./", "."}, 'marketplace.json plugin source must be "./", the repository root')
+    require(
+        "version" not in entry,
+        "marketplace.json must not set version: plugin.json wins and `claude plugin validate` warns",
+    )
+    require(
+        entry.get("description", claude["description"]) == claude["description"],
+        "marketplace.json plugin description must match the plugin manifests",
+    )
+    return {
+        "plugin": claude["name"],
+        "version": claude["version"],
+        "marketplace": marketplace["name"],
+        "manifests": [
+            str(path.relative_to(repo_root)) for path in (codex_path, claude_path, marketplace_path)
+        ],
+    }
+
+
+def read_frontmatter(path: Path) -> dict[str, str]:
+    """Read the single-line `key: value` fields of a SKILL.md frontmatter block.
+
+    Deliberately small and stdlib-only. A folded or block YAML value would be
+    read as its indicator character, so validate_skill_frontmatter() rejects
+    those and asks for the value on one line.
+    """
+    lines = path.read_text(encoding="utf-8").splitlines()
+    require(bool(lines) and lines[0].strip() == "---", f"{path} must start with a YAML frontmatter block")
+    fields: dict[str, str] = {}
+    for line in lines[1:]:
+        if line.strip() == "---":
+            return fields
+        key, sep, value = line.partition(":")
+        if sep and key.strip() and not key.startswith((" ", "\t")):
+            fields[key.strip()] = value.strip()
+    raise SystemExit(f"{path} frontmatter block is never closed")
+
+
+def validate_skill_frontmatter(repo_root: Path, skill_names: list[str]) -> dict:
+    """Each skill's frontmatter must follow the Agent Skills spec both harnesses read.
+
+    `name` must equal the directory name. Claude Code takes a plugin skill's
+    command from `name`, the spec requires the match, and the registry, the
+    graph, and the selector all use the directory name as the skill's id, so a
+    mismatch would give one skill two names. `claude plugin validate` checks
+    neither the match nor the naming rule.
+    """
+    for skill_name in skill_names:
+        path = repo_root / "skills" / skill_name / "SKILL.md"
+        fields = read_frontmatter(path)
+        name = fields.get("name", "")
+        require(name == skill_name, f"{path}: frontmatter name {name!r} must equal the directory name {skill_name!r}")
+        require(
+            len(name) <= SKILL_NAME_MAX and SKILL_NAME_RE.fullmatch(name) is not None,
+            f"{path}: name must be 1-{SKILL_NAME_MAX} lowercase letters, digits, and single hyphens",
+        )
+        description = fields.get("description", "")
+        require(
+            description and description not in {">", "|", ">-", "|-", ">+", "|+"},
+            f"{path}: description must be present and written on one line",
+        )
+        require(
+            len(description) <= SKILL_DESCRIPTION_MAX,
+            f"{path}: description is {len(description)} characters; the limit is {SKILL_DESCRIPTION_MAX}",
+        )
+    return {"skills_checked": len(skill_names)}
+
+
+def validate_skill_references(repo_root: Path, skill_names: list[str]) -> dict:
+    """Nothing may name a skill that does not exist.
+
+    The registry cards, skill-platform map, and graph nodes are checked where
+    they are validated below. This adds the three places those checks never
+    read: the selector's hard-coded skill tables, the selector fixtures, and the
+    prose and paths across the repository. The history file is exempt because
+    naming retired skills is its job.
+    """
+    known = set(skill_names)
+
+    # Load the selector from this repo_root by path. A plain import would be
+    # cached in sys.modules and answer for whichever copy was imported first.
+    # The module is registered only while it executes, because its dataclass
+    # looks its own module up in sys.modules.
+    module_name = "_validated_skill_graph_selector"
+    spec = importlib.util.spec_from_file_location(module_name, repo_root / "scripts" / "skill_graph_selector.py")
+    selector = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = selector
+    try:
+        spec.loader.exec_module(selector)
+    finally:
+        sys.modules.pop(module_name, None)
+    named: set[str] = set()
+    for skills in selector.LANE_SKILL_MAP.values():
+        named.update(skills)
+    for skill, companions in selector.SPECIAL_SKILL_COMPANIONS.items():
+        named.add(skill)
+        named.update(companions)
+    named.update(selector.OPTIONAL_SKILL_PATTERNS)
+    unknown = sorted(named - known)
+    require(not unknown, f"scripts/skill_graph_selector.py names skills that do not exist: {unknown}")
+
+    cases = load_json(repo_root / "tests" / "fixtures" / "skill_graph_selector_cases.json")
+    fixture_skills = {
+        skill
+        for case in cases
+        for field in ("selected_skills", "blocked_skills")
+        for skill in case["expected"].get(field, [])
+    }
+    unknown = sorted(fixture_skills - known)
+    require(not unknown, f"selector fixtures expect skills that do not exist: {unknown}")
+
+    problems: list[str] = []
+    files_scanned = 0
+    for relative, text in iter_text_files(repo_root):
+        if relative in HISTORY_FILES:
+            continue
+        files_scanned += 1
+        for name in sorted(set(SKILL_PATH_RE.findall(text))):
+            if name not in known:
+                problems.append(f"{relative}: path skills/{name}/ does not exist")
+        names = {name for pattern in SKILL_NAME_RES for name in pattern.findall(text)}
+        for name in sorted(names - known):
+            problems.append(f"{relative}: names skill {name!r}, which does not exist")
+    require(not problems, "references to missing skills:\n  " + "\n  ".join(problems))
+    return {"text_files_scanned": files_scanned, "selector_skills": len(named), "fixture_skills": len(fixture_skills)}
+
+
+def check_package_pins(repo_root: Path) -> dict:
+    """Every copy of the package pin must agree, and nothing may point at the retired fork.
+
+    The pin lives in several places that cannot import each other: the
+    constants in scripts/_package_adapter.py, the PEP 723 block of each adapter
+    script, and the docs and registry that link the release. Moving it means
+    editing every copy in one change; this check is what enforces that.
+    """
+    found: dict[str, set[str]] = {}
+    retired: list[str] = []
+    for relative, text in iter_text_files(repo_root):
+        if relative in HISTORY_FILES:
+            continue
+        for pattern in PIN_PATTERNS:
+            for version in pattern.findall(text):
+                found.setdefault(version, set()).add(relative)
+        if relative == VALIDATOR_PATH:
+            continue  # this file holds the list of retired references
+        for marker in RETIRED_REFERENCES:
+            if marker in text:
+                retired.append(f"{relative}: {marker}")
+    require(not retired, "references to the retired metasalmon fork remain:\n  " + "\n  ".join(sorted(retired)))
+    require(found, "no metasalmon or metasalmonpy pin found")
+    require(
+        len(found) == 1,
+        "package pins disagree:\n  "
+        + "\n  ".join(f"v{version}: {', '.join(sorted(paths))}" for version, paths in sorted(found.items())),
+    )
+    (pin,) = found
+
+    requirement = f"metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v{pin}"
+    adapters: list[str] = []
+    for script in sorted((repo_root / "skills").glob("*/scripts/*.py")):
+        text = script.read_text(encoding="utf-8")
+        if "_package_adapter" not in text:
+            continue
+        relative = script.relative_to(repo_root).as_posix()
+        block = re.search(r"^# /// script\n(.*?)^# ///$", text, flags=re.MULTILINE | re.DOTALL)
+        require(block is not None, f"{relative} imports the package adapter but has no PEP 723 script block for uv")
+        require(requirement in block.group(1), f"{relative}: its script block must require {requirement!r}")
+        adapters.append(relative)
+    require(adapters, "no package adapter scripts found")
+    return {"pin": f"v{pin}", "files": len(found[pin]), "adapters": adapters}
+
+
+def check_no_local_term_search(repo_root: Path) -> dict:
+    """No skill script may reimplement ontology term search.
+
+    Term search belongs to metasalmonpy (Brett, 2026-09-25: the plugin's own
+    implementation retires in favour of it). This is a static check over every
+    file under skills/*/scripts/ and every script in scripts/ except this
+    validator, which fetches the published ontologies only to report their
+    versions and which holds the marker list itself.
+
+    What it catches: a script that reads the published ontology artifacts
+    (JSON-LD, Turtle, OWL, the w3id namespaces or the ontology repositories),
+    parses RDF, SKOS, or IAO label predicates, calls one of the vocabulary
+    services find_terms() searches, or defines its own find_terms,
+    search_terms, sources_for_role, get_term, or scoring or ranking function.
+    Measured against the retired implementation on 2026-09-25:
+    scripts/ontology_lookup_common.py fails on four predicate markers and three
+    local definitions (search_terms, get_term, _score_record), and the lookup
+    scripts built on it fail on the published-artifact URLs they fetched.
+
+    What it misses: search against a source not on the list; a URL assembled
+    at runtime from fragments; matching or ranking over terms already in
+    memory, such as a vendored term list; and instructions in a SKILL.md that
+    tell the harness to fetch and grep an ontology itself, which is prose, not
+    a script.
+
+    Maintenance: when metasalmonpy's find_terms() gains a vocabulary source,
+    add its host to TERM_SEARCH_MARKERS.
+
+    Retires when the plugin reaches term search only through a command-line
+    tool or generated adapter that the packages ship, leaving no Python import
+    surface to police, or when a behavioural test shows that every term the
+    plugin returns carries the package's provenance.
+    """
+    targets = [
+        path
+        for path in sorted((repo_root / "skills").glob("*/scripts/**/*"))
+        if path.is_file() and "__pycache__" not in path.parts
+    ]
+    targets += [
+        path
+        for path in sorted((repo_root / "scripts").glob("*.py"))
+        if path.relative_to(repo_root).as_posix() != VALIDATOR_PATH
+    ]
+    problems: list[str] = []
+    for path in targets:
+        relative = path.relative_to(repo_root).as_posix()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for marker in TERM_SEARCH_MARKERS:
+            if marker in text:
+                problems.append(f"{relative}: contains {marker!r}")
+        for name in LOCAL_SEARCH_DEFINITION_RE.findall(text):
+            problems.append(f"{relative}: defines {name}()")
+    require(
+        not problems,
+        "skill scripts must call metasalmonpy for term search, not reimplement it:\n  " + "\n  ".join(problems),
+    )
+    return {"scripts_checked": len(targets)}
+
+
+def _split_flow_items(inner: str, where: str) -> list[str]:
+    """Split the inside of a YAML flow collection on its top-level commas."""
+    items: list[str] = []
+    current: list[str] = []
+    depth = 0
+    quote = None
+    escaped = False
+    for char in inner:
+        current.append(char)
+        if quote == '"' and escaped:
+            escaped = False
+        elif quote == '"' and char == "\\":
+            escaped = True
+        elif quote:
+            if char == quote:
+                quote = None
+        elif char in "'\"":
+            quote = char
+        elif char in "[{":
+            depth += 1
+        elif char in "]}":
+            depth -= 1
+        elif char == "," and depth == 0:
+            current.pop()
+            items.append("".join(current))
+            current = []
+    require(quote is None and depth == 0, f"{where}: unbalanced quotes or brackets")
+    items.append("".join(current))
+    return [item.strip() for item in items if item.strip()]
+
+
+def _strip_yaml_comment(value: str) -> str:
+    """Drop a trailing `# comment`, which YAML starts at a `#` after whitespace.
+
+    Quoted and flow values are scanned so that a `#` inside quotes is kept.
+    """
+    value = value.strip()
+    if value.startswith("#"):
+        return ""
+    if not value or value[0] not in "'\"[{":
+        return value.split(" #", 1)[0].rstrip()
+    quote = None
+    escaped = False
+    for index, char in enumerate(value):
+        if quote == '"' and escaped:
+            escaped = False
+        elif quote == '"' and char == "\\":
+            escaped = True
+        elif quote:
+            if char == quote:
+                quote = None
+        elif char in "'\"":
+            quote = char
+        elif char == "#" and value[index - 1].isspace():
+            return value[:index].rstrip()
+    return value
+
+
+def parse_yaml_scalar(text: str, where: str):
+    """Read one value from the small YAML subset the eval files use.
+
+    Supported: single- and double-quoted strings, flow sequences, flow
+    mappings, integers, floats, booleans, null, and plain strings. Anything
+    else, such as a block scalar or an anchor, is rejected by name rather than
+    misread, so extend this deliberately if a case ever needs more.
+    """
+    value = text.strip()
+    if not value:
+        return None
+    if value[0] == "'":
+        require(len(value) >= 2 and value.endswith("'"), f"{where}: unterminated single-quoted value")
+        inner = value[1:-1]
+        require("'" not in inner.replace("''", ""), f"{where}: stray quote inside a single-quoted value")
+        return inner.replace("''", "'")
+    if value[0] == '"':
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"{where}: double-quoted value outside the JSON-compatible subset: {exc}") from exc
+    if value[0] == "[":
+        require(value.endswith("]"), f"{where}: unterminated flow sequence")
+        return [parse_yaml_scalar(item, where) for item in _split_flow_items(value[1:-1], where)]
+    if value[0] == "{":
+        require(value.endswith("}"), f"{where}: unterminated flow mapping")
+        mapping: dict = {}
+        for item in _split_flow_items(value[1:-1], where):
+            key, sep, rest = item.partition(":")
+            require(bool(sep) and bool(key.strip()), f"{where}: flow mapping entry {item!r} needs key: value")
+            mapping[key.strip()] = parse_yaml_scalar(rest, where)
+        return mapping
+    require(value[0] not in "|>&*!%@`", f"{where}: {value[0]!r} values are outside the YAML subset this validator reads")
+    if re.fullmatch(r"[-+]?\d+", value):
+        return int(value)
+    if re.fullmatch(r"[-+]?\d+\.\d+", value):
+        return float(value)
+    if value.lower() in {"true", "false"}:
+        return value.lower() == "true"
+    if value.lower() in {"null", "~"}:
+        return None
+    return value
+
+
+def read_eval_file(path: Path) -> tuple[dict, str]:
+    """Return (frontmatter fields, body) for a prompt.md or grader file."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    require(bool(lines) and lines[0].strip() == "---", f"{path}: must start with a --- frontmatter block")
+    end = next((index for index in range(1, len(lines)) if lines[index].strip() == "---"), None)
+    require(end is not None, f"{path}: frontmatter block is never closed")
+    fields: dict = {}
+    for number, line in enumerate(lines[1:end], start=2):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        where = f"{path}:{number}"
+        require(not line[0].isspace(), f"{where}: nested or continued values are outside the YAML subset this validator reads")
+        key, sep, value = line.partition(":")
+        require(bool(sep) and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key) is not None, f"{where}: expected key: value")
+        require(key not in fields, f"{where}: duplicate key {key!r}")
+        fields[key] = parse_yaml_scalar(_strip_yaml_comment(value), where)
+    return fields, "\n".join(lines[end + 1:]).strip()
+
+
+def _compile_eval_regex(pattern, flags, where: str) -> re.Pattern:
+    """Compile a grader regex with Python's re, as a proxy for JavaScript's.
+
+    The runner uses JavaScript regex syntax. The two agree on everything these
+    cases use (classes, groups, alternation, \\b, \\d, \\s, \\w on ASCII text);
+    a JavaScript-only construct would fail here and need a look.
+    """
+    require(isinstance(pattern, str) and pattern != "", f"{where}: needs a non-empty pattern")
+    flags = flags or ""
+    require(isinstance(flags, str) and set(flags) <= JS_REGEX_FLAGS, f"{where}: flags {flags!r} are not JavaScript regex flags")
+    try:
+        return re.compile(pattern, re.IGNORECASE if "i" in flags else 0)
+    except re.error as exc:
+        raise SystemExit(f"{where}: pattern {pattern!r} does not compile: {exc}") from exc
+
+
+def validate_evals(repo_root: Path, skill_names: list[str]) -> dict:
+    """Check every eval case offline, since nothing else does before a live run.
+
+    Schema: prompt.md frontmatter keys, value ranges, grader types, and each
+    type's options, all as documented; an unknown key is an error there too.
+
+    Drift, which is the reason this exists: every skill must be the subject of
+    at least one case; each case's `tool_used: Skill` grader must name exactly
+    one skill that exists; a Bash grader that names a `.py` script must match a
+    script the plugin ships; skills an llm rubric names must exist; and every
+    tool a grader expects must be in the case's allowed_tools. Renaming or
+    deleting a skill or script without updating its eval fails here, not at
+    the next paid run. Not caught: a stale name inside a regex alternation
+    that still matches another script, and anything about whether a case
+    passes, which only a live run can say.
+    """
+    claude = load_json(repo_root / ".claude-plugin" / "plugin.json")
+    eval_dir = (claude.get("experimental") or {}).get("evals") or EVAL_DIR_DEFAULT
+    eval_root = repo_root / eval_dir
+    require(eval_root.is_dir(), f"{eval_dir}/ is missing: every skill needs an eval case")
+    plugin_name = claude["name"]
+
+    gitignore = (repo_root / ".gitignore").read_text(encoding="utf-8").splitlines()
+    require(
+        f"{eval_dir}/results/" in {line.strip() for line in gitignore},
+        f".gitignore must ignore {eval_dir}/results/, where every eval run writes its report",
+    )
+
+    skill_inputs = {
+        skill: (json.dumps({"skill": f"{plugin_name}:{skill}"}), json.dumps({"skill": skill}))
+        for skill in skill_names
+    }
+    script_inputs = {
+        path.relative_to(repo_root).as_posix(): (
+            json.dumps({"command": f"python3 {path}"}),
+            json.dumps({"command": f'uv run -q "{path}"'}),
+        )
+        for path in sorted((repo_root / "skills").glob("*/scripts/*.py")) + sorted((repo_root / "scripts").glob("*.py"))
+    }
+
+    case_dirs: list[Path] = []
+    pending = [eval_root]
+    while pending:
+        directory = pending.pop()
+        for child in sorted(directory.iterdir()):
+            if not child.is_dir() or child.name in {"results", "mocks"} or child.name.startswith("."):
+                continue
+            if (child / "prompt.md").exists() or (child / "case.yaml").exists():
+                case_dirs.append(child)
+            else:
+                pending.append(child)
+    require(case_dirs, f"{eval_dir}/ holds no eval cases")
+
+    covered: dict[str, list[str]] = {skill: [] for skill in skill_names}
+    grader_count = 0
+    paid_count = 0
+    for case_dir in sorted(case_dirs):
+        case = case_dir.relative_to(repo_root).as_posix()
+        require(
+            not (case_dir / "case.yaml").exists(),
+            f"{case}/case.yaml is not read by this validator; keep the case in prompt.md, or extend validate_evals first",
+        )
+        fields, prompt = read_eval_file(case_dir / "prompt.md")
+        unknown = sorted(set(fields) - EVAL_PROMPT_KEYS)
+        require(not unknown, f"{case}/prompt.md: unknown frontmatter keys {unknown}; the runner rejects them")
+        require(bool(prompt), f"{case}/prompt.md: the body is the prompt and must not be empty")
+        require(fields.get("name", case_dir.name) == case_dir.name, f"{case}/prompt.md: name must equal the directory name")
+        require(fields.get("schema_version", "1.1") == "1.1", f"{case}/prompt.md: schema_version must be \"1.1\"")
+        for key, low, high in (("runs", 1, 50), ("max_turns", 1, 200), ("timeout_seconds", 1, 3600)):
+            if key in fields:
+                value = fields[key]
+                require(
+                    isinstance(value, int) and not isinstance(value, bool) and low <= value <= high,
+                    f"{case}/prompt.md: {key} must be an integer from {low} to {high}",
+                )
+        for key in ("tags", "allowed_tools", "plugins"):
+            if key in fields:
+                require_string_list(fields[key], f"{case}/prompt.md: {key}")
+        env = fields.get("env") or {}
+        require(isinstance(env, dict), f"{case}/prompt.md: env must be a mapping")
+        bad_env = sorted(key for key in env if not EVAL_ENV_KEY_RE.match(key))
+        require(not bad_env, f"{case}/prompt.md: env keys must match EVAL_[A-Z0-9_]*, not {bad_env}")
+        allowed = set(fields.get("allowed_tools") or [])
+
+        grader_paths = sorted((case_dir / "graders").glob("*.md"))
+        require(grader_paths, f"{case}: needs at least one grader under graders/")
+        subjects: set[str] = set()
+        for grader_path in grader_paths:
+            where = grader_path.relative_to(repo_root).as_posix()
+            grader, body = read_eval_file(grader_path)
+            kind = grader.get("type")
+            require(kind in EVAL_GRADER_OPTIONS, f"{where}: type must be one of {sorted(EVAL_GRADER_OPTIONS)}")
+            unknown = sorted(set(grader) - EVAL_GRADER_COMMON_KEYS - EVAL_GRADER_OPTIONS[kind])
+            require(not unknown, f"{where}: unknown keys {unknown} for a {kind} grader")
+            if "weight" in grader:
+                weight = grader["weight"]
+                require(
+                    isinstance(weight, (int, float)) and not isinstance(weight, bool) and weight > 0,
+                    f"{where}: weight must be a positive number",
+                )
+            require(grader.get("arm") in (None, "with-only", "both"), f"{where}: arm must be with-only or both")
+            grader_count += 1
+            paid_count += kind in EVAL_PAID_GRADER_TYPES
+
+            if kind == "regex":
+                _compile_eval_regex(grader.get("pattern"), grader.get("flags"), where)
+                match = grader.get("match", "contains")
+                require(
+                    match in {"contains", "not_contains"} or re.fullmatch(r"count:\d+", str(match)) is not None,
+                    f"{where}: match must be contains, not_contains, or count:N",
+                )
+                target = grader.get("target", "last_message")
+                if isinstance(target, dict):
+                    require(target.get("source") == "file", f"{where}: a mapping target needs source: file")
+                    path = target.get("path")
+                    require(
+                        isinstance(path, str) and path and not path.startswith("/") and ".." not in path.split("/"),
+                        f"{where}: target path must be relative to the run's workspace",
+                    )
+                else:
+                    require(target in EVAL_TARGETS, f"{where}: target must be one of {sorted(EVAL_TARGETS)} or a file")
+            elif kind == "tool_used":
+                tool = grader.get("tool")
+                require(isinstance(tool, str) and tool.strip(), f"{where}: needs tool")
+                low = grader.get("min", 1)
+                high = grader.get("max")
+                require(isinstance(low, int) and low >= 0, f"{where}: min must be a non-negative integer")
+                require(high is None or (isinstance(high, int) and high >= low), f"{where}: max must be an integer no smaller than min")
+                pattern = None
+                if "input_match" in grader:
+                    pattern = _compile_eval_regex(grader["input_match"], None, where)
+                if low >= 1:
+                    require(tool in allowed, f"{where}: expects {tool} but {case}/prompt.md does not allow it")
+                if tool == "Skill":
+                    require(pattern is not None, f"{where}: a Skill grader must name its skill with input_match")
+                    named = [skill for skill, inputs in skill_inputs.items() if any(pattern.search(text) for text in inputs)]
+                    require(
+                        len(named) == 1,
+                        f"{where}: input_match must name exactly one existing skill, and it names {named or 'none'}",
+                    )
+                    if low >= 1:
+                        subjects.add(named[0])
+                elif tool == "Bash" and pattern is not None and ".py" in pattern.pattern.replace("\\.", "."):
+                    require(
+                        any(pattern.search(text) for inputs in script_inputs.values() for text in inputs),
+                        f"{where}: input_match names a script the plugin does not ship",
+                    )
+            elif kind == "tool_order":
+                for key in ("before", "after"):
+                    step = grader.get(key)
+                    tool = step.get("tool") if isinstance(step, dict) else step
+                    require(isinstance(tool, str) and tool.strip(), f"{where}: {key} needs a tool")
+                    require(tool in allowed, f"{where}: expects {tool} but {case}/prompt.md does not allow it")
+                    if isinstance(step, dict) and "input_match" in step:
+                        _compile_eval_regex(step["input_match"], None, where)
+            elif kind == "file_exists":
+                path = grader.get("path")
+                require(isinstance(path, str) and path.strip(), f"{where}: needs path")
+                if grader.get("exists", True):
+                    require(allowed & EVAL_FILE_CREATING_TOOLS, f"{where}: expects a file, but the case allows no tool that creates one")
+            elif kind in EVAL_PAID_GRADER_TYPES:
+                criteria = grader.get("criteria") or body
+                require(bool(criteria), f"{where}: an {kind} grader needs criteria")
+                require("PASS" in criteria and "FAIL" in criteria, f"{where}: write the criteria as PASS and FAIL conditions")
+                missing = sorted(set(re.findall(r"\b[a-z0-9]+(?:-[a-z0-9]+)*-skill\b", criteria)) - set(skill_names))
+                require(not missing, f"{where}: criteria name skills that do not exist: {missing}")
+                if kind == "llm":
+                    focus = grader.get("focus", "last_message")
+                    require(
+                        focus in EVAL_TARGETS or (isinstance(focus, dict) and focus.get("source") == "file"),
+                        f"{where}: focus must be one of {sorted(EVAL_TARGETS)} or a file",
+                    )
+                else:
+                    baseline_file = grader.get("baseline_file")
+                    require(
+                        isinstance(baseline_file, str) and (case_dir / baseline_file).is_file(),
+                        f"{where}: baseline_file must name a transcript in the case directory",
+                    )
+
+        require(subjects, f"{case}: needs a tool_used: Skill grader that expects its skill to fire")
+        if case_dir.name in skill_inputs:
+            require(
+                case_dir.name in subjects,
+                f"{case}: the case is named for skill {case_dir.name!r} but its Skill grader expects {sorted(subjects)}",
+            )
+        for skill in subjects:
+            covered[skill].append(case_dir.name)
+
+    uncovered = sorted(skill for skill, cases in covered.items() if not cases)
+    require(not uncovered, f"skills with no eval case: {uncovered}")
+    return {
+        "eval_dir": eval_dir,
+        "cases": len(case_dirs),
+        "graders": grader_count,
+        "judge_graders": paid_count,
+        "free_graders": grader_count - paid_count,
+    }
 
 
 def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
@@ -320,6 +1078,10 @@ def validate_regression_assets(repo_root: Path) -> dict:
     workflow_text = workflow_path.read_text(encoding="utf-8")
     require("python3 scripts/validate_scaffold.py" in workflow_text, "CI workflow must run scaffold validation")
     require("python3 -m unittest discover -s tests -p 'test_*.py'" in workflow_text, "CI workflow must run unittest discovery")
+    require(
+        'SMN_PLUGIN_LIVE_ADAPTERS: "1"' in workflow_text and "test_package_adapters.py" in workflow_text,
+        "CI workflow must run the live package-adapter tests against the pinned release",
+    )
 
     return {
         "selector_fixture_case_count": len(cases),
@@ -413,26 +1175,44 @@ def check_ontology_surface(url: str, root_iri: str) -> dict:
         return {"ok": False, "url": url, "error": str(exc)}
 
 
-def check_metasalmon_surface() -> dict:
+def _version_key(tag: str) -> tuple[int, ...]:
+    match = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)", tag)
+    return tuple(int(part) for part in match.groups()) if match else ()
+
+
+def check_package_tag(repository: str, pin: str) -> dict:
+    """Does the pinned tag still exist upstream, and is there a newer one?
+
+    `ok` is false only when the pinned tag is gone. A newer tag is reported as a
+    drift warning, because moving the pin is a deliberate change, not a fix.
+    """
+    url = f"https://github.com/salmon-data-mobilization/{repository}.git"
     try:
         proc = subprocess.run(
-            [
-                "Rscript",
-                "-e",
-                "if (requireNamespace('metasalmon', quietly = TRUE)) { cat(as.character(utils::packageVersion('metasalmon'))) } else { cat('NOT_INSTALLED') }",
-            ],
+            ["git", "ls-remote", "--tags", url],
             capture_output=True,
             text=True,
             check=False,
+            timeout=30,
         )
-        version = proc.stdout.strip()
-        if proc.returncode != 0:
-            return {"ok": False, "error": proc.stderr.strip() or "Rscript failed"}
-        if version == "NOT_INSTALLED" or not version:
-            return {"ok": False, "error": "metasalmon is not installed"}
-        return {"ok": True, "version": version}
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": str(exc)}
+        return {"ok": False, "url": url, "error": str(exc)}
+    if proc.returncode != 0:
+        return {"ok": False, "url": url, "error": proc.stderr.strip() or "git ls-remote failed"}
+    tags = {
+        line.split("refs/tags/", 1)[1].removesuffix("^{}")
+        for line in proc.stdout.splitlines()
+        if "refs/tags/" in line
+    }
+    releases = sorted((tag for tag in tags if _version_key(tag)), key=_version_key)
+    latest = releases[-1] if releases else None
+    return {
+        "ok": pin in tags,
+        "url": url,
+        "pinned": pin,
+        "latest": latest,
+        "newer_release": latest is not None and _version_key(latest) > _version_key(pin),
+    }
 
 
 def check_rmis_surface() -> dict:
@@ -458,14 +1238,9 @@ def check_rmis_surface() -> dict:
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    manifest_path = repo_root / ".codex-plugin" / "plugin.json"
     skills_root = repo_root / "skills"
 
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    required_top = ["name", "version", "description", "skills", "interface"]
-    missing = [key for key in required_top if key not in manifest]
-    if missing:
-        raise SystemExit(f"plugin manifest missing keys: {missing}")
+    manifest_stats = validate_manifests(repo_root)
 
     skill_names: list[str] = []
     python_files: list[Path] = []
@@ -486,6 +1261,11 @@ def main() -> None:
     for path in python_files:
         py_compile.compile(str(path), doraise=True)
 
+    frontmatter_stats = validate_skill_frontmatter(repo_root, skill_names)
+    reference_stats = validate_skill_references(repo_root, skill_names)
+    pin_stats = check_package_pins(repo_root)
+    term_search_stats = check_no_local_term_search(repo_root)
+    eval_stats = validate_evals(repo_root, skill_names)
     registry_stats = validate_platform_registry(repo_root, skill_names)
     skill_graph_stats = validate_skill_graph(repo_root, skill_names)
     regression_stats = validate_regression_assets(repo_root)
@@ -502,7 +1282,8 @@ def main() -> None:
             "https://dfo-pacific-science.github.io/dfo-salmon-ontology/gcdfo.jsonld",
             "https://w3id.org/gcdfo/salmon",
         ),
-        "metasalmon": check_metasalmon_surface(),
+        "metasalmon": check_package_tag("metasalmon", pin_stats["pin"]),
+        "metasalmonpy": check_package_tag("metasalmonpy", pin_stats["pin"]),
         "rmis": check_rmis_surface(),
     }
     warnings = [
@@ -510,13 +1291,23 @@ def main() -> None:
         for name, detail in watch_surface_checks.items()
         if not detail.get("ok")
     ]
+    warnings += [
+        f"watch surface {name}: {detail['latest']} is newer than the pinned {detail['pinned']}"
+        for name, detail in watch_surface_checks.items()
+        if detail.get("newer_release")
+    ]
 
     print(json.dumps({
         "ok": True,
-        "manifest": str(manifest_path),
+        "manifests": manifest_stats,
         "skill_count": len(skill_names),
         "skills": skill_names,
         "python_files_compiled": len(python_files),
+        "skill_frontmatter": frontmatter_stats,
+        "skill_references": reference_stats,
+        "package_pins": pin_stats,
+        "term_search_guard": term_search_stats,
+        "evals": eval_stats,
         "registry": registry_stats,
         "skill_graph": skill_graph_stats,
         "regression": regression_stats,
