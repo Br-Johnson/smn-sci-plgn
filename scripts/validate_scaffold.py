@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import ast
 import json
 import py_compile
 import re
 import subprocess
+import sys
 from pathlib import Path
 from urllib import request
 
@@ -14,6 +16,23 @@ NON_PLATFORM_SKILLS = {
     "salmon-stock-brief-workflow-skill",
 }
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+# Thin front door contract (PL-1). A skill script is an adapter: it marshals
+# JSON to a pinned, released package, CLI, or public API and holds no domain
+# logic. These constants define what the static check accepts and forbids.
+ADAPTER_MAX_LINES = 400
+ADAPTER_SHARED_MODULES = {"_common"}
+PINNED_DEP_RE = re.compile(r"(@v?\d+\.\d+\.\d+(?:[.\w-]*)?|==\d+\.\d+(?:\.\d+)?)$")
+FORBIDDEN_IMPORTS = {"rdflib", "pyld", "owlready2", "frictionless", "pandas", "numpy", "networkx"}
+FORBIDDEN_LITERALS = (
+    "http://www.w3.org/2000/01/rdf-schema#",
+    "http://www.w3.org/2002/07/owl#",
+    "http://www.w3.org/2004/02/skos/core#",
+    "@value",
+    "@list",
+)
+FORBIDDEN_DEF_RE = re.compile(r"(score|rank|search_terms|get_term|normalize_record|ontology_metadata|load_jsonld)", re.IGNORECASE)
+EVAL_RESERVED_DIRS = {"mocks", "results"}
 
 
 def load_json(path: Path):
@@ -93,6 +112,7 @@ def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
     mappings = skill_map.get("skills")
     require(isinstance(mappings, list) and mappings, "registry/skill-platform-map.json must contain a non-empty skills list")
     seen_mapped_skills: set[str] = set()
+    seen_pairs: set[tuple[str, str]] = set()
     for entry in mappings:
         require(isinstance(entry, dict), "each skill-platform mapping must be an object")
         skill = entry.get("skill")
@@ -103,13 +123,14 @@ def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
         require(isinstance(kb_page, str) and kb_page.strip(), "skill-platform mapping requires kb_page")
         require(skill in skill_names, f"skill-platform mapping references unknown skill {skill}")
         require(platform_id in platform_cards, f"skill-platform mapping references unknown platform {platform_id}")
-        require(skill not in seen_mapped_skills, f"duplicate skill-platform mapping for {skill}")
+        require((skill, platform_id) not in seen_pairs, f"duplicate skill-platform mapping for {skill} -> {platform_id}")
+        seen_pairs.add((skill, platform_id))
         seen_mapped_skills.add(skill)
         require(skill in platform_cards[platform_id]["related_skills"], f"platform card {platform_id} does not list mapped skill {skill}")
         require((repo_root / kb_page).exists(), f"mapped kb page does not exist: {kb_page}")
 
     expected_platform_skills = sorted(skill for skill in skill_names if skill not in NON_PLATFORM_SKILLS)
-    require(sorted(seen_mapped_skills) == expected_platform_skills, "every external-source skill must map to exactly one platform card and kb page")
+    require(sorted(seen_mapped_skills) == expected_platform_skills, "every external-source skill must map to at least one platform card and kb page, and non-platform skills must not be mapped")
 
     identity_records = load_json(registry_root / "identity" / "seed-crosswalks.json")
     require(isinstance(identity_records, list) and identity_records, "registry/identity/seed-crosswalks.json must contain records")
@@ -162,6 +183,7 @@ def validate_platform_registry(repo_root: Path, skill_names: list[str]) -> dict:
     return {
         "platform_card_count": len(platform_cards),
         "mapped_external_skills": len(seen_mapped_skills),
+        "skill_platform_pairs": len(seen_pairs),
         "identity_record_count": len(identity_records),
         "bounded_identity_record_count": len(bounded_records),
     }
@@ -391,6 +413,168 @@ def validate_gap_register(repo_root: Path, categories: list[str]) -> None:
     require(set(referenced) == set(categories), "docs/platform-gap-register.md category list must match registry/vocab.json")
 
 
+def validate_manifests(repo_root: Path) -> dict:
+    """Both client manifests must exist, agree on name and version, and share skills/."""
+    codex_path = repo_root / ".codex-plugin" / "plugin.json"
+    claude_path = repo_root / ".claude-plugin" / "plugin.json"
+    marketplace_path = repo_root / ".claude-plugin" / "marketplace.json"
+    for path in (codex_path, claude_path, marketplace_path):
+        require(path.exists(), f"manifest missing: {path}")
+
+    codex = load_json(codex_path)
+    claude = load_json(claude_path)
+    marketplace = load_json(marketplace_path)
+
+    for key in ("name", "version", "description", "skills", "interface"):
+        require(key in codex, f"codex manifest missing key: {key}")
+    require(codex["skills"] in {"./skills/", "./skills", "skills/"}, "codex manifest must point skills at ./skills/")
+    for key in ("name", "version", "description"):
+        require(isinstance(claude.get(key), str) and claude[key].strip(), f"claude manifest missing key: {key}")
+    require(re.fullmatch(r"[a-z0-9][a-z0-9-]*", claude["name"]), "claude manifest name must be kebab-case")
+    require(codex["name"] == claude["name"], "codex and claude manifests must share one plugin name")
+    require(codex["version"] == claude["version"], "codex and claude manifests must share one version")
+    for key in ("skills", "commands", "agents"):
+        require(key not in claude, f"claude manifest must rely on the default skills/ scan; remove {key}")
+
+    require(isinstance(marketplace.get("name"), str) and marketplace["name"].strip(), "marketplace.json requires name")
+    require(marketplace["name"] not in {".", ""} and "/" not in marketplace["name"], "marketplace.json name must be a plain identifier")
+    owner = marketplace.get("owner")
+    require(isinstance(owner, dict) and isinstance(owner.get("name"), str) and owner["name"].strip(), "marketplace.json requires owner.name")
+    plugins = marketplace.get("plugins")
+    require(isinstance(plugins, list) and len(plugins) == 1, "marketplace.json must list exactly one plugin: this repository")
+    entry = plugins[0]
+    require(entry.get("name") == claude["name"], "marketplace entry name must equal the claude manifest name")
+    require(entry.get("source") in {".", "./"}, "marketplace entry source must be the repository root")
+    require("version" not in entry, "marketplace entry must not restate version; plugin.json owns it")
+
+    return {
+        "plugin_name": claude["name"],
+        "version": claude["version"],
+        "marketplace": marketplace["name"],
+    }
+
+
+def _script_metadata_dependencies(text: str) -> list[str]:
+    """Return dependency strings from a PEP 723 inline script metadata block."""
+    match = re.search(r"^# /// script\s*$(.*?)^# ///\s*$", text, flags=re.MULTILINE | re.DOTALL)
+    if not match:
+        return []
+    body = "\n".join(line[2:] if line.startswith("# ") else line[1:] for line in match.group(1).splitlines())
+    deps_match = re.search(r"dependencies\s*=\s*\[(.*?)\]", body, flags=re.DOTALL)
+    if not deps_match:
+        return []
+    return [item.strip().strip("\"'") for item in deps_match.group(1).split(",") if item.strip().strip("\"'")]
+
+
+def _imported_modules(tree: ast.AST) -> set[str]:
+    modules: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                modules.add(alias.name.split(".")[0])
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            modules.add(node.module.split(".")[0])
+    return modules
+
+
+def validate_thin_front_door(repo_root: Path, skill_names: list[str]) -> dict:
+    """Static check for PL-1: skill scripts are adapters, not a place where logic lives.
+
+    Allowed: stdlib, the shared plumbing module scripts/_common.py, and packages
+    declared in the script's own PEP 723 block at a pinned release. Forbidden:
+    shared domain modules under scripts/, unpinned dependencies, ontology or
+    dataframe libraries, RDF/JSON-LD vocabulary literals, ranking or term-search
+    function definitions, and adapters longer than ADAPTER_MAX_LINES.
+    """
+    stdlib = set(sys.stdlib_module_names)
+    scripts_root = repo_root / "scripts"
+    require(not (scripts_root / "ontology_lookup_common.py").exists(), "scripts/ontology_lookup_common.py must stay deleted; term lookup lives in metasalmonpy")
+
+    shared_modules = {path.stem for path in scripts_root.glob("*.py")}
+    metasalmon_card = load_json(repo_root / "registry" / "platforms" / "metasalmon.json")
+    pins = metasalmon_card.get("pinned_releases", {})
+    require(isinstance(pins, dict) and pins, "registry/platforms/metasalmon.json must declare pinned_releases")
+
+    checked = 0
+    pinned_declarations: dict[str, list[str]] = {}
+    for skill_name in skill_names:
+        for path in sorted((repo_root / "skills" / skill_name).rglob("*.py")):
+            rel = path.relative_to(repo_root).as_posix()
+            text = path.read_text(encoding="utf-8")
+            lines = text.splitlines()
+            require(len(lines) <= ADAPTER_MAX_LINES, f"{rel}: adapter exceeds {ADAPTER_MAX_LINES} lines; move logic upstream into the package it calls")
+
+            declared = _script_metadata_dependencies(text)
+            declared_names = set()
+            for dep in declared:
+                require(PINNED_DEP_RE.search(dep) is not None, f"{rel}: dependency is not pinned to a release: {dep}")
+                name = re.split(r"[\s@=<>\[]", dep, maxsplit=1)[0]
+                declared_names.add(name.replace("-", "_"))
+                for package, version in pins.items():
+                    if name == package:
+                        require(dep.endswith(f"@v{version}") or dep.endswith(f"=={version}"), f"{rel}: {package} pin {dep!r} disagrees with registry pin {version}")
+                        pinned_declarations.setdefault(package, []).append(rel)
+
+            tree = ast.parse(text)
+            for module in sorted(_imported_modules(tree)):
+                if module in stdlib:
+                    continue
+                require(module not in FORBIDDEN_IMPORTS, f"{rel}: imports {module}; adapters must not parse ontologies or manipulate frames locally")
+                if module in shared_modules:
+                    require(module in ADAPTER_SHARED_MODULES, f"{rel}: imports shared domain module scripts/{module}.py; only {sorted(ADAPTER_SHARED_MODULES)} is allowed")
+                    continue
+                require(module in declared_names, f"{rel}: imports {module} without declaring it as a pinned PEP 723 dependency")
+
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    require(FORBIDDEN_DEF_RE.search(node.name) is None, f"{rel}: defines {node.name}(); ranking and term-search logic belongs upstream")
+                if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                    for literal in FORBIDDEN_LITERALS:
+                        require(literal not in node.value, f"{rel}: contains RDF/JSON-LD vocabulary literal {literal!r}; adapters must not read ontology documents")
+
+            for package, version in pins.items():
+                for match in re.finditer(rf"PINNED_{package.upper()}\s*=\s*[\"']([^\"']+)[\"']", text):
+                    require(match.group(1) == version, f"{rel}: PINNED_{package.upper()} {match.group(1)} disagrees with registry pin {version}")
+                    pinned_declarations.setdefault(package, []).append(rel)
+            checked += 1
+
+    for package in pins:
+        require(package in pinned_declarations, f"registry pins {package} but no skill script declares that pin")
+
+    return {
+        "adapter_scripts_checked": checked,
+        "pinned_releases": pins,
+        "pin_declarations": {package: sorted(set(paths)) for package, paths in pinned_declarations.items()},
+    }
+
+
+def validate_evals(repo_root: Path, skill_names: list[str]) -> dict:
+    """Every skill has an eval case under evals/<skill>/ that `claude plugin eval` can run."""
+    evals_root = repo_root / "evals"
+    require(evals_root.is_dir(), "evals/ directory is missing")
+    case_dirs = {path.name for path in evals_root.iterdir() if path.is_dir() and path.name not in EVAL_RESERVED_DIRS}
+    grader_count = 0
+    for skill_name in skill_names:
+        case_dir = evals_root / skill_name
+        prompt_path = case_dir / "prompt.md"
+        require(prompt_path.exists(), f"evals/{skill_name}/prompt.md is missing; every skill needs at least one eval case")
+        prompt_text = prompt_path.read_text(encoding="utf-8")
+        require(prompt_text.startswith("---\n"), f"{prompt_path}: prompt.md must start with YAML frontmatter")
+        body = prompt_text.split("---", 2)
+        require(len(body) == 3 and body[2].strip(), f"{prompt_path}: prompt body is empty")
+        graders = sorted((case_dir / "graders").glob("*.md"))
+        require(graders, f"evals/{skill_name}/graders/ must contain at least one grader")
+        for grader in graders:
+            grader_text = grader.read_text(encoding="utf-8")
+            require(re.search(r"^type:\s*(regex|tool_used|tool_order|file_exists|llm|baseline)\s*$", grader_text, flags=re.MULTILINE), f"{grader}: grader frontmatter must declare a supported type")
+            grader_count += 1
+        skill_fired = any(re.search(rf"tool:\s*Skill", g.read_text(encoding="utf-8")) for g in graders)
+        require(skill_fired, f"evals/{skill_name}: add a tool_used grader with tool: Skill so the run shows the skill fired")
+    unknown = sorted(case_dirs - set(skill_names))
+    require(not unknown, f"evals/ contains cases for unknown skills: {unknown}")
+    return {"eval_cases": len(skill_names), "graders": grader_count}
+
+
 def fetch_json(url: str):
     req = request.Request(url, headers={"Accept": "application/json, application/ld+json;q=0.9"}, method="GET")
     with request.urlopen(req, timeout=20) as response:
@@ -413,7 +597,19 @@ def check_ontology_surface(url: str, root_iri: str) -> dict:
         return {"ok": False, "url": url, "error": str(exc)}
 
 
-def check_metasalmon_surface() -> dict:
+def check_release_pin(repo: str, pinned: str) -> dict:
+    """Compare the pinned release with the latest published release of an upstream repository."""
+    try:
+        latest = fetch_json(f"https://api.github.com/repos/{repo}/releases/latest")
+        tag = str(latest.get("tag_name", ""))
+        latest_version = tag[1:] if tag.startswith("v") else tag
+        return {"ok": bool(tag), "repo": repo, "pinned": pinned, "latest": latest_version, "pin_is_latest": latest_version == pinned}
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "repo": repo, "pinned": pinned, "error": str(exc)}
+
+
+def check_metasalmon_r_runtime(pinned: str) -> dict:
+    """Interim R engine: report whether metasalmon is installed at the pinned version."""
     try:
         proc = subprocess.run(
             [
@@ -429,8 +625,8 @@ def check_metasalmon_surface() -> dict:
         if proc.returncode != 0:
             return {"ok": False, "error": proc.stderr.strip() or "Rscript failed"}
         if version == "NOT_INSTALLED" or not version:
-            return {"ok": False, "error": "metasalmon is not installed"}
-        return {"ok": True, "version": version}
+            return {"ok": False, "error": "metasalmon is not installed in the active R library (interim engine only)"}
+        return {"ok": True, "version": version, "pinned": pinned, "pin_matches": version == pinned}
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "error": str(exc)}
 
@@ -458,14 +654,9 @@ def check_rmis_surface() -> dict:
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    manifest_path = repo_root / ".codex-plugin" / "plugin.json"
     skills_root = repo_root / "skills"
 
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    required_top = ["name", "version", "description", "skills", "interface"]
-    missing = [key for key in required_top if key not in manifest]
-    if missing:
-        raise SystemExit(f"plugin manifest missing keys: {missing}")
+    manifest_stats = validate_manifests(repo_root)
 
     skill_names: list[str] = []
     python_files: list[Path] = []
@@ -490,9 +681,12 @@ def main() -> None:
     skill_graph_stats = validate_skill_graph(repo_root, skill_names)
     regression_stats = validate_regression_assets(repo_root)
     kb_stats = validate_kb(repo_root)
+    thin_front_door_stats = validate_thin_front_door(repo_root, skill_names)
+    eval_stats = validate_evals(repo_root, skill_names)
     vocab = load_json(repo_root / "registry" / "vocab.json")
     validate_gap_register(repo_root, vocab["capability_categories"])
 
+    pins = thin_front_door_stats["pinned_releases"]
     watch_surface_checks = {
         "smn": check_ontology_surface(
             "https://salmon-data-mobilization.github.io/salmon-domain-ontology/smn.jsonld",
@@ -502,7 +696,9 @@ def main() -> None:
             "https://dfo-pacific-science.github.io/dfo-salmon-ontology/gcdfo.jsonld",
             "https://w3id.org/gcdfo/salmon",
         ),
-        "metasalmon": check_metasalmon_surface(),
+        "metasalmon_release": check_release_pin("salmon-data-mobilization/metasalmon", pins["metasalmon"]),
+        "metasalmonpy_release": check_release_pin("salmon-data-mobilization/metasalmonpy", pins["metasalmonpy"]),
+        "metasalmon_r_runtime": check_metasalmon_r_runtime(pins["metasalmon"]),
         "rmis": check_rmis_surface(),
     }
     warnings = [
@@ -510,10 +706,15 @@ def main() -> None:
         for name, detail in watch_surface_checks.items()
         if not detail.get("ok")
     ]
+    warnings.extend(
+        f"watch surface {name}: pinned {detail.get('pinned')} but latest release is {detail.get('latest')}"
+        for name, detail in watch_surface_checks.items()
+        if detail.get("ok") and "pin_is_latest" in detail and not detail["pin_is_latest"]
+    )
 
     print(json.dumps({
         "ok": True,
-        "manifest": str(manifest_path),
+        "manifests": manifest_stats,
         "skill_count": len(skill_names),
         "skills": skill_names,
         "python_files_compiled": len(python_files),
@@ -521,6 +722,8 @@ def main() -> None:
         "skill_graph": skill_graph_stats,
         "regression": regression_stats,
         "kb": kb_stats,
+        "thin_front_door": thin_front_door_stats,
+        "evals": eval_stats,
         "watch_surface_checks": watch_surface_checks,
         "warnings": warnings,
     }, indent=2))

@@ -11,7 +11,7 @@
     "https://github.com/salmon-data-mobilization/salmon-domain-ontology"
   ],
   "access_tier": "public",
-  "auth_access_model": "The published ontology artifacts are currently public and readable without credentials.",
+  "auth_access_model": "The published ontology artifacts are currently public and readable without credentials. Retrieval runs through the pinned metasalmonpy release.",
   "data_domains": [
     "shared salmon semantics",
     "cross-organization ontology terms",
@@ -73,24 +73,26 @@
   },
   "blockers": [
     "The ontology is schema, not operational instance data.",
-    "The repo does not yet maintain a verified domain-coverage matrix against every salmon subdomain."
+    "The repo does not yet maintain a verified domain-coverage matrix against every salmon subdomain.",
+    "This plugin reaches the ontology only through metasalmonpy `find_terms()`; there is no local JSON-LD reader any more, so coverage follows the pinned metasalmonpy release."
   ],
   "governance_constraints": [
     "Shared-term promotion should stay conservative and evidence-based."
   ],
   "related_skills": [
-    "smn-ontology-skill"
+    "salmon-terms"
   ],
-  "last_verified_date": "2026-04-17",
+  "last_verified_date": "2026-09-25",
   "evidence_links": [
     "https://salmon-data-mobilization.github.io/salmon-domain-ontology/smn.jsonld",
     "https://github.com/salmon-data-mobilization/salmon-domain-ontology",
-    "skills/smn-ontology-skill/SKILL.md",
-    "skills/smn-ontology-skill/scripts/smn_ontology_lookup.py"
+    "skills/salmon-terms/SKILL.md",
+    "skills/salmon-terms/scripts/salmon_terms.py"
   ],
   "watch_fields": [
     "version metadata",
     "JSON-LD publication surface",
-    "shared-vs-profile boundary decisions"
+    "shared-vs-profile boundary decisions",
+    "metasalmonpy source adapter behaviour for this ontology"
   ]
 }

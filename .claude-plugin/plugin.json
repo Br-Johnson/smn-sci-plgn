@@ -1,0 +1,32 @@
+{
+  "name": "salmon-science-research",
+  "displayName": "Salmon Science Research",
+  "version": "0.1.0",
+  "description": "Thin skills front door for salmon ecology, conservation, and management science: routing, entity normalization, ontology term lookup through metasalmonpy, Salmon Data Package workflows through metasalmon or metasalmonpy, and narrow adapters for public salmon data platforms.",
+  "author": {
+    "name": "Brett Johnson",
+    "url": "https://github.com/Br-Johnson"
+  },
+  "homepage": "https://github.com/Br-Johnson/smn-sci-plgn",
+  "repository": "https://github.com/Br-Johnson/smn-sci-plgn",
+  "license": "MIT",
+  "keywords": [
+    "salmon",
+    "ecology",
+    "conservation",
+    "fisheries",
+    "management-science",
+    "ontology",
+    "metasalmon",
+    "metasalmonpy",
+    "salmon-data-package",
+    "streamnet",
+    "ptagis",
+    "rmis",
+    "dart",
+    "npafc",
+    "research",
+    "evidence-synthesis",
+    "skill-routing"
+  ]
+}

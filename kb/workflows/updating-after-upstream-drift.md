@@ -3,7 +3,7 @@
 Use this workflow when validation or manual checks show that an upstream version, auth model, or payload shape changed.
 
 1. Confirm the drift against the upstream source, not just a cached local assumption.
-2. Update the relevant platform card in `registry/platforms/`.
+2. Update the relevant platform card in `registry/platforms/`. For a package release, bump `pinned_releases` on the `metasalmon` card and the matching pin in every adapter script (`salmon_terms.py`, `metasalmon_api.py`) in the same change; the validator refuses a mismatch.
 3. Update `access_tier` if the real access posture changed.
 4. Update the related wiki page in `kb/platforms/`.
 5. Update the related graph node or edge if the drift changes routing, pairing, or governance constraints.

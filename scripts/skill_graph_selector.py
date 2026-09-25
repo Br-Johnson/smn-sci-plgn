@@ -215,14 +215,11 @@ LANE_SKILL_MAP: dict[str, tuple[str, ...]] = {
     "lane:genetics-stock-identification": ("salmon-literature-skill",),
     "lane:climate-ocean-context": ("salmon-literature-skill",),
     "lane:literature-reports-dataset-discovery": ("salmon-literature-skill",),
-    "lane:ontology-semantic-resolution": ("smn-ontology-skill",),
-    "lane:package-metadata-validation": ("smn-ontology-skill", "metasalmon-skill"),
+    "lane:ontology-semantic-resolution": ("salmon-terms",),
+    "lane:package-metadata-validation": ("metasalmon-skill", "salmon-terms"),
 }
 
 SPECIAL_SKILL_COMPANIONS: dict[str, tuple[str, ...]] = {
-    "smn-ontology-skill": (),
-    "gcdfo-ontology-skill": ("smn-ontology-skill",),
-    "metasalmon-skill": ("smn-ontology-skill",),
     "ptagis-skill": ("dart-query-skill",),
     "streamnet-api-skill": ("salmon-literature-skill",),
     "rmis-skill": ("salmon-literature-skill",),
@@ -444,38 +441,20 @@ def expand_selected_skills(text: str, seeded_lanes: list[str], index: GraphIndex
 
     for lane_id in seeded_lanes:
         lane_skills = list(LANE_SKILL_MAP.get(lane_id, ()))
-        if lane_id == "lane:ontology-semantic-resolution" and dfo_specific:
-            lane_skills.append("gcdfo-ontology-skill")
-        elif lane_id == "lane:package-metadata-validation" and dfo_specific:
-            lane_skills.append("gcdfo-ontology-skill")
 
         for skill_name in lane_skills:
-            if skill_name == "gcdfo-ontology-skill" and "smn-ontology-skill" not in selected:
-                add_skill(
-                    "smn-ontology-skill",
-                    selected,
-                    reasons,
-                    "Selected smn-ontology-skill as the shared-term dependency for DFO-specific ontology or package work.",
-                )
-
-            if skill_name == "metasalmon-skill" and "smn-ontology-skill" not in selected:
-                add_skill(
-                    "smn-ontology-skill",
-                    selected,
-                    reasons,
-                    "Selected smn-ontology-skill first because metasalmon depends on the shared ontology layer.",
-                )
-
             add_skill(
                 skill_name,
                 selected,
                 reasons,
                 f"Selected {skill_name} from {lane_id}.",
             )
+            if skill_name == "salmon-terms" and dfo_specific and not any("gcdfo" in reason for reason in reasons):
+                reasons.append(
+                    "Detected a DFO-specific cue; run salmon-terms with sources that include gcdfo and report which hits are shared smn terms."
+                )
 
             for companion in SPECIAL_SKILL_COMPANIONS.get(skill_name, ()):
-                if companion == "smn-ontology-skill" and lane_id == "lane:package-metadata-validation":
-                    continue
                 if companion == "salmon-literature-skill" and lane_id not in {
                     "lane:stock-assessment",
                     "lane:watershed-connectivity",
@@ -484,8 +463,6 @@ def expand_selected_skills(text: str, seeded_lanes: list[str], index: GraphIndex
                 }:
                     continue
                 if companion == "dart-query-skill" and lane_id != "lane:telemetry-passage":
-                    continue
-                if companion == "smn-ontology-skill" and skill_name == "gcdfo-ontology-skill":
                     continue
                 add_skill(
                     companion,

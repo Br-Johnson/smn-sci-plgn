@@ -11,7 +11,7 @@
     "https://github.com/dfo-pacific-science/dfo-salmon-ontology"
   ],
   "access_tier": "public",
-  "auth_access_model": "The published ontology artifacts are currently public and readable without credentials.",
+  "auth_access_model": "The published ontology artifacts are currently public and readable without credentials. Retrieval runs through the pinned metasalmonpy release.",
   "data_domains": [
     "DFO-specific salmon semantics",
     "program and profile-scoped ontology terms",
@@ -73,24 +73,26 @@
   },
   "blockers": [
     "The ontology is schema, not operational instance data.",
-    "Coverage claims beyond term lookup are not yet maintained as verified platform capabilities."
+    "Coverage claims beyond term lookup are not yet maintained as verified platform capabilities.",
+    "This plugin reaches the ontology only through metasalmonpy `find_terms()`; there is no local JSON-LD reader any more, so coverage follows the pinned metasalmonpy release."
   ],
   "governance_constraints": [
     "DFO-specific terms should remain separate from shared `smn` terms unless explicit promotion criteria are met."
   ],
   "related_skills": [
-    "gcdfo-ontology-skill"
+    "salmon-terms"
   ],
-  "last_verified_date": "2026-04-17",
+  "last_verified_date": "2026-09-25",
   "evidence_links": [
     "https://dfo-pacific-science.github.io/dfo-salmon-ontology/gcdfo.jsonld",
     "https://github.com/dfo-pacific-science/dfo-salmon-ontology",
-    "skills/gcdfo-ontology-skill/SKILL.md",
-    "skills/gcdfo-ontology-skill/scripts/gcdfo_ontology_lookup.py"
+    "skills/salmon-terms/SKILL.md",
+    "skills/salmon-terms/scripts/salmon_terms.py"
   ],
   "watch_fields": [
     "version metadata",
     "JSON-LD publication surface",
-    "shared-vs-DFO boundary decisions"
+    "shared-vs-DFO boundary decisions",
+    "metasalmonpy source adapter behaviour for this ontology"
   ]
 }

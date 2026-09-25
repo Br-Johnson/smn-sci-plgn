@@ -97,6 +97,13 @@
       "items": {
         "type": "string"
       }
+    },
+    "pinned_releases": {
+      "type": "object",
+      "description": "Optional map from package or CLI name to the released version this plugin's adapters are pinned to. Adapters must declare the same pin.",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   }
 }

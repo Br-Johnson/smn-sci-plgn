@@ -1,7 +1,7 @@
 {
   "name": "salmon-science-research",
-  "version": "0.0.1",
-  "description": "Open-source salmon ecology, conservation, and management-science workflows with routing, normalization, and source-specific skills.",
+  "version": "0.1.0",
+  "description": "Thin skills front door for salmon ecology, conservation, and management science: routing, entity normalization, ontology term lookup through metasalmonpy, Salmon Data Package workflows through metasalmon or metasalmonpy, and narrow adapters for public salmon data platforms.",
   "author": {
     "name": "Brett Johnson and contributors",
     "url": "https://github.com/Br-Johnson"

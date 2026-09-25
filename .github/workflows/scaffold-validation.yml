@@ -7,7 +7,7 @@ on:
 jobs:
   validate-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Check out repository
@@ -18,9 +18,19 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Validate scaffold
         run: python3 scripts/validate_scaffold.py
 
       - name: Run selector regression tests
         if: always()
         run: python3 -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Resolve the pinned metasalmonpy release through the adapters
+        run: |
+          echo '{"action":"runtime"}' | uv run skills/salmon-terms/scripts/salmon_terms.py | tee /tmp/salmon-terms-runtime.json
+          python3 -c 'import json; d=json.load(open("/tmp/salmon-terms-runtime.json")); assert d["ok"] and d["runtime"]["pin_matches"], d'
+          echo '{"action":"catalog"}' | uv run skills/metasalmon-skill/scripts/metasalmon_api.py | tee /tmp/metasalmon-catalog.json
+          python3 -c 'import json; d=json.load(open("/tmp/metasalmon-catalog.json")); assert d["ok"] and d["runtime"]["pin_matches"] and "validate_salmon_datapackage" in d["catalog"]["actions"], d'

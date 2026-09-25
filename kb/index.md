@@ -16,6 +16,7 @@ Canonical structured truth:
 - [Shared vs DFO term boundary](concepts/shared-vs-dfo-term-boundary.md): when to use `smn`, `gcdfo`, and profile bridge artifacts.
 - [Platform gap method](concepts/platform-gap-method.md): how capability status, evidence, and drift are tracked.
 - [Skill graph method](concepts/skill-graph-method.md): how lane seeding, graph expansion, and capability filtering fit together.
+- [Thin front door](concepts/thin-front-door.md): what a skill adapter may and may not contain, and how the validator enforces it.
 
 ## Platforms
 
@@ -29,7 +30,7 @@ Canonical structured truth:
 - [PubMed](platforms/pubmed.md)
 - [SMN ontology](platforms/smn-ontology.md)
 - [GCDFO ontology](platforms/gcdfo-ontology.md)
-- [metasalmon](platforms/metasalmon.md)
+- [metasalmon / metasalmonpy](platforms/metasalmon.md)
 
 ## Gaps
 

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "smn-sci-plgn",
+  "description": "Brett Johnson's salmon science plugin catalog. It lists one plugin: this repository.",
+  "owner": {
+    "name": "Brett Johnson",
+    "url": "https://github.com/Br-Johnson"
+  },
+  "plugins": [
+    {
+      "name": "salmon-science-research",
+      "source": ".",
+      "description": "Thin skills front door for salmon science: routing, entity normalization, ontology term lookup through metasalmonpy, Salmon Data Package workflows, and narrow public-platform adapters.",
+      "category": "research",
+      "tags": [
+        "salmon",
+        "fisheries",
+        "ontology",
+        "metasalmon",
+        "research"
+      ]
+    }
+  ]
+}

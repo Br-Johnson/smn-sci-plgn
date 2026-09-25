@@ -11,8 +11,8 @@ Use `gcdfo` for DFO-specific, program-scoped, or policy-scoped semantics.
 
 ## What this means for the plugin
 
-- the ontology lookup skills should check shared `smn` first for reusable concepts
-- DFO-only workflows should fall back to `gcdfo` when shared terms do not exist
+- `salmon-terms` keeps `smn` ahead of `gcdfo` in its default source order and reports the `source` of every hit; check the shared layer first for reusable concepts
+- DFO-only workflows include `gcdfo` in the `sources` list when shared terms do not exist, and say so in the answer
 - a future identity graph can use both ontologies as semantic anchors without collapsing their boundary
 
 ## Why this matters

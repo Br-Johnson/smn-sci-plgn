@@ -32,7 +32,8 @@ Canonical graph artifacts:
 - Platform cards remain the canonical source for capability and auth truth.
 - The executable selector currently reads `access_tier` from the platform cards before falling back to auth prose.
 - The seed normalizer is scaffold-only and must not be treated as authoritative crosswalk coverage.
-- `gcdfo` remains a profile layer and should stay paired with `smn` when the user is not asking for DFO-only semantics.
+- `salmon-terms` is the only term-lookup skill. `gcdfo` remains a profile layer: keep `smn` in the `sources` list unless the user asks for DFO-only semantics, and report which hits are shared.
+- Skills are adapters over pinned packages, CLIs, or public APIs. If the graph seems to need new logic, the change belongs upstream, not in a skill script.
 
 ## Maintenance rule
 

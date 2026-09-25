@@ -21,8 +21,7 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 ## Initial bundled skills
 
 - `salmon-entity-normalizer-skill`
-- `smn-ontology-skill`
-- `gcdfo-ontology-skill`
+- `salmon-terms`
 - `metasalmon-skill`
 - `streamnet-api-skill`
 - `ptagis-skill`
@@ -65,11 +64,12 @@ See [references/skill-graph-routing.md](references/skill-graph-routing.md) for g
 
 ## Upstream foundations
 
-Treat these repos as upstream foundations for future skill growth:
+Treat these repos as upstream foundations. Skills call them; they do not
+re-implement them (see `kb/concepts/thin-front-door.md`):
 
 - shared ontology: `salmon-data-mobilization/salmon-domain-ontology`
 - DFO-specific ontology: `dfo-pacific-science/dfo-salmon-ontology`
-- data package and semantic workflow engine: `dfo-pacific-science/metasalmon`
+- data package and semantic workflow engine: `salmon-data-mobilization/metasalmon` (R) and `salmon-data-mobilization/metasalmonpy` (Python), pinned at 0.5.0
 
 ## Gap awareness
 
