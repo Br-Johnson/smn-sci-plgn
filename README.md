@@ -24,7 +24,7 @@ The design follows the same high-level pattern as the Life Science Research plug
 
 ## Status
 
-This is a scaffolded `0.0.1` repo, not a complete salmon platform.
+This is a `0.1.0` repo, not a complete salmon platform.
 
 What is real now:
 - Codex and Claude Code plugin manifests, checked for agreement
