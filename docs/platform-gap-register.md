@@ -74,6 +74,7 @@ These are the upstream components most likely to force skill updates.
 Recent closures or partial closures:
 - ontology lookup is no longer missing as a skill family
 - the plugin no longer runs its own term search: `salmon-terms` calls metasalmonpy, and `metasalmon-skill` runs on it too, with R documented as the alternative
+- package-adapter request types and raw-output failure responses are covered by offline fake-package tests; this does not close the creation/review bridge or establish live-model behaviour
 - the repo now installs as a Claude Code plugin as well as a Codex plugin, and validation keeps the manifests in agreement
 - the repo now has an eval case for every skill under `evals/`, checked offline in CI but not yet scored
 - RMIS is no longer only a recommendation; there is now a real auth-aware scaffold

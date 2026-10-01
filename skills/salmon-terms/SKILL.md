@@ -45,6 +45,13 @@ Every response carries `runtime`, so each result records the package version
 that produced it. `save_raw` and `raw_output_path` write the full response to a
 file, as in the other skills.
 
+`max_items` must be a positive JSON integer. `expand_query` and `save_raw`
+must be JSON booleans, and `sources` must be an array of non-empty strings
+or omitted. Malformed controls return `invalid_input` before a search.
+If saving the requested raw output fails, the response returns
+`ok: false` with `error.code: raw_output_failed`, retaining the search
+results, diagnostics and runtime; it does not claim that a file was saved.
+
 Roles are `variable`, `property`, `entity`, `unit`, `constraint`, and
 `statistical_modifier`, plus `method` for code values. Omit `sources` and the
 package uses the role's default list; an explicit list is a strict allowlist.

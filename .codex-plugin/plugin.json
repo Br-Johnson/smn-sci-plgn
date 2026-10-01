@@ -1,6 +1,6 @@
 {
   "name": "salmon-science-research",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Open-source salmon ecology, conservation, and management-science workflows with routing, normalization, and source-specific skills.",
   "author": {
     "name": "Brett Johnson and contributors",
