@@ -1,5 +1,12 @@
 # Knowledge Base Log
 
+## [2026-09-30] reliability | package-adapter-requests
+
+- Aligned the Codex manifest with the existing Claude/plugin version `0.1.0`; the tracked mismatch previously made the scaffold validator fail.
+- Both thin package adapters reject malformed JSON controls before the corresponding package operation, and return one JSON error with findings/runtime retained when a requested raw-output save fails.
+- Added offline fake-package tests for request types, ordered search results, strict-validation controls, source allowlists, save failures and package-error preservation; no source or model calls.
+- Clarified the metasalmon platform card and skill: strict validation establishes conformance, while semantic choices, rights, evidence independence and publication remain separate human decisions.
+
 ## [2026-04-17] bootstrap | registry-and-wiki
 
 - Added `registry/` with platform-card and identity-record schemas.

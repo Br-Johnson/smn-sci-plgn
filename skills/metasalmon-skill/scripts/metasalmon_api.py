@@ -31,15 +31,21 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import emit, getenv_any, load_input, result_error, write_raw  # noqa: E402
+from _common import emit, getenv_any, load_input, result_error  # noqa: E402
 from _package_adapter import (  # noqa: E402
+    InvalidRequest,
     METASALMON_R_REF,
     captured_warnings,
     import_metasalmonpy,
     missing_package_error,
     pin_warnings,
+    request_bool,
+    request_string,
+    request_string_list,
     runtime_info,
+    save_response,
     to_json_value,
+    validate_common_request,
 )
 
 ACTIONS = ("runtime", "catalog", "validate_salmon_datapackage", "fetch_salmon_ontology")
@@ -88,10 +94,10 @@ def catalog(package) -> dict:
 
 
 def validate(package, payload: dict) -> dict:
-    path = str(payload.get("path") or "").strip()
+    path = request_string(payload, "path")
     if not path:
         return result_error("missing_path", "validate_salmon_datapackage requires path")
-    require_iris = bool(payload.get("require_iris", False))
+    require_iris = request_bool(payload, "require_iris", False)
     base = {"action": "validate_salmon_datapackage", "path": path, "require_iris": require_iris}
 
     caught: list[str] = []
@@ -123,16 +129,17 @@ def fetch_ontology(package, payload: dict) -> dict:
     # ontology, so an unqualified call could quietly return a different
     # ontology from the one asked for. The caller names the URL, and nothing is
     # tried after it unless the caller also names fallback URLs.
-    url = str(payload.get("url") or "").strip()
+    url = request_string(payload, "url")
     if not url:
         return result_error(
             "missing_url",
             "fetch_salmon_ontology requires url; the skill's SKILL.md lists the smn "
             "and gcdfo ontology URLs",
         )
-    kwargs = {"url": url, "fallback_urls": list(payload.get("fallback_urls") or [])}
-    if payload.get("cache_dir"):
-        kwargs["cache_dir"] = str(payload["cache_dir"])
+    kwargs = {"url": url, "fallback_urls": request_string_list(payload, "fallback_urls") or []}
+    cache_dir = request_string(payload, "cache_dir")
+    if cache_dir:
+        kwargs["cache_dir"] = cache_dir
 
     with captured_warnings() as caught:
         cached_path = package.fetch_salmon_ontology(**kwargs)
@@ -158,6 +165,11 @@ def main() -> None:
     if not isinstance(payload, dict):
         emit(result_error("invalid_input", "expected a JSON object"))
         return
+    try:
+        validate_common_request(payload, "runtime")
+    except InvalidRequest as exc:
+        emit(result_error("invalid_input", str(exc)))
+        return
 
     package = import_metasalmonpy()
     if package is None:
@@ -165,7 +177,7 @@ def main() -> None:
         return
     runtime = runtime_info(package)
 
-    action = payload.get("action", "runtime")
+    action = request_string(payload, "action", "runtime")
     try:
         if action == "runtime":
             response = {"ok": True, "action": "runtime", "r_alternative": r_alternative()}
@@ -184,18 +196,14 @@ def main() -> None:
             response = result_error(
                 "invalid_action", f"action must be one of {', '.join(ACTIONS)}"
             )
+    except InvalidRequest as exc:
+        response = result_error("invalid_input", str(exc), action=action)
     except Exception as exc:  # noqa: BLE001 - report the package's own message
         response = result_error("package_error", str(exc), action=action)
 
     response["runtime"] = runtime
     response["warnings"] = pin_warnings(runtime) + list(response.get("warnings", []))
-    if response.get("ok"):
-        response["raw_output_path"] = write_raw(
-            response,
-            requested=bool(payload.get("save_raw")),
-            raw_output_path=payload.get("raw_output_path"),
-            default_name="metasalmon-raw.json",
-        )
+    save_response(response, payload, "metasalmon-raw.json")
     emit(response)
 
 
