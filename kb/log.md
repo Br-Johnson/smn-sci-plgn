@@ -40,3 +40,10 @@
 - Added `tests/test_eval_cases.py`, which feeds four cases' deterministic graders the offline output of their skills' scripts. It scores no case.
 - No case has been scored. `claude plugin eval` needs Claude Code 2.1.269 or later, and the installed 2.1.267 answers that the command is in early access.
 - Measured 2026-09-25: `gis.critfc.org`, the CRITFC skill's REST root, does not resolve, and the NOAA SPS skill's home URL returns 404. Both cases can still pass by reporting the failure honestly.
+
+## [2026-10-05] commons | read-only-card-tools
+
+- Registered `commons-card` against its own `salmon-knowledge-commons` platform card and wiki page, using existing metadata-validation graph topology with an explicit structural-read-only governance tag. The existing selector's hardcoded package routes do not automatically select it.
+- Pinned the private tool checkout to `1b7594e6263933e08ae196b4374373eb907c137f`. The first slice delegates structural validation, mandatory `ledger_table.py --dry-run`, explicit `ledger_check.py --from-card`, and printing the upstream CONTRIBUTING checklist. It ships no commons content and adds no card-writing, source-fetching, model-execution, or publication route.
+- Recorded the upstream ledger attribution limits and the pending B-123 `citations_checked` schema split. Checked-only has no actual-card coverage at this pin; neither it nor a card-only structural pass establishes claim entailment, scientific verification, or human approval.
+- Synthetic offline controls check wrapper behavior only. No live model eval has been scored, and no `citations_checked`, `verified`, promotion, or ontology-minting authority is added.

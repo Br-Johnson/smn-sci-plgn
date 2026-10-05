@@ -1,0 +1,102 @@
+{
+  "platform_id": "salmon-knowledge-commons",
+  "platform_name": "Salmon Knowledge Commons local tools",
+  "owner": "salmon-data-mobilization",
+  "canonical_urls": [
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons"
+  ],
+  "docs_urls": [
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons/blob/1b7594e6263933e08ae196b4374373eb907c137f/CONTRIBUTING.md",
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons/blob/1b7594e6263933e08ae196b4374373eb907c137f/scripts/ledger/README.md"
+  ],
+  "access_tier": "project_gated",
+  "auth_access_model": "The commons is private. This skill requires an already authorized local checkout at 1b7594e6263933e08ae196b4374373eb907c137f; it does not fetch content, obtain credentials, or widen source access. Synthetic offline controls carry no commons content.",
+  "data_domains": [
+    "Open Knowledge Format card structure",
+    "in-card citation-ledger structure",
+    "commons contributor checklist"
+  ],
+  "identifier_systems": [
+    "caller-supplied local card paths",
+    "source IDs and footnote keys already present in local inputs"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "missing",
+      "note": "No source search, commons acquisition, or discovery API is exposed."
+    },
+    "metadata_schema": {
+      "status": "supported",
+      "note": "Calls the pinned okf-check.py for structural validation of explicitly supplied local inputs; a pass is not scientific or human verification."
+    },
+    "entity_lookup": {
+      "status": "missing",
+      "note": "No entity lookup service or authoritative identity resolution is exposed."
+    },
+    "identifier_crosswalks": {
+      "status": "missing",
+      "note": "No operational crosswalks or ontology term minting are exposed."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "No assessment data access, scientific calculation, or model execution is exposed."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "No telemetry or passage data access is exposed."
+    },
+    "hatchery": {
+      "status": "missing",
+      "note": "No hatchery data access or operations are exposed."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "No harvest or fishery data access or operations are exposed."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "No genetics or stock-identification data access is exposed."
+    },
+    "package_metadata_export": {
+      "status": "partial",
+      "note": "Calls ledger_table.py only with --dry-run to print a candidate Citation ledger section from local inputs. It does not write cards, save reports, compile, distribute, or publish the commons."
+    },
+    "provenance_versioning": {
+      "status": "partial",
+      "note": "Pins the tool checkout and preserves its structural findings. Explicit ledger_check.py --from-card does not prove entailment or independently verify citations; citations_checked remains blocked by B-123, and checked-only excludes all actual cards at this pin."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "missing",
+      "note": "The local command wrapper exposes no content API, bulk acquisition, model provider, or publication service."
+    }
+  },
+  "blockers": [
+    "The user must already have an authorized local checkout and the pinned tools' local Python dependencies; the skill does not install or acquire them.",
+    "The upstream ledger README records attribution limits: superseded negatives can remain standing, shared filename or commit associations can misattribute a negative, and a row without card assignment can list another card's places.",
+    "A successful card-only structural check does not establish that a located passage supports the card's claim."
+  ],
+  "governance_constraints": [
+    "Read-only first slice: mandatory ledger_table.py --dry-run, explicit ledger_check.py --from-card, no --report output, card writes, compiler, content distribution, or source fetching.",
+    "Do not add citations_checked or verified assertions, promote status, mint ontology terms, publish sources, or claim human approval from tool success.",
+    "The pinned CONTRIBUTING checklist remains the upstream contributor contract; printing it does not perform or attest to its steps.",
+    "Synthetic offline controls establish wrapper behavior only and provide no scientific evidence or scored model coverage."
+  ],
+  "related_skills": [
+    "commons-card"
+  ],
+  "last_verified_date": "2026-10-05",
+  "evidence_links": [
+    "skills/commons-card/SKILL.md",
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons/blob/1b7594e6263933e08ae196b4374373eb907c137f/scripts/okf-check.py",
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons/blob/1b7594e6263933e08ae196b4374373eb907c137f/scripts/ledger/ledger_table.py",
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons/blob/1b7594e6263933e08ae196b4374373eb907c137f/scripts/ledger/ledger_check.py",
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons/blob/1b7594e6263933e08ae196b4374373eb907c137f/scripts/ledger/README.md",
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons/blob/1b7594e6263933e08ae196b4374373eb907c137f/CONTRIBUTING.md"
+  ],
+  "watch_fields": [
+    "exact commons tool commit and local dependency requirements",
+    "ledger attribution limits and card-assignment behavior",
+    "B-123 citations_checked schema admission and checked-only coverage",
+    "upstream CONTRIBUTING human-approval requirements"
+  ]
+}

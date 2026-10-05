@@ -1,6 +1,6 @@
 {
   "graph_version": "0.0.1",
-  "last_updated": "2026-09-25",
+  "last_updated": "2026-10-05",
   "description": "Typed skill graph for the salmon scaffold. Seed candidate lanes lexically or semantically, normalize the entities, then expand through typed skill, platform, and governance edges while respecting access tiers and scaffold boundaries.",
   "nodes": [
     {
@@ -390,6 +390,34 @@
       "type": "governance_tag",
       "label": "seed-identity-only",
       "description": "The current identity layer is scaffold-only and non-authoritative for production crosswalks."
+    },
+    {
+      "id": "skill:commons-card",
+      "type": "skill",
+      "label": "commons-card",
+      "description": "Read-only wrapper for pinned private commons card structure, dry-run ledger rendering, explicit card-only checks, and the contributor checklist.",
+      "entrypoint": "skills/commons-card/SKILL.md",
+      "role": "package",
+      "input_contract": "Explicitly supplied local inputs and an already authorized commons tool checkout at 1b7594e6263933e08ae196b4374373eb907c137f.",
+      "lane_tags": [
+        "lane:package-metadata-validation"
+      ],
+      "selection_note": "Invoke explicitly for commons card checks; do not substitute this for Salmon Data Package validation, source acquisition, or scientific verification."
+    },
+    {
+      "id": "platform:salmon-knowledge-commons",
+      "type": "platform",
+      "label": "Salmon Knowledge Commons local tools",
+      "description": "Platform card-backed private local tool checkout; no bundled commons content, source API, model provider, or publication surface.",
+      "entrypoint": "registry/platforms/salmon-knowledge-commons.json",
+      "platform_id": "salmon-knowledge-commons",
+      "platform_card": "registry/platforms/salmon-knowledge-commons.json"
+    },
+    {
+      "id": "governance:structural-read-only",
+      "type": "governance_tag",
+      "label": "structural-read-only",
+      "description": "An already authorized local checkout supplies structural tools. No content fetching, writes, verification assertions, authority changes, ontology minting, or publication follows from a tool pass."
     }
   ],
   "edges": [
@@ -974,6 +1002,46 @@
       "evidence_refs": [
         "registry/platforms/rmis.json",
         "skills/rmis-skill/references/rmis-access.md"
+      ]
+    },
+    {
+      "source": "lane:package-metadata-validation",
+      "relation": "routes_to",
+      "target": "skill:commons-card",
+      "rationale": "Explicit commons card requests can use existing metadata-validation topology for local structural checks and dry-run ledger previews; this does not change the selector hardcoded package routes.",
+      "evidence_refs": [
+        "skills/commons-card/SKILL.md",
+        "registry/platforms/salmon-knowledge-commons.json"
+      ]
+    },
+    {
+      "source": "skill:commons-card",
+      "relation": "uses_platform",
+      "target": "platform:salmon-knowledge-commons",
+      "rationale": "The skill delegates to three upstream tools and the contributor checklist in the caller-provided pinned local checkout.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/salmon-knowledge-commons.json"
+      ]
+    },
+    {
+      "source": "skill:commons-card",
+      "relation": "constrained_by",
+      "target": "governance:structural-read-only",
+      "rationale": "The first slice prints structural findings only; ledger rendering always uses --dry-run and the check is explicit --from-card, with no independent verification assertion.",
+      "evidence_refs": [
+        "skills/commons-card/SKILL.md",
+        "registry/platforms/salmon-knowledge-commons.json"
+      ]
+    },
+    {
+      "source": "platform:salmon-knowledge-commons",
+      "relation": "constrained_by",
+      "target": "governance:structural-read-only",
+      "rationale": "Private commons access remains caller-authorized and external; upstream attribution limits and human approval requirements remain in force.",
+      "evidence_refs": [
+        "registry/platforms/salmon-knowledge-commons.json",
+        "kb/platforms/salmon-knowledge-commons.md"
       ]
     }
   ]
