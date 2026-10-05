@@ -6,6 +6,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 
 - Validate the scaffold: `python3 scripts/validate_scaffold.py`
 - Run the offline regression suite (selector routes, validator guards, adapter startup): `python3 -m unittest discover -s tests -p 'test_*.py'`
+- Run the optional commons-card controls against an already authorized local commons checkout at `1b7594e6263933e08ae196b4374373eb907c137f`: `SMN_COMMONS_CHECKOUT=<private-checkout> python3 -m unittest discover -s tests -p 'test_commons_card_upstream.py'`. These controls create only synthetic inputs in temporary folders, execute the pinned tools offline and check for input mutations; they do not acquire the checkout or read its real cards.
 - Run the live package-adapter tests, which need uv and network access: `SMN_PLUGIN_LIVE_ADAPTERS=1 python3 -m unittest discover -s tests -p 'test_package_adapters.py'`
 - Run one eval case against a live model: `claude plugin eval . --no-publish --ablation none --runs 1 --case <case> --allow-tools Bash`, plus `Write` for the stock-brief case and one `"WebFetch(domain:<host>)"` grant for each host the case's `description` names. It needs Claude Code 2.1.269 or later, and every run is billed model usage. `scripts/validate_scaffold.py` checks the case files offline, and no case has been scored yet.
 - Install for Codex / OpenAI: `python3 scripts/install_codex_plugin.py`
@@ -31,6 +32,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Crosswalk and harmonization lookups: `skills/critfc-crosswalk-skill/SKILL.md`
 - Ontology term search, shared `smn` and DFO `gcdfo` alike: `skills/salmon-terms/SKILL.md`
 - Salmon Data Package workflows: `skills/metasalmon-skill/SKILL.md`
+- Read-only local commons card structure, ledger preview and explicit card-only checks: `skills/commons-card/SKILL.md`. Invoke it explicitly; automatic routing remains outside this first slice.
 - Structured stock briefs: `skills/salmon-stock-brief-workflow-skill/SKILL.md`
 - StreamNet access: `skills/streamnet-api-skill/SKILL.md`
 - PTAGIS access: `skills/ptagis-skill/SKILL.md`
@@ -48,6 +50,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Executable graph selector: `scripts/skill_graph_selector.py`
 - Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`
 - Stock-brief contract helper: `skills/salmon-stock-brief-workflow-skill/scripts/stock_brief_contract.py`
+- Commons-card wrapper, which delegates to an explicitly supplied private checkout at the fixed commit and exposes no card/report writes or source acquisition: `skills/commons-card/scripts/commons_card.py`
 - CI validation workflow: `.github/workflows/scaffold-validation.yml`
 
 ## Canonical Data Contracts

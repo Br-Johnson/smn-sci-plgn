@@ -1,0 +1,16 @@
+{
+  "producer": "process:synthetic-control",
+  "date": "2026-10-05",
+  "rows": [
+    {
+      "source_id": "synthetic-source",
+      "resolution_status": "resolved",
+      "resolution_method": "synthetic supplied copy",
+      "fulltext_obtained": true,
+      "passage_located": true,
+      "passage_section_or_page": "Section 1",
+      "supports_claims": "Fabricated transport control only; no scientific evidence.",
+      "cards": ["synthetic-card.md"]
+    }
+  ]
+}
