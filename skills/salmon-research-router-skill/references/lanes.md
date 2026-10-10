@@ -17,7 +17,7 @@ After seeding a lane, use [skill-graph-routing.md](skill-graph-routing.md) to ex
 | `lane:hatchery-harvest-management` | `What does harvest or hatchery evidence say?` | `salmon-entity-normalizer-skill`, then `rmis-skill`, `salmon-literature-skill` |
 | `lane:genetics-stock-identification` | `What genetics or GSI evidence exists?` | `salmon-literature-skill` |
 | `lane:climate-ocean-context` | `What climate or ocean context matters here?` | `salmon-literature-skill` |
-| `lane:package-metadata-validation` | `How do I build or validate a Salmon Data Package?` | `metasalmon-skill`, with `salmon-terms` for the package's term IRIs |
+| `lane:package-metadata-validation` | `How do I build or validate a Salmon Data Package?` | `metasalmon-skill`, with `salmon-terms` for the package's term IRIs and `sdp-semantic-review` to judge its review packet |
 | workflow overlay | `Write me a structured stock brief.` | `salmon-stock-brief-workflow-skill` plus the evidence lanes it depends on |
 | special case | `What is still missing from the salmon platform?` | consult `docs/platform-gap-register.md`, then use source skills only to support the answer |
 

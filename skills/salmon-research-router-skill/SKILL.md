@@ -68,7 +68,7 @@ Treat these repos as upstream foundations for future skill growth:
 
 - shared ontology: `salmon-data-mobilization/salmon-domain-ontology`
 - DFO-specific ontology: `dfo-pacific-science/dfo-salmon-ontology`
-- data package and semantic workflow engine: `salmon-data-mobilization/metasalmon` and its Python mirror `salmon-data-mobilization/metasalmonpy`, both pinned at `v0.5.0`
+- data package and semantic workflow engine: `salmon-data-mobilization/metasalmon` and its Python mirror `salmon-data-mobilization/metasalmonpy`, both pinned at `v0.6.0`
 
 ## Gap awareness
 

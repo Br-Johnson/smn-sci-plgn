@@ -18,7 +18,7 @@ parsing.
   `https://w3id.org/gcdfo/salmon#<LocalName>`, for example
   `https://w3id.org/gcdfo/salmon#ConservationUnit`.
 - Upstream: [dfo-pacific-science/dfo-salmon-ontology](https://github.com/dfo-pacific-science/dfo-salmon-ontology).
-- For concepts that are DFO-specific, program-scoped, or deliberately
+- For concepts that are DFO-specific, scoped to a DFO program, or deliberately
   profile-scoped.
 
 ## The boundary between them

@@ -1,0 +1,25 @@
+{
+  "about": "Blind runs of the sdp-semantic-review skill on the six Theme A packets in theme-a/v1. Each run read the skill's documents and its six packets only, never the oracles, a fixture's recorded answer or another run, and wrote its answers with the metasalmon-skill adapter's write_assessments action, which calls no package function. `replay_theme_a.py cohort` ingests every answer through the pinned package and scores it on the oracles. Brett promotes a run by setting its promoted_by.",
+  "recorded": "2026-10-10",
+  "harness": "claude-code",
+  "guide": {
+    "skills/sdp-semantic-review/SKILL.md": "sha256:ae75779065e1f27a228b7f37657326845fa16ad6ec42c46c44c9006e095fdf37",
+    "skills/sdp-semantic-review/references/judging.md": "sha256:ee3690caf042fcc7419856c414aaef3603e8dd85df1f7277ec3d567385b44013",
+    "skills/sdp-semantic-review/references/handoff.md": "sha256:bed28d702969602495306e56fd022e8699bec26b669af15559224cf03f7c0bcd",
+    "skills/salmon-terms/references/source-notes.md": "sha256:6a6debb0ae590a33914ed3805c671fb05c8275e9daf77813f18049867ca42259"
+  },
+  "runs": [
+    {
+      "run_id": "run-7",
+      "promoted_by": null
+    },
+    {
+      "run_id": "run-8",
+      "promoted_by": null
+    },
+    {
+      "run_id": "run-9",
+      "promoted_by": null
+    }
+  ]
+}

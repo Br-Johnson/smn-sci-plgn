@@ -1,13 +1,13 @@
 # /// script
 # requires-python = ">=3.10"
 # dependencies = [
-#     "metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.5.0",
+#     "metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.6.0",
 # ]
 # ///
 """salmon-terms adapter: a JSON request on stdin, metasalmonpy's answer on stdout.
 
 Run it with uv, which reads the block above and installs metasalmonpy from its
-v0.5.0 tag into a cached, isolated environment the first time:
+v0.6.0 tag into a cached, isolated environment the first time:
 
     echo '{"action":"find_terms","query":"escapement","role":"variable"}' \
       | uv run skills/salmon-terms/scripts/salmon_terms.py

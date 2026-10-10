@@ -144,8 +144,8 @@ class OfflineGraderFeasibilityTests(unittest.TestCase):
         # version number is not evidence that the package version was
         # reported. These strings exercise the pattern; they are not replies.
         pattern = compiled(grader("metasalmon-skill", "version-reported"))
-        self.assertRegex("metasalmonpy 0.5.0 is installed and matches the pin.", pattern)
-        self.assertRegex("| metasalmonpy | 0.5.0 |", pattern)
+        self.assertRegex("metasalmonpy 0.6.0 is installed and matches the pin.", pattern)
+        self.assertRegex("| metasalmonpy | 0.6.0 |", pattern)
         self.assertNotRegex("Python 3.13.11 is available, and metasalmonpy imported.", pattern)
 
 

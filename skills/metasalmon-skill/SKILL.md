@@ -1,6 +1,6 @@
 ---
 name: metasalmon-skill
-description: Validate Salmon Data Packages and fetch the salmon ontologies through the released metasalmonpy package (v0.5.0, the Python mirror of metasalmon), with metasalmon in R as the documented alternative. Use when the user needs to check a Salmon Data Package, confirm which package release is available, or cache an ontology file. For ontology term search use salmon-terms.
+description: Validate Salmon Data Packages and fetch the salmon ontologies through the released metasalmonpy package (v0.6.0, the Python mirror of metasalmon), with metasalmon in R as the documented alternative. Use when the user needs to check a Salmon Data Package, confirm which package release is available, or cache an ontology file. For ontology term search use salmon-terms; to judge a package's semantic review packet use sdp-semantic-review.
 ---
 
 # metasalmon
@@ -8,14 +8,14 @@ description: Validate Salmon Data Packages and fetch the salmon ontologies throu
 Salmon Data Package logic lives in two packages that mirror each other:
 [metasalmon](https://github.com/salmon-data-mobilization/metasalmon) in R and
 [metasalmonpy](https://github.com/salmon-data-mobilization/metasalmonpy) in
-Python, both at `v0.5.0`. This skill runs metasalmonpy and returns what it
+Python, both at `v0.6.0`. This skill runs metasalmonpy and returns what it
 returns. Do not re-implement package logic in chat or in a script.
 
 ## Run it
 
 The adapter needs [uv](https://docs.astral.sh/uv/). Its script declares one
 dependency inline,
-`metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.5.0`,
+`metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.6.0`,
 and uv installs it into a cached, isolated environment on first use. No R
 installation is needed. uv keeps that environment in its user cache. Where
 the cache directory isn't writable, as in some sandboxed runs, set
@@ -52,6 +52,11 @@ The adapter reads one JSON object from stdin and writes one to stdout.
   Each cache directory holds one ontology at a time under a file name the
   package chooses, so give `smn` and `gcdfo` separate `cache_dir` values to
   keep both.
+- `build_review_packet`, `write_assessments` and `ingest_assessments`: the
+  semantic review round trip, through the package's
+  `write_semantic_review_packet()` and `ingest_semantic_assessments()`. The
+  sdp-semantic-review skill drives them and documents their fields; use that
+  skill rather than calling them on their own.
 
 Every response carries `runtime`. `save_raw` and `raw_output_path` write the
 full response to a file.
@@ -64,11 +69,12 @@ full response to a file.
 - The adapter never calls the packages' LLM features. LLM review in
   metasalmon and metasalmonpy is opt-in, and turning it on is the user's choice,
   made in the package directly.
-- Package creation (`create_sdp()`), the 0.5.0 review flow (`review_semantics()`,
+- Package creation (`create_sdp()`), the review console (`review_semantics()`,
   `accept_suggestion()`, `reject_suggestion()`, `apply_sdp_semantics()`,
   `review_metadata()`, and the `set_sdp_*()` setters), and publication are not
   bridged here yet. Run them with the user in Python or R, following the
-  package documentation.
+  package documentation. Confirming a term in the console is the user's act,
+  which is why sdp-semantic-review hands it to them rather than bridging it.
 - Report the package's findings as the package states them. A clean strict
   validation (`require_iris: true`) is the bar for calling a package ready to
   publish.
@@ -78,10 +84,10 @@ map, what is not bridged, and why this skill runs Python first.
 
 ## R alternative
 
-The same calls in metasalmon v0.5.0:
+The same calls in metasalmon v0.6.0:
 
 ```bash
-Rscript -e 'install.packages("remotes"); remotes::install_github("salmon-data-mobilization/metasalmon@v0.5.0")'
+Rscript -e 'install.packages("remotes"); remotes::install_github("salmon-data-mobilization/metasalmon@v0.6.0")'
 Rscript -e 'metasalmon::validate_salmon_datapackage("path/to/sdp", require_iris = TRUE)'
 Rscript -e 'metasalmon::fetch_salmon_ontology(url = "https://w3id.org/smn/", fallback_urls = character(0))'
 ```

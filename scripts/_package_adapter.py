@@ -34,11 +34,11 @@ from _common import result_error
 # constant. `check_package_pins()` in scripts/validate_scaffold.py fails when any
 # copy of either pin disagrees with the others, so moving the pin means editing
 # every copy in one change, which is the point.
-METASALMONPY_VERSION = "0.5.0"
+METASALMONPY_VERSION = "0.6.0"
 METASALMONPY_REQUIREMENT = (
-    "metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.5.0"
+    "metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.6.0"
 )
-METASALMON_R_REF = "salmon-data-mobilization/metasalmon@v0.5.0"
+METASALMON_R_REF = "salmon-data-mobilization/metasalmon@v0.6.0"
 
 
 def import_metasalmonpy() -> Any | None:

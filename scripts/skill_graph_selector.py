@@ -251,6 +251,12 @@ OPTIONAL_SKILL_PATTERNS: dict[str, tuple[str, ...]] = {
         r"\bstructured brief\b",
         r"\bmanagement brief\b",
     ),
+    "sdp-semantic-review": (
+        r"\breview[- ]packet\b",
+        r"\bsemantic[- ]review\b",
+        r"\bjudge\b",
+        r"\b(?:review|check|choose|pick)\b.{0,40}\b(?:iris?|ontology terms?|candidates?)\b",
+    ),
 }
 
 
@@ -511,6 +517,17 @@ def expand_selected_skills(text: str, seeded_lanes: list[str], index: GraphIndex
             selected,
             reasons,
             "Selected salmon-stock-brief-workflow-skill because the user asked for a structured stock brief.",
+        )
+    if contains_any(text, optional_patterns["sdp-semantic-review"]) and {
+        "lane:package-metadata-validation",
+        "lane:ontology-semantic-resolution",
+    } & set(seeded_lanes):
+        add_skill(
+            "sdp-semantic-review",
+            selected,
+            reasons,
+            "Selected sdp-semantic-review because the request asks for a package's semantic review: "
+            "judging the ontology candidates its review packet offers.",
         )
 
     if no_auth:

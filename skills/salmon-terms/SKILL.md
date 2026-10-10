@@ -1,6 +1,6 @@
 ---
 name: salmon-terms
-description: Find existing ontology terms and IRIs for salmon concepts with metasalmonpy's role-aware find_terms() at the pinned v0.5.0 release, across the shared smn ontology, the DFO gcdfo profile, and the external vocabularies the package searches (OLS, NVS, QUDT, GBIF, WoRMS, ZOOMA, BioPortal). Use when the user needs a term, IRI, label, or definition for a salmon concept, wants a shared or DFO-specific term, or asks which sources a semantic role searches.
+description: Find existing ontology terms and IRIs for salmon concepts with metasalmonpy's role-aware find_terms() at the pinned v0.6.0 release, across the shared smn ontology, the DFO gcdfo profile, and the external vocabularies the package searches (OLS, NVS, QUDT, GBIF, WoRMS, ZOOMA, BioPortal). Use when the user needs a term, IRI, label, or definition for a salmon concept, wants a shared or DFO-specific term, or asks which sources a semantic role searches.
 ---
 
 # Salmon Terms
@@ -13,7 +13,7 @@ ontology files, rank, filter, or re-score anything itself.
 
 The adapter needs [uv](https://docs.astral.sh/uv/) and network access. Its
 script declares one dependency inline,
-`metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.5.0`,
+`metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.6.0`,
 and uv installs it into a cached, isolated environment on first use.
 uv keeps that environment in its user cache. Where the cache directory isn't
 writable, as in some sandboxed runs, set `UV_CACHE_DIR` to a writable
@@ -74,12 +74,12 @@ package uses the role's default list; an explicit list is a strict allowlist.
 
 ## R alternative
 
-metasalmon v0.5.0 has the same two functions. R's `find_terms()` defaults to a
+metasalmon v0.6.0 has the same two functions. R's `find_terms()` defaults to a
 fixed source list (`smn`, `gcdfo`, `ols`, `nvs`) whatever the role, so pass
 `sources = sources_for_role(role)` to search what this skill searches:
 
 ```bash
-Rscript -e 'install.packages("remotes"); remotes::install_github("salmon-data-mobilization/metasalmon@v0.5.0")'
+Rscript -e 'install.packages("remotes"); remotes::install_github("salmon-data-mobilization/metasalmon@v0.6.0")'
 Rscript -e 'library(metasalmon); r <- find_terms("escapement", role = "variable", sources = sources_for_role("variable")); print(head(r))'
 ```
 
