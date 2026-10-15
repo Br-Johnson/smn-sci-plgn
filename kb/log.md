@@ -40,3 +40,10 @@
 - Added `tests/test_eval_cases.py`, which feeds four cases' deterministic graders the offline output of their skills' scripts. It scores no case.
 - No case has been scored. `claude plugin eval` needs Claude Code 2.1.269 or later, and the installed 2.1.267 answers that the command is in early access.
 - Measured 2026-09-25: `gis.critfc.org`, the CRITFC skill's REST root, does not resolve, and the NOAA SPS skill's home URL returns 404. Both cases can still pass by reporting the failure honestly.
+
+## [2026-10-15] skill | commons-card
+
+- Added `commons-card` (tern M-21), the citation-ledger skill for the salmon knowledge commons. It runs the commons' own `scripts/okf-check.py`, `scripts/ledger/ledger_table.py` and `scripts/ledger/ledger_check.py --from-card`, and prints its `CONTRIBUTING.md`, all at one pinned commons commit, against the user's clone. It holds no checks of its own.
+- The commons is private, so the adapter copies the pinned files out of the clone's git objects into a temporary directory for each call and deletes them afterwards; the plugin carries no commons content. When the clone's copies differ from the pinned ones, every response lists them as drift.
+- Added a platform card and wiki page for the commons, its skill-platform mapping, and three skill-graph edges, with a new `governance:private-content` tag.
+- The eval case grades that the skill fires, runs its adapter, and reports the pinned commit. The offline tests build a small clone of their own; the live tests run only where `SALMON_COMMONS_DIR` names a real clone, and passed against the commons' main on 2026-10-15.
