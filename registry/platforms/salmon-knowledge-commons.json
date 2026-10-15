@@ -1,0 +1,96 @@
+{
+  "platform_id": "salmon-knowledge-commons",
+  "platform_name": "Salmon knowledge commons",
+  "owner": "salmon-data-mobilization",
+  "canonical_urls": [
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons"
+  ],
+  "docs_urls": [
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons"
+  ],
+  "access_tier": "project_gated",
+  "auth_access_model": "A private GitHub repository: reading it needs membership of the salmon-data-mobilization organisation. The commons-card skill reads the commons only from the user's own clone and makes no network call to it.",
+  "data_domains": [
+    "source-backed salmon concept cards",
+    "in-card citation ledgers",
+    "ontology gap register"
+  ],
+  "identifier_systems": [
+    "concept card paths",
+    "card source ids",
+    "ontology term IRIs in card alignments"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "missing",
+      "note": "The skill checks and writes cards; it does not search the commons."
+    },
+    "metadata_schema": {
+      "status": "supported",
+      "note": "The commons' own validator, at the pinned commit, checks every card against the commons' closed schema and its rules."
+    },
+    "entity_lookup": {
+      "status": "missing",
+      "note": "The commons is a concept bundle, not an entity registry, and the skill exposes no lookup."
+    },
+    "identifier_crosswalks": {
+      "status": "missing",
+      "note": "Cards carry alignment IRIs, but the skill exposes no crosswalk resolution."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "The commons holds concepts, not assessment data."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "The commons holds concepts, not telemetry data."
+    },
+    "hatchery": {
+      "status": "missing",
+      "note": "The commons holds concepts, not hatchery data."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "The commons holds concepts, not harvest or fishery data."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "The commons holds concepts, not genetics data."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "The commons is not a data package and the skill exports nothing."
+    },
+    "provenance_versioning": {
+      "status": "supported",
+      "note": "The skill writes each card's in-card citation-ledger table from ledger JSON and runs the card-only check that holds every cited source to a resolved row with a located passage, all with the commons' own scripts at a pinned commit."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "One JSON adapter over the commons' own scripts, run against the user's clone; the commons has no API."
+    }
+  },
+  "blockers": [
+    "The commons is private, so the skill needs a local clone that contains the pinned commit; the plugin cannot fetch it.",
+    "The adapter needs uv, or a Python with PyYAML and jsonschema, to run the commons' scripts."
+  ],
+  "governance_constraints": [
+    "The public plugin carries no commons content: the skill reads the commons' scripts and CONTRIBUTING.md from the user's clone at run time and deletes its copies afterwards.",
+    "Writing a card or its ledger is not verifying it, and what an agent may merge in the commons is set by the commons' own CONTRIBUTING.md, which the skill prints."
+  ],
+  "related_skills": [
+    "commons-card"
+  ],
+  "last_verified_date": "2026-10-15",
+  "evidence_links": [
+    "https://github.com/salmon-data-mobilization/salmon-knowledge-commons",
+    "skills/commons-card/SKILL.md",
+    "skills/commons-card/scripts/commons_card.py"
+  ],
+  "watch_fields": [
+    "pinned commons commit",
+    "the command-line options of okf-check.py, ledger_table.py and ledger_check.py",
+    "the ledger JSON keys ledger_table.py reads",
+    "CONTRIBUTING.md"
+  ]
+}

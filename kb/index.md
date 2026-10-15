@@ -30,6 +30,7 @@ Canonical structured truth:
 - [SMN ontology](platforms/smn-ontology.md)
 - [GCDFO ontology](platforms/gcdfo-ontology.md)
 - [metasalmon and metasalmonpy](platforms/metasalmon.md)
+- [Salmon knowledge commons](platforms/salmon-knowledge-commons.md)
 
 ## Gaps
 

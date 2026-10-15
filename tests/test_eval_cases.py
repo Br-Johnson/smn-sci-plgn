@@ -8,14 +8,16 @@ skill runs, offline, so that a case cannot silently become impossible to pass
 because the skill's output or the grader drifted.
 
 Covered: salmon-stock-brief-workflow-skill, salmon-entity-normalizer-skill,
-dart-query-skill (its catalog is built in), and salmon-research-router-skill.
-The other nine cases need network access or a package install, so only the
-structural checks in scripts/validate_scaffold.py reach them offline.
+dart-query-skill (its catalog is built in), salmon-research-router-skill, and
+commons-card (its pin is reported with no clone present). The other nine cases
+need network access or a package install, so only the structural checks in
+scripts/validate_scaffold.py reach them offline.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -147,6 +149,27 @@ class OfflineGraderFeasibilityTests(unittest.TestCase):
         self.assertRegex("metasalmonpy 0.5.0 is installed and matches the pin.", pattern)
         self.assertRegex("| metasalmonpy | 0.5.0 |", pattern)
         self.assertNotRegex("Python 3.13.11 is available, and metasalmonpy imported.", pattern)
+
+    def test_commons_card_reports_its_pin_without_a_clone(self) -> None:
+        # An eval workspace has no clone of the private commons, so the case
+        # can pass only if the adapter names its pin even when it finds none.
+        case = "commons-card"
+        adapter = REPO_ROOT / "skills" / case / "scripts" / "commons_card.py"
+        with tempfile.TemporaryDirectory() as workspace:
+            result = subprocess.run(
+                [sys.executable, str(adapter)],
+                input=json.dumps({"action": "runtime"}),
+                cwd=workspace,
+                env={key: value for key, value in os.environ.items() if key != "SALMON_COMMONS_DIR"},
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        response = json.loads(result.stdout)
+        self.assertFalse(response["ok"])
+        self.assertRegex(response["pin"]["commit"], compiled(grader(case, "pin-reported")))
 
 
 if __name__ == "__main__":
