@@ -54,6 +54,11 @@
       "skill": "npafc-skill",
       "platform_id": "npafc",
       "kb_page": "kb/platforms/npafc.md"
+    },
+    {
+      "skill": "commons-card",
+      "platform_id": "salmon-knowledge-commons",
+      "kb_page": "kb/platforms/salmon-knowledge-commons.md"
     }
   ]
 }

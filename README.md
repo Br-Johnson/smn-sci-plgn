@@ -37,6 +37,7 @@ What is real now:
 - an authenticated RMIS skill scaffold
 - ontology term search through metasalmonpy (`salmon-terms`)
 - a thin `metasalmon-skill` adapter to metasalmonpy, with R as the documented alternative
+- a `commons-card` skill that runs the salmon knowledge commons' own card and citation-ledger checks at a pinned commons commit, against the user's clone
 - a living parity-gap register in `docs/platform-gap-register.md`
 - a machine-readable platform registry in `registry/`
 - a typed router-adjacent skill graph in `registry/skill-graph.json`
@@ -61,6 +62,7 @@ Requirements:
 - the source skills use the Python standard library only
 - [uv](https://docs.astral.sh/uv/) for `salmon-terms`, `metasalmon-skill` and `sdp-semantic-review` (which runs the `metasalmon-skill` adapter), whose scripts declare `metasalmonpy` `v0.6.0` inline, so uv installs it on first use
 - optional: R with `metasalmon` `v0.6.0` for the documented R route
+- for `commons-card`: git, uv, and a clone of the private salmon knowledge commons; its script declares PyYAML and jsonschema inline for the commons' scripts
 
 Install for Codex / OpenAI:
 
@@ -110,6 +112,12 @@ Run the live package-adapter tests, which install metasalmonpy from its pinned t
 SMN_PLUGIN_LIVE_ADAPTERS=1 python3 -m unittest discover -s tests -p 'test_package_adapters.py'
 ```
 
+Run the live commons tests, which need a clone of the private salmon knowledge commons and uv:
+
+```bash
+SALMON_COMMONS_DIR=path/to/salmon-knowledge-commons python3 -m unittest tests.test_commons_card
+```
+
 Run an eval case against a live model. The cases need Claude Code 2.1.269 or
 later, and every run counts against your plan or API bill, so start with one
 case and one run:
@@ -156,6 +164,7 @@ smn-sci-plgn/
 │   ├── salmon-entity-normalizer-skill/
 │   ├── salmon-terms/
 │   ├── metasalmon-skill/
+│   ├── commons-card/
 │   ├── streamnet-api-skill/
 │   ├── ptagis-skill/
 │   ├── rmis-skill/
@@ -241,6 +250,20 @@ Evaluation:
 - `evals/sdp-semantic-review/cohort/` holds three blind runs of the skill on
   the six Theme A packets, recorded 2026-10-10 against the current guide; all
   three pass every case, and none is promoted yet
+
+### `commons-card`
+
+The citation-ledger skill for the salmon knowledge commons. It runs the
+commons' own scripts at a pinned commons commit, against the user's clone, and
+holds no checks of its own. The commons is private, so the plugin carries none
+of it: each call copies the pinned scripts out of the clone's git history and
+deletes them afterwards.
+
+Current coverage:
+- `okf-check.py`: the whole bundle against the commons' schema and rules, or its gap register
+- `ledger_table.py`: a card's in-card citation-ledger table from ledger JSON, as a dry run or written
+- `ledger_check.py --from-card`: the card-only ledger check
+- the commons' `CONTRIBUTING.md`, and which of those files the clone has changed since the pin
 
 ### `streamnet-api-skill`
 
@@ -378,6 +401,19 @@ Repos:
 - [salmon-data-mobilization/metasalmon](https://github.com/salmon-data-mobilization/metasalmon) ([v0.6.0](https://github.com/salmon-data-mobilization/metasalmon/releases/tag/v0.6.0))
 - [salmon-data-mobilization/metasalmonpy](https://github.com/salmon-data-mobilization/metasalmonpy) ([v0.6.0](https://github.com/salmon-data-mobilization/metasalmonpy/releases/tag/v0.6.0))
 
+### `salmon-data-mobilization/salmon-knowledge-commons`
+
+Role:
+- private bundle of source-backed salmon concept cards, and the register of ontology gaps
+- the home of the card rules, the validator and the citation-ledger tools
+
+How it factors in:
+- `commons-card` runs the commons' own scripts at a pinned commit against the user's clone
+- the plugin is public and carries no commons content
+
+Repo:
+- [salmon-data-mobilization/salmon-knowledge-commons](https://github.com/salmon-data-mobilization/salmon-knowledge-commons) (members only)
+
 ## Architecture
 
 The intended architecture is:
@@ -409,7 +445,7 @@ This scaffold is intentionally vendor-light:
 
 - skills are plain `SKILL.md` directories with local scripts
 - source scripts use the Python standard library only
-- the two package adapters declare their one dependency, metasalmonpy pinned by tag, inline and run under uv
+- the two package adapters declare their one dependency, metasalmonpy pinned by tag, inline and run under uv; the `commons-card` adapter declares the two libraries the commons' scripts import the same way
 - no private MCP servers are required
 - no vendor-specific app connectors are required
 
@@ -420,6 +456,7 @@ That makes the repo portable:
 That also keeps responsibilities clean:
 - ontologies stay authoritative in the ontology repos
 - data-package and term-search logic stays authoritative in `metasalmon` and `metasalmonpy`
+- card rules and citation-ledger checks stay authoritative in the salmon knowledge commons
 - this plugin becomes the orchestration and synthesis layer over those assets
 
 ## Known Platform Gaps

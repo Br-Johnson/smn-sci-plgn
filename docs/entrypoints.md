@@ -32,6 +32,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Ontology term search, shared `smn` and DFO `gcdfo` alike: `skills/salmon-terms/SKILL.md`
 - Salmon Data Package workflows: `skills/metasalmon-skill/SKILL.md`
 - Judging a package's semantic review packet: `skills/sdp-semantic-review/SKILL.md`
+- Writing and checking salmon knowledge commons cards: `skills/commons-card/SKILL.md`
 - Structured stock briefs: `skills/salmon-stock-brief-workflow-skill/SKILL.md`
 - StreamNet access: `skills/streamnet-api-skill/SKILL.md`
 - PTAGIS access: `skills/ptagis-skill/SKILL.md`
@@ -45,6 +46,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 
 - Package adapters, which only marshal JSON to metasalmonpy `v0.6.0`: `skills/salmon-terms/scripts/salmon_terms.py` and `skills/metasalmon-skill/scripts/metasalmon_api.py`
 - Plumbing the two adapters share, including the package pin: `scripts/_package_adapter.py`
+- Commons adapter, which runs the commons' own scripts at its pinned commit against the user's clone: `skills/commons-card/scripts/commons_card.py`
 - Shared stdlib helper utilities: `scripts/_common.py`
 - Executable graph selector: `scripts/skill_graph_selector.py`
 - Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`

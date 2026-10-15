@@ -1,6 +1,6 @@
 {
   "graph_version": "0.0.1",
-  "last_updated": "2026-10-10",
+  "last_updated": "2026-10-15",
   "description": "Typed skill graph for the salmon scaffold. Seed candidate lanes lexically or semantically, normalize the entities, then expand through typed skill, platform, and governance edges while respecting access tiers and scaffold boundaries.",
   "nodes": [
     {
@@ -205,6 +205,15 @@
       "selection_note": "Use when the user explicitly asks for a structured stock brief rather than raw retrieval."
     },
     {
+      "id": "skill:commons-card",
+      "type": "skill",
+      "label": "commons-card",
+      "description": "Writes and checks salmon knowledge commons cards with the commons' own validator and citation-ledger tools, run at a pinned commons commit against the user's clone; holds no checks of its own.",
+      "entrypoint": "skills/commons-card/SKILL.md",
+      "role": "knowledge",
+      "input_contract": "A clone of the commons, card paths, and citation-ledger JSON files; returns the validator's findings, the in-card ledger sections, the card-only check, and CONTRIBUTING.md at the pin."
+    },
+    {
       "id": "platform:streamnet",
       "type": "platform",
       "label": "StreamNet",
@@ -302,6 +311,15 @@
       "entrypoint": "registry/platforms/npafc.json",
       "platform_id": "npafc",
       "platform_card": "registry/platforms/npafc.json"
+    },
+    {
+      "id": "platform:salmon-knowledge-commons",
+      "type": "platform",
+      "label": "Salmon knowledge commons",
+      "description": "Platform card-backed private bundle of source-backed salmon concept cards, reached only through the user's own clone.",
+      "entrypoint": "registry/platforms/salmon-knowledge-commons.json",
+      "platform_id": "salmon-knowledge-commons",
+      "platform_card": "registry/platforms/salmon-knowledge-commons.json"
     },
     {
       "id": "lane:stock-assessment",
@@ -403,6 +421,12 @@
       "type": "governance_tag",
       "label": "seed-identity-only",
       "description": "The current identity layer is scaffold-only and non-authoritative for production crosswalks."
+    },
+    {
+      "id": "governance:private-content",
+      "type": "governance_tag",
+      "label": "private-content",
+      "description": "The source is private, so the public plugin carries none of its content and reads it only from the user's own copy at run time."
     }
   ],
   "edges": [
@@ -1027,6 +1051,35 @@
       "evidence_refs": [
         "registry/platforms/rmis.json",
         "skills/rmis-skill/references/rmis-access.md"
+      ]
+    },
+    {
+      "source": "skill:commons-card",
+      "relation": "uses_platform",
+      "target": "platform:salmon-knowledge-commons",
+      "rationale": "The skill runs the commons' own validator, ledger-table writer and card-only check, at a pinned commit, against the user's clone.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/salmon-knowledge-commons.json"
+      ]
+    },
+    {
+      "source": "skill:commons-card",
+      "relation": "constrained_by",
+      "target": "governance:private-content",
+      "rationale": "The adapter copies the pinned scripts out of the user's clone for each call and deletes them afterwards, so the plugin ships no commons content.",
+      "evidence_refs": [
+        "skills/commons-card/SKILL.md",
+        "skills/commons-card/scripts/commons_card.py"
+      ]
+    },
+    {
+      "source": "platform:salmon-knowledge-commons",
+      "relation": "constrained_by",
+      "target": "governance:auth-required",
+      "rationale": "The commons is a private repository that only members of its organisation can read.",
+      "evidence_refs": [
+        "registry/platforms/salmon-knowledge-commons.json"
       ]
     }
   ]
