@@ -27,3 +27,13 @@ This is the package-first core of the salmon stack. The plugin is its front
 door and holds no logic of its own: a skill calls the packages for anything the
 packages can do. Package creation, the review flow, and publication are the
 parts not bridged yet.
+
+Adapter controls use JSON types: a string such as `"false"` cannot silently
+enable expansion or strict validation. Requested raw-output save failures
+return a JSON error with the package findings and runtime retained. These
+contracts are checked offline in
+[test_package_adapter_requests.py](../../tests/test_package_adapter_requests.py).
+
+Strict package validation establishes conformance. Human semantic review,
+source rights, evidence independence and publication approval are separate
+decisions, as recorded in the platform card's governance constraints.

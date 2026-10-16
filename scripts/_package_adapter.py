@@ -25,7 +25,7 @@ import sys
 import warnings
 from typing import Any, Iterator
 
-from _common import result_error
+from _common import result_error, write_raw
 
 # The one release this plugin is pinned to, for both packages.
 #
@@ -39,6 +39,78 @@ METASALMONPY_REQUIREMENT = (
     "metasalmonpy @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.5.0"
 )
 METASALMON_R_REF = "salmon-data-mobilization/metasalmon@v0.5.0"
+
+
+class InvalidRequest(ValueError):
+    """Malformed adapter controls, distinct from a package validation error."""
+
+
+def request_bool(payload: dict[str, Any], key: str, default: bool) -> bool:
+    """JSON controls must be booleans: the text 'false' is not true."""
+    value = payload.get(key, default)
+    if not isinstance(value, bool):
+        raise InvalidRequest(f"{key} must be a JSON boolean")
+    return value
+
+
+def request_string(
+    payload: dict[str, Any], key: str, default: str | None = None
+) -> str | None:
+    """Do not turn arrays or objects into plausible paths, queries, or roles."""
+    value = payload.get(key, default)
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise InvalidRequest(f"{key} must be a string")
+    return value.strip()
+
+
+def request_string_list(payload: dict[str, Any], key: str) -> list[str] | None:
+    """A list is passed through; a single string must not become characters."""
+    value = payload.get(key)
+    if value is None:
+        return None
+    if not isinstance(value, list) or any(
+        not isinstance(item, str) or not item.strip() for item in value
+    ):
+        raise InvalidRequest(f"{key} must be an array of non-empty strings")
+    return value
+
+
+def request_positive_int(payload: dict[str, Any], key: str, default: int) -> int:
+    value = payload.get(key, default)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise InvalidRequest(f"{key} must be a positive JSON integer")
+    return value
+
+
+def validate_common_request(payload: dict[str, Any], default_action: str) -> None:
+    """Reject malformed controls before importing or calling the package."""
+    if not request_string(payload, "action", default_action):
+        raise InvalidRequest("action must be a non-empty string")
+    request_bool(payload, "save_raw", False)
+    path = request_string(payload, "raw_output_path")
+    if path is not None and not path:
+        raise InvalidRequest("raw_output_path must be a non-empty string")
+
+
+def save_response(
+    response: dict[str, Any], payload: dict[str, Any], default_name: str
+) -> None:
+    """Keep one JSON response, with the package findings, if saving fails."""
+    if not response.get("ok"):
+        return
+    try:
+        response["raw_output_path"] = write_raw(
+            response,
+            requested=request_bool(payload, "save_raw", False),
+            raw_output_path=request_string(payload, "raw_output_path"),
+            default_name=default_name,
+        )
+    except (OSError, TypeError, ValueError) as exc:
+        response["ok"] = False
+        response["raw_output_path"] = None
+        response["error"] = {"code": "raw_output_failed", "message": str(exc)}
 
 
 def import_metasalmonpy() -> Any | None:

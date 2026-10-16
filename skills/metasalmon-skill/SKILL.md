@@ -56,6 +56,12 @@ The adapter reads one JSON object from stdin and writes one to stdout.
 Every response carries `runtime`. `save_raw` and `raw_output_path` write the
 full response to a file.
 
+Controls such as `require_iris` and `save_raw` must be JSON booleans, not
+strings such as `"false"`. A malformed request returns `invalid_input`.
+If saving the requested raw output fails, the response returns
+`ok: false` with `error.code: raw_output_failed`, retains the package's
+findings and runtime, and does not claim that a file was saved.
+
 ## Operating rules
 
 - Term search, meaning `find_terms()` and `sources_for_role()`, is the
@@ -69,9 +75,10 @@ full response to a file.
   `review_metadata()`, and the `set_sdp_*()` setters), and publication are not
   bridged here yet. Run them with the user in Python or R, following the
   package documentation.
-- Report the package's findings as the package states them. A clean strict
-  validation (`require_iris: true`) is the bar for calling a package ready to
-  publish.
+- Report the package's findings as the package states them. Clean strict
+  validation (`require_iris: true`) establishes structural and semantic
+  conformance. It does not approve semantic choices, source rights, evidence
+  independence, or publication; those remain separate human decisions.
 
 See [references/capabilities.md](references/capabilities.md) for the action
 map, what is not bridged, and why this skill runs Python first.

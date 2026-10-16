@@ -73,7 +73,7 @@
     },
     "bulk_access_api_ergonomics": {
       "status": "partial",
-      "note": "The plugin reaches the packages through thin JSON adapters that run metasalmonpy under uv; the R route is documented rather than wrapped."
+      "note": "The plugin reaches the packages through thin JSON adapters that run metasalmonpy under uv; the R route is documented rather than wrapped. Adapter controls require JSON types, and a requested raw-output save failure returns a JSON error while retaining the package findings."
     }
   },
   "blockers": [
@@ -82,6 +82,7 @@
   ],
   "governance_constraints": [
     "LLM-assisted features and publication helpers may depend on external provider setup and human review.",
+    "Strict package validation checks structural and semantic conformance; it does not grant source rights or approve semantic choices, evidence independence, or publication.",
     "Term-request submission files GitHub issues, so it stays a dry run until the user approves the rendered text."
   ],
   "related_skills": [
@@ -95,7 +96,8 @@
     "skills/metasalmon-skill/SKILL.md",
     "skills/metasalmon-skill/scripts/metasalmon_api.py",
     "skills/salmon-terms/SKILL.md",
-    "skills/salmon-terms/scripts/salmon_terms.py"
+    "skills/salmon-terms/scripts/salmon_terms.py",
+    "tests/test_package_adapter_requests.py"
   ],
   "watch_fields": [
     "pinned release tag for both packages",
