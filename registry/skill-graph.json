@@ -52,7 +52,7 @@
       "id": "skill:salmon-terms",
       "type": "skill",
       "label": "salmon-terms",
-      "description": "Term search through metasalmonpy's find_terms() and sources_for_role() at the pinned v0.5.0 release, across smn, gcdfo, and external vocabularies.",
+      "description": "Term search through metasalmonpy's find_terms() and sources_for_role() at the pinned v0.6.0 release, across smn, gcdfo, and external vocabularies.",
       "entrypoint": "skills/salmon-terms/SKILL.md",
       "role": "semantic",
       "input_contract": "Salmon concepts, semantic roles, and optional source lists; returns ranked term IRIs, labels, definitions, and per-source diagnostics.",
@@ -66,12 +66,25 @@
       "id": "skill:metasalmon-skill",
       "type": "skill",
       "label": "metasalmon-skill",
-      "description": "Thin adapter to metasalmonpy v0.5.0 for Salmon Data Package validation and ontology fetch, with metasalmon in R documented as the alternative.",
+      "description": "Thin adapter to metasalmonpy v0.6.0 for Salmon Data Package validation, ontology fetch, and the semantic review-packet round trip, with metasalmon in R documented as the alternative.",
       "entrypoint": "skills/metasalmon-skill/SKILL.md",
       "role": "package",
-      "input_contract": "Salmon Data Package validation, ontology file fetch, and package runtime checks.",
+      "input_contract": "Salmon Data Package validation, ontology file fetch, review-packet build and ingest, and package runtime checks.",
       "lane_tags": [
         "lane:package-metadata-validation"
+      ]
+    },
+    {
+      "id": "skill:sdp-semantic-review",
+      "type": "skill",
+      "label": "sdp-semantic-review",
+      "description": "Judges a Salmon Data Package's semantic review packet in the harness: chooses among each slot's ontology candidates by index, and writes the answers through metasalmon-skill's adapter for metasalmonpy v0.6.0 to ingest, validate, and record.",
+      "entrypoint": "skills/sdp-semantic-review/SKILL.md",
+      "role": "semantic",
+      "input_contract": "A Salmon Data Package path or an existing semantic-review-packet.json, with optional context documents; returns the recorded verdicts and the calls the user runs to confirm them.",
+      "lane_tags": [
+        "lane:package-metadata-validation",
+        "lane:ontology-semantic-resolution"
       ]
     },
     {
@@ -267,7 +280,7 @@
       "id": "platform:metasalmon",
       "type": "platform",
       "label": "metasalmon and metasalmonpy",
-      "description": "Platform card-backed package pair (R and its Python mirror, both pinned at v0.5.0) behind Salmon Data Package validation and term search.",
+      "description": "Platform card-backed package pair (R and its Python mirror, both pinned at v0.6.0) behind Salmon Data Package validation, term search, and the semantic review packet.",
       "entrypoint": "registry/platforms/metasalmon.json",
       "platform_id": "metasalmon",
       "platform_card": "registry/platforms/metasalmon.json"
@@ -871,6 +884,46 @@
       "evidence_refs": [
         "registry/skill-platform-map.json",
         "registry/platforms/metasalmon.json"
+      ]
+    },
+    {
+      "source": "lane:package-metadata-validation",
+      "relation": "routes_to",
+      "target": "skill:sdp-semantic-review",
+      "rationale": "Filling a package's semantic IRI slots is the review step of package authoring, and since 0.6.0 the packages leave the judging of their candidates to the harness.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/references/lanes.md",
+        "skills/sdp-semantic-review/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:sdp-semantic-review",
+      "relation": "depends_on",
+      "target": "skill:metasalmon-skill",
+      "rationale": "The skill builds, answers, and ingests a packet through metasalmon-skill's adapter, which runs the pinned metasalmonpy.",
+      "evidence_refs": [
+        "skills/sdp-semantic-review/SKILL.md",
+        "skills/metasalmon-skill/scripts/metasalmon_api.py"
+      ]
+    },
+    {
+      "source": "skill:sdp-semantic-review",
+      "relation": "uses_platform",
+      "target": "platform:metasalmon",
+      "rationale": "The packages write the review packet and ingest, validate, and record the skill's answers; the skill only judges.",
+      "evidence_refs": [
+        "registry/skill-platform-map.json",
+        "registry/platforms/metasalmon.json"
+      ]
+    },
+    {
+      "source": "skill:sdp-semantic-review",
+      "relation": "constrained_by",
+      "target": "governance:organization-profile",
+      "rationale": "A requested term's namespace decides whether it goes to the shared smn layer or the DFO gcdfo profile, so the skill names one only when the evidence settles it.",
+      "evidence_refs": [
+        "kb/concepts/shared-vs-dfo-term-boundary.md",
+        "skills/sdp-semantic-review/references/judging.md"
       ]
     },
     {

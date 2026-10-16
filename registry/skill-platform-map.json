@@ -36,6 +36,11 @@
       "kb_page": "kb/platforms/metasalmon.md"
     },
     {
+      "skill": "sdp-semantic-review",
+      "platform_id": "metasalmon",
+      "kb_page": "kb/platforms/metasalmon.md"
+    },
+    {
       "skill": "critfc-crosswalk-skill",
       "platform_id": "critfc-crosswalk",
       "kb_page": "kb/platforms/critfc-crosswalk.md"

@@ -449,5 +449,25 @@
         "literature-reports-dataset-discovery"
       ]
     }
+  },
+  {
+    "request": "Judge the semantic review packet for my Salmon Data Package",
+    "expected": {
+      "seeded_lanes": [
+        "lane:ontology-semantic-resolution",
+        "lane:package-metadata-validation"
+      ],
+      "selected_skills": [
+        "salmon-terms",
+        "metasalmon-skill",
+        "sdp-semantic-review"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "sdp-semantic-review",
+        "review packet"
+      ]
+    }
   }
 ]

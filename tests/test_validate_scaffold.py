@@ -132,8 +132,8 @@ class PluginChecksTests(unittest.TestCase):
     def test_pin_drift_in_one_adapter_is_rejected(self) -> None:
         self.edit_text(
             "skills/salmon-terms/scripts/salmon_terms.py",
+            "metasalmonpy@v0.6.0",
             "metasalmonpy@v0.5.0",
-            "metasalmonpy@v0.4.0",
         )
         self.assert_rejected(vs.check_package_pins, self.root, fragment="package pins disagree")
 

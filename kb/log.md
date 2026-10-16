@@ -41,6 +41,14 @@
 - No case has been scored. `claude plugin eval` needs Claude Code 2.1.269 or later, and the installed 2.1.267 answers that the command is in early access.
 - Measured 2026-09-25: `gis.critfc.org`, the CRITFC skill's REST root, does not resolve, and the NOAA SPS skill's home URL returns 404. Both cases can still pass by reporting the failure honestly.
 
+## [2026-10-10] skill | sdp-semantic-review
+
+- Added `sdp-semantic-review` (tern M-19): the harness judges the semantic review packet that metasalmon or metasalmonpy 0.6.0 writes, and the package ingests, validates and records the answers. It replaces the packages' `llm_assess = TRUE` call, which 0.6.0 deprecates and 0.7.0 removes.
+- Added `build_review_packet`, `write_assessments` and `ingest_assessments` to `metasalmon-skill`'s adapter. `write_assessments` builds the answer file and its `.packet-id` sidecar from the packet alone.
+- Moved every package pin from `v0.5.0` to `v0.6.0`. Neither package had that tag yet, so the live adapter job failed until both were tagged on 2026-10-16.
+- Added `evals/sdp-semantic-review/replay_theme_a.py`, which replays answer files through the pinned package and scores them on metasalmon's Theme A oracles, vendored with the conformance fixtures, and `cohort/`, three blind runs of the skill on the six Theme A packets, none promoted yet.
+- Blind runs against the first draft of the guide passed four of the six cases each. All three rejected a fish-weight property because the column totals it, and named a namespace for the gap the oracle leaves uncertain. A second cohort passed all six in two runs of three; the third named `smn` for that gap. The recorded cohort, against the final guide, passed all six in all three runs and agreed on every slot. Every run judged the six cases the guide was revised against, so the cohort shows the guide carries the oracles' positions, not that it generalizes to other packages.
+
 ## [2026-10-15] skill | commons-card
 
 - Added `commons-card` (tern M-21), the citation-ledger skill for the salmon knowledge commons. It runs the commons' own `scripts/okf-check.py`, `scripts/ledger/ledger_table.py` and `scripts/ledger/ledger_check.py --from-card`, and prints its `CONTRIBUTING.md`, all at one pinned commons commit, against the user's clone. It holds no checks of its own.

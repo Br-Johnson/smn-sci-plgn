@@ -53,15 +53,15 @@ What is still intentionally thin:
 - full API coverage for salmon portals
 - hatchery, genetics, and management-data harmonization
 - composite workflows beyond the stock-brief scaffold
-- scored behaviour: the eval cases have not yet been run against a live model
+- scored behaviour: the `claude plugin eval` cases have not yet been run against a live model; the one exception is `sdp-semantic-review`, whose judgements are scored offline on metasalmon's Theme A oracles from recorded blind runs
 
 ## Quick Start
 
 Requirements:
 - Python 3.10+
 - the source skills use the Python standard library only
-- [uv](https://docs.astral.sh/uv/) for `salmon-terms` and `metasalmon-skill`, whose scripts declare `metasalmonpy` `v0.5.0` inline, so uv installs it on first use
-- optional: R with `metasalmon` `v0.5.0` for the documented R route
+- [uv](https://docs.astral.sh/uv/) for `salmon-terms`, `metasalmon-skill` and `sdp-semantic-review` (which runs the `metasalmon-skill` adapter), whose scripts declare `metasalmonpy` `v0.6.0` inline, so uv installs it on first use
+- optional: R with `metasalmon` `v0.6.0` for the documented R route
 - for `commons-card`: git, uv, and a clone of the private salmon knowledge commons; its script declares PyYAML and jsonschema inline for the commons' scripts
 
 Install for Codex / OpenAI:
@@ -208,7 +208,7 @@ Seed normalization layer for:
 
 ### `salmon-terms`
 
-Ontology term search through metasalmonpy `v0.5.0`. The skill has no search
+Ontology term search through metasalmonpy `v0.6.0`. The skill has no search
 logic of its own; the package searches the shared `smn` ontology, the DFO
 `gcdfo` profile, and external vocabularies, and ranks the results.
 
@@ -219,7 +219,7 @@ Current coverage:
 
 ### `metasalmon-skill`
 
-Thin adapter to metasalmonpy `v0.5.0`, the Python mirror of the `metasalmon` R
+Thin adapter to metasalmonpy `v0.6.0`, the Python mirror of the `metasalmon` R
 package. The R route is documented in the skill as the alternative.
 
 Current coverage:
@@ -227,6 +227,29 @@ Current coverage:
 - function catalog
 - `validate_salmon_datapackage()`, including the strict `require_iris` check
 - `fetch_salmon_ontology()`
+- the semantic review round trip that `sdp-semantic-review` drives:
+  `write_semantic_review_packet()`, the harness's answer file, and
+  `ingest_semantic_assessments()`
+
+### `sdp-semantic-review`
+
+Judges a Salmon Data Package's semantic review packet in the harness. Since
+0.6.0 the packages find ontology candidates for every unfilled IRI slot but no
+longer judge them: the package writes a packet, this skill chooses among each
+slot's candidates by index, the `metasalmon-skill` adapter writes the answers
+in the package's 30-column contract, and the package ingests, validates and
+records them. Nothing reaches the package's metadata until the user confirms
+each term in the package's review console, so the skill ends by handing the
+user the calls that do.
+
+Evaluation:
+- `evals/sdp-semantic-review/replay_theme_a.py` replays answer files through
+  the pinned package and scores the outcomes on metasalmon's Theme A oracles,
+  vendored with their conformance fixtures; `controls` checks the instrument
+  and `cohort` scores recorded skill runs
+- `evals/sdp-semantic-review/cohort/` holds three blind runs of the skill on
+  the six Theme A packets, recorded 2026-10-10 against the current guide; all
+  three pass every case, and none is promoted yet
 
 ### `commons-card`
 
@@ -370,13 +393,13 @@ Role:
 - something this plugin integrates with rather than replaces
 
 How it factors in:
-- the plugin pins both packages at `v0.5.0`
-- `salmon-terms` and `metasalmon-skill` are thin adapters to metasalmonpy
+- the plugin pins both packages at `v0.6.0`
+- `salmon-terms` and `metasalmon-skill` are thin adapters to metasalmonpy, and `sdp-semantic-review` judges the review packets the packages write
 - data-package authoring, validation, semantic QA, and publication helpers stay in the packages
 
 Repos:
-- [salmon-data-mobilization/metasalmon](https://github.com/salmon-data-mobilization/metasalmon) ([v0.5.0](https://github.com/salmon-data-mobilization/metasalmon/releases/tag/v0.5.0))
-- [salmon-data-mobilization/metasalmonpy](https://github.com/salmon-data-mobilization/metasalmonpy) ([v0.5.0](https://github.com/salmon-data-mobilization/metasalmonpy/releases/tag/v0.5.0))
+- [salmon-data-mobilization/metasalmon](https://github.com/salmon-data-mobilization/metasalmon) ([v0.6.0](https://github.com/salmon-data-mobilization/metasalmon/releases/tag/v0.6.0))
+- [salmon-data-mobilization/metasalmonpy](https://github.com/salmon-data-mobilization/metasalmonpy) ([v0.6.0](https://github.com/salmon-data-mobilization/metasalmonpy/releases/tag/v0.6.0))
 
 ### `salmon-data-mobilization/salmon-knowledge-commons`
 
