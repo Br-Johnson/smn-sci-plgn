@@ -1,6 +1,6 @@
 {
   "graph_version": "0.0.1",
-  "last_updated": "2026-10-15",
+  "last_updated": "2026-10-24",
   "description": "Typed skill graph for the salmon scaffold. Seed candidate lanes lexically or semantically, normalize the entities, then expand through typed skill, platform, and governance edges while respecting access tiers and scaffold boundaries.",
   "nodes": [
     {
@@ -427,6 +427,44 @@
       "type": "governance_tag",
       "label": "private-content",
       "description": "The source is private, so the public plugin carries none of its content and reads it only from the user's own copy at run time."
+    },
+    {
+      "id": "lane:private-research-workbench",
+      "type": "lane",
+      "label": "private-research-workbench",
+      "description": "Offline private project-export inspection and explicitly selected contribution previews; no hosted API.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "skill:salmon-workbench-skill",
+      "type": "skill",
+      "label": "salmon-workbench-skill",
+      "description": "Offline private project-export inspection and explicitly selected contribution previews; no hosted API.",
+      "entrypoint": "skills/salmon-workbench-skill/SKILL.md",
+      "role": "workflow",
+      "input_contract": "Offline private project-export inspection and explicitly selected contribution previews; no hosted API.",
+      "lane_tags": [
+        "lane:private-research-workbench"
+      ]
+    },
+    {
+      "id": "lane:research-framework",
+      "type": "lane",
+      "label": "research-framework",
+      "description": "Source-backed life-phase hypotheses and evidence requirements; no fitted models or scientific approval.",
+      "entrypoint": "skills/salmon-research-router-skill/references/lanes.md"
+    },
+    {
+      "id": "skill:salmon-research-framework-skill",
+      "type": "skill",
+      "label": "salmon-research-framework-skill",
+      "description": "Source-backed life-phase hypotheses and evidence requirements; no fitted models or scientific approval.",
+      "entrypoint": "skills/salmon-research-framework-skill/SKILL.md",
+      "role": "workflow",
+      "input_contract": "Source-backed life-phase hypotheses and evidence requirements; no fitted models or scientific approval.",
+      "lane_tags": [
+        "lane:research-framework"
+      ]
     }
   ],
   "edges": [
@@ -1080,6 +1118,51 @@
       "rationale": "The commons is a private repository that only members of its organisation can read.",
       "evidence_refs": [
         "registry/platforms/salmon-knowledge-commons.json"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:private-research-workbench",
+      "rationale": "Offline private project-export inspection and explicitly selected contribution previews; no hosted API.",
+      "evidence_refs": [
+        "skills/salmon-workbench-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "lane:private-research-workbench",
+      "relation": "routes_to",
+      "target": "skill:salmon-workbench-skill",
+      "rationale": "Offline private project-export inspection and explicitly selected contribution previews; no hosted API.",
+      "evidence_refs": [
+        "skills/salmon-workbench-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:research-framework",
+      "rationale": "Source-backed life-phase hypotheses and evidence requirements; no fitted models or scientific approval.",
+      "evidence_refs": [
+        "skills/salmon-research-framework-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "lane:research-framework",
+      "relation": "routes_to",
+      "target": "skill:salmon-research-framework-skill",
+      "rationale": "Source-backed life-phase hypotheses and evidence requirements; no fitted models or scientific approval.",
+      "evidence_refs": [
+        "skills/salmon-research-framework-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-framework-skill",
+      "relation": "depends_on",
+      "target": "skill:salmon-entity-normalizer-skill",
+      "rationale": "Normalisation preserves candidate species and unit ambiguity before a framework proposal.",
+      "evidence_refs": [
+        "skills/salmon-research-framework-skill/SKILL.md"
       ]
     }
   ]

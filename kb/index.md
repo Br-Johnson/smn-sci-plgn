@@ -50,3 +50,5 @@ Canonical structured truth:
 ## Log
 
 - [kb/log.md](log.md): append-only chronology of major knowledge-base and registry changes.
+
+- [Private research workbench](workflows/research-workbench.md): local exports, contribution review and framework proposals.

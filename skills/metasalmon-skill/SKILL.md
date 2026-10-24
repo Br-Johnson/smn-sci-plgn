@@ -75,9 +75,10 @@ full response to a file.
   bridged here yet. Run them with the user in Python or R, following the
   package documentation. Confirming a term in the console is the user's act,
   which is why sdp-semantic-review hands it to them rather than bridging it.
-- Report the package's findings as the package states them. A clean strict
-  validation (`require_iris: true`) is the bar for calling a package ready to
-  publish.
+- Report the package's findings as the package states them. Clean strict
+  validation (`require_iris: true`) reports package-check success only. Rights,
+  disclosure, scientific review and explicit release authorization remain
+  separate publication gates; validation creates no human acceptance.
 
 See [references/capabilities.md](references/capabilities.md) for the action
 map, what is not bridged, and why this skill runs Python first.

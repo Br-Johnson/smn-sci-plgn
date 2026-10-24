@@ -14,6 +14,8 @@ NON_PLATFORM_SKILLS = {
     "salmon-research-router-skill",
     "salmon-entity-normalizer-skill",
     "salmon-stock-brief-workflow-skill",
+    "salmon-workbench-skill",
+    "salmon-research-framework-skill",
 }
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 

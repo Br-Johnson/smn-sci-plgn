@@ -18,6 +18,12 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 - Parallelize only when the lanes are independent.
 - End with the user's actual answer, not a tool inventory.
 
+## Local research workflows
+
+- For private project exports and contribution previews use `salmon-workbench-skill`.
+- For explicit life-phase hypotheses and evidence requirements use `salmon-research-framework-skill`.
+- Both are local file workflows. They do not provide hosted workbench APIs or fitted models.
+
 ## Initial bundled skills
 
 - `salmon-entity-normalizer-skill`

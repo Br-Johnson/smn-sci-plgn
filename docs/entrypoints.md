@@ -77,3 +77,11 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Change user-facing repo scope or setup: `README.md`
 - Change plugin metadata: `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json` together, since validation fails until they agree
 - Move the metasalmon or metasalmonpy pin: every copy in one change, meaning `scripts/_package_adapter.py`, the inline metadata block of both adapter scripts, and the docs that name the tag. Validation fails until they agree.
+
+## Private research project path
+
+- Workbench export inspection and selected contribution preview: `skills/salmon-workbench-skill/SKILL.md`.
+- Framework template/check: `skills/salmon-research-framework-skill/SKILL.md`.
+- One shared implementation: `scripts/workbench_project.py`; each skill has a portable wrapper.
+- Contract/semantic/privacy regressions: `tests/test_workbench_project.py`.
+- No hosted client, model fitting, graph publication or human decision application is implemented in this path.
