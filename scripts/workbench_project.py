@@ -74,10 +74,16 @@ def validate_bundle(data, *, require_commitment=False):
     strings(data.get("limitations"), "limitations")
     p = data.get("project")
     object_fields(p, "id title description question hypothesis region spatialScale temporalStart temporalEnd temporalScale ownerName createdAt updatedAt", "project")
-    require(p["id"].strip() and p["title"].strip() and p["ownerName"].strip(), "project requires ID, title and owner")
-    instant(p["createdAt"], "project.createdAt")
-    instant(p["updatedAt"], "project.updatedAt")
+    require(p["id"].strip() and p["title"].strip(), "project requires ID and title")
     require(type(p.get("revision")) is int and p["revision"] >= 0, "revision must be a nonnegative integer")
+    saved = p["revision"] > 0
+    if saved:
+        require(p["ownerName"].strip(), "saved project requires ownerName")
+    for key in ("createdAt", "updatedAt"):
+        if saved or p[key]:
+            instant(p[key], f"project.{key}")
+    if require_commitment:
+        require(saved, "contribution preview requires a saved project revision")
     for key in ("temporalStart", "temporalEnd"):
         if p[key]:
             date(p[key], key)
@@ -99,6 +105,8 @@ def validate_bundle(data, *, require_commitment=False):
     for x in array(p.get("datasets"), "project.datasets"):
         object_fields(x, "id title citation url status reason limitations evidence sourceType", "dataset")
         require(x["status"] in {"candidate", "included", "excluded", "deferred"}, "invalid source decision")
+        if x["status"] != "candidate":
+            require(x["reason"].strip(), "non-candidate source decision requires a reason")
         require(x["sourceType"] in {"catalog", "upload"}, "invalid sourceType")
         for k in ("sourceSha256", "originalFileName"):
             require(k not in x or isinstance(x[k], str), f"{k} must be a string")
@@ -134,6 +142,9 @@ def inspect_bundle(data, as_of=None):
     today = date(as_of, "as_of") if as_of else instant(data["exportedAt"], "exportedAt").date()
     counts = {state: sum(x["status"] == state for x in p["datasets"]) for state in ("candidate", "included", "excluded", "deferred")}
     return {"format": "salmon-workbench-inspection.v1", "privacy": "private", "projectId": p["id"],
+            "projectState": "unsaved_draft" if p["revision"] == 0 else "saved_revision_record",
+            "declaredRevision": p["revision"], "persistenceVerified": False,
+            "warnings": ["Unsaved draft: persistence and owner are not established."] if p["revision"] == 0 else [],
             "asOf": today.isoformat(), "sourceDecisions": counts, "sourceCatalogCount": len(data["sources"]),
             "pendingIdentityCount": sum(x["status"] == "pending" for x in p["identities"]),
             "embargoState": ("not_committed" if not p["contribution"]["committed"] else
@@ -152,7 +163,8 @@ def framework_template(data):
             "evidenceType": "unknown", "survivalEvidence": [], "assignmentKind": "unknown",
             "usesAssignmentProbabilities": False, "exposures": [], "outcome": "",
             "spatialScale": data["project"]["spatialScale"], "temporalWindow": "",
-            "alternatives": [], "sources": [], "limitations": ["Draft; no model, cohort alignment or scientific approval."]}
+            "alternatives": [], "sources": [], "limitations": ["Draft; no model, cohort alignment or scientific approval."]
+            + (["Unsaved source project; persistence and owner are not established."] if data["project"]["revision"] == 0 else [])}
 
 
 def supported_evidence(value, label):

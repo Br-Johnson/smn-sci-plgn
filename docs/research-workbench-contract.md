@@ -10,10 +10,10 @@ This is a private export. Project notes, source decisions and native IDs stay pr
 
 ## Implemented components
 
-- `inspect`: source-decision counts, pending identity count and embargo review state. Drafts may be uncommitted. Time is explicit `--as-of` or the export timestamp.
+- `inspect`: source-decision counts, pending identity count and embargo review state. Drafts may be uncommitted. Browser exports at revision zero may have blank owner/creation/update fields; they are reported as `unsaved_draft` without minting those fields. Revision greater than zero requires nonblank owner and valid timestamps. Server persistence is not independently verified. Non-candidate source decisions require a nonblank reason. Time is explicit `--as-of` or the export timestamp.
 - `framework-template`: an editable proposal with question and scale context; missing scientific evidence stays empty/unknown.
 - `framework-check`: field/enum checks plus required explicit age/cohort evidence for first-winter proposals, separate direct-survival evidence, and no probability use from hard/unknown assignments. Evidence strings are not scientifically verified.
-- `contribution-preview`: a committed project is required. Only caller-supplied text in explicitly allowed fields is emitted; no private fields are copied automatically. It remains disclosure-review-required and cannot publish.
+- `contribution-preview`: a saved revision and committed project are required. Only caller-supplied text in explicitly allowed fields is emitted; no private fields are copied automatically. It remains disclosure-review-required and cannot publish.
 
 CLI output is JSON on stdout. Inputs are unchanged. The local JSON reader rejects duplicate keys, nonfinite tokens, symlink files and oversized inputs. The helper has no network client, model API, graph writer or publication function.
 

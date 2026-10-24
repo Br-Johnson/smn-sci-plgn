@@ -6,6 +6,7 @@
 - Private exports, pending identity proposals and finite embargo review remain separate from publication.
 - Aligned plugin manifest versions at 0.1.0; corrected validation versus publication wording.
 - Existing SDK actions/pins unchanged; no hosted API or fitted model claim.
+- Browser-export alignment: revision-zero drafts preserve blank owner/timestamps and are explicitly unsaved; contribution preview requires a saved revision. Non-candidate source decisions need reasons.
 
 
 ## [2026-04-17] bootstrap | registry-and-wiki

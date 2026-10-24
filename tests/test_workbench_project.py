@@ -67,6 +67,36 @@ class WorkbenchProjectTests(unittest.TestCase):
         self.assertFalse(wp.inspect_bundle(b)["commitmentComplete"])
         with self.assertRaises(wp.ContractError): wp.contribution_preview(b, {"title": "Safe title"})
 
+    def test_browser_unsaved_draft_has_no_minted_owner_or_persistence(self):
+        b = bundle(); p = b["project"]
+        p.update(revision=0, ownerName="", createdAt="", updatedAt="")
+        before = deepcopy(b)
+        inspected = wp.inspect_bundle(b)
+        self.assertEqual(inspected["projectState"], "unsaved_draft")
+        self.assertFalse(inspected["persistenceVerified"])
+        self.assertTrue(inspected["warnings"])
+        self.assertNotIn("ownerName", inspected)
+        self.assertIn("Unsaved source project", " ".join(wp.framework_template(b)["limitations"]))
+        self.assertEqual(b, before)
+        with self.assertRaisesRegex(wp.ContractError, "saved project revision"):
+            wp.contribution_preview(b, {"title": "Safe title"})
+
+    def test_saved_revision_requires_owner_and_server_timestamp_fields(self):
+        for field in ("ownerName", "createdAt", "updatedAt"):
+            with self.subTest(field=field):
+                b = bundle(); b["project"][field] = ""
+                with self.assertRaises(wp.ContractError): wp.inspect_bundle(b)
+        b = bundle(); b["project"].update(revision=0, createdAt="not-a-timestamp")
+        with self.assertRaises(wp.ContractError): wp.inspect_bundle(b)
+
+    def test_source_decision_reason_guard_matches_server(self):
+        for state in ("included", "excluded", "deferred"):
+            with self.subTest(state=state):
+                b = bundle(); b["project"]["datasets"][0].update(status=state, reason=" ")
+                with self.assertRaisesRegex(wp.ContractError, "requires a reason"): wp.inspect_bundle(b)
+        b = bundle(); b["project"]["datasets"][0].update(status="candidate", reason="")
+        self.assertEqual(wp.inspect_bundle(b)["sourceDecisions"]["candidate"], 1)
+
     def test_commitment_needs_outputs_reason_and_real_date(self):
         for field, value in [("outputs", []), ("reason", ""), ("embargoUntil", "forever"), ("embargoUntil", "2026-02-30")]:
             with self.subTest(field=field, value=value):

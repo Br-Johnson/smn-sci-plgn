@@ -24,8 +24,13 @@ write, fetch, upload, call a model, apply decisions or publish.
 Install the complete plugin checkout: the wrappers require its shared
 `scripts/workbench_project.py`, rather than a copied standalone skill folder.
 
-- Drafts without a contribution commitment can be inspected. A contribution
-  preview requires a commitment, selected output types, reason and finite date.
+- Unsaved browser drafts (revision zero, possibly blank owner/timestamps) and
+  drafts without a contribution commitment can be inspected. Inspection reports
+  unsaved status without establishing an owner or persistence. Saved revision
+  records require nonblank owner and valid timestamps; the helper does not
+  independently verify server persistence. A contribution preview requires a
+  saved revision, commitment, selected output types, reason and finite date.
+- Source decisions other than `candidate` require a nonblank reason.
 - An expired embargo becomes `review_due`; visibility stays private. Dates use
   explicit `--as-of` or the export timestamp, never an implicit current clock.
 - `selected-fields.json` must contain only explicitly supplied sanitized text
