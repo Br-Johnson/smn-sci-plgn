@@ -1,5 +1,13 @@
 # Knowledge Base Log
 
+## [2026-10-24] local-workflows | research-workbench
+
+- Added two offline project/framework skills and canonical routing nodes.
+- Private exports, pending identity proposals and finite embargo review remain separate from publication.
+- Aligned plugin manifest versions at 0.1.0; corrected validation versus publication wording.
+- Existing SDK actions/pins unchanged; no hosted API or fitted model claim.
+
+
 ## [2026-04-17] bootstrap | registry-and-wiki
 
 - Added `registry/` with platform-card and identity-record schemas.

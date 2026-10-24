@@ -12,6 +12,8 @@ from typing import Iterable
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 LANE_PRIORITY = [
+    "lane:private-research-workbench",
+    "lane:research-framework",
     "lane:stock-assessment",
     "lane:crosswalk-harmonization",
     "lane:ontology-semantic-resolution",
@@ -26,6 +28,8 @@ LANE_PRIORITY = [
 ]
 
 LANE_PATTERNS: dict[str, tuple[str, ...]] = {
+    "lane:private-research-workbench": (r"\bworkbench\b", r"\bproject export\b", r"\bcontribution preview\b"),
+    "lane:research-framework": (r"\bresearch framework\b", r"\blikely suspects\b", r"\banalytical framework\b"),
     "lane:stock-assessment": (
         r"\bstock\b",
         r"\bassessment\b",
@@ -206,6 +210,8 @@ NORMALIZER_LANES = {
 }
 
 LANE_SKILL_MAP: dict[str, tuple[str, ...]] = {
+    "lane:private-research-workbench": ("salmon-workbench-skill",),
+    "lane:research-framework": ("salmon-entity-normalizer-skill", "salmon-research-framework-skill"),
     "lane:stock-assessment": ("salmon-entity-normalizer-skill", "streamnet-api-skill", "salmon-literature-skill"),
     "lane:crosswalk-harmonization": ("salmon-entity-normalizer-skill", "critfc-crosswalk-skill"),
     "lane:telemetry-passage": ("salmon-entity-normalizer-skill", "ptagis-skill", "dart-query-skill"),

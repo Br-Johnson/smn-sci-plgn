@@ -69,9 +69,10 @@ full response to a file.
   `review_metadata()`, and the `set_sdp_*()` setters), and publication are not
   bridged here yet. Run them with the user in Python or R, following the
   package documentation.
-- Report the package's findings as the package states them. A clean strict
-  validation (`require_iris: true`) is the bar for calling a package ready to
-  publish.
+- Report the package's findings as the package states them. Clean strict
+  validation (`require_iris: true`) reports package-check success only. Rights,
+  disclosure, scientific review and explicit release authorization remain
+  separate publication gates; validation creates no human acceptance.
 
 See [references/capabilities.md](references/capabilities.md) for the action
 map, what is not bridged, and why this skill runs Python first.

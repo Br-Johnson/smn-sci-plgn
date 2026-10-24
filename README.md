@@ -44,6 +44,7 @@ What is real now:
 - a bounded Columbia Basin v0 identity slice with non-authoritative identity hints
 - a seed identity/crosswalk data layer with explicit schemas
 - three new source scaffolds: `CRITFC`, `NOAA SPS`, and `NPAFC`
+- offline private research-project inspection, contribution previews and framework proposal checks
 - a scaffolded stock-brief composite workflow
 - a maintainer-first in-repo knowledge base in `kb/`
 
@@ -442,3 +443,11 @@ The highest-current blockers remain:
 - [dfo-pacific-science/dfo-salmon-ontology](https://github.com/dfo-pacific-science/dfo-salmon-ontology)
 - [salmon-data-mobilization/metasalmon](https://github.com/salmon-data-mobilization/metasalmon)
 - [salmon-data-mobilization/metasalmonpy](https://github.com/salmon-data-mobilization/metasalmonpy)
+
+## Local research workbench and framework
+
+`salmon-workbench-skill` reads `salmon-research-project.v1` JSON exports; it does not connect to a hosted workbench. Drafts can be inspected, while contribution previews require a commitment, selected outputs, reason and finite date. Preview text is explicitly supplied and still needs disclosure review. Embargo expiry requests review without changing privacy.
+
+`salmon-research-framework-skill` creates and checks a local hypothesis/evidence proposal. First-winter age/cohort and direct-survival claims require explicit evidence entries. Entries remain unverified proposals; no model, scientific acceptance, identity bridge or publication occurs. Both skills use Python standard-library helpers and need no API key.
+
+The existing SDK adapter remains at its documented pin and implemented actions. These local helpers do not require a package-pin change or claim new SDK creation/review capabilities. Framework provenance and article capability evidence: [framing](skills/salmon-research-framework-skill/references/framing.md).

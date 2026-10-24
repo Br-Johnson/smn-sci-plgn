@@ -32,3 +32,10 @@ The repo does not yet ship:
 - deterministic composite workflows beyond the stock-brief scaffold
 
 If those are needed, say so clearly instead of pretending the current scaffold can answer them directly.
+
+## Local project lanes
+
+- `lane:private-research-workbench`: project exports, embargo review and sanitized contribution previews → `salmon-workbench-skill`.
+- `lane:research-framework`: explicit life-phase hypotheses, outcomes, exposures and evidence requirements → `salmon-research-framework-skill`; entity normalisation remains non-authoritative.
+
+These lanes require no network or model credentials. A successful contract check does not grant scientific or publication approval.

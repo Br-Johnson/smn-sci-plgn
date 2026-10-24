@@ -91,3 +91,7 @@ Still open at parity-blocking severity:
 - scored behavior tests: an eval case exists for every skill, but none has been run against a live model
 - governance-aware access beyond `access_tier`
 - deterministic composite workflows beyond the stock-brief scaffold
+
+## Local project workflow boundary (2026-10-24)
+
+Private research exports and explicit framework proposals now have offline helpers and routing. Hosted client/authentication, scientific evidence verification, survival models, identity acceptance and publication remain outside this implementation. SDK creation/review remains outside the current thin adapter. Live-model eval cases are supplied but unscored until explicitly run.

@@ -449,5 +449,40 @@
         "literature-reports-dataset-discovery"
       ]
     }
+  },
+  {
+    "request": "Inspect this private workbench project export and its embargo",
+    "expected": {
+      "seeded_lanes": [
+        "lane:private-research-workbench"
+      ],
+      "selected_skills": [
+        "salmon-workbench-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "private-research-workbench",
+        "salmon-workbench-skill"
+      ]
+    }
+  },
+  {
+    "request": "Draft a research framework for first winter",
+    "expected": {
+      "seeded_lanes": [
+        "lane:research-framework"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "salmon-research-framework-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "research-framework",
+        "salmon-research-framework-skill"
+      ]
+    }
   }
 ]
