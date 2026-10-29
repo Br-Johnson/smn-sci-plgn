@@ -88,5 +88,6 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Workbench export inspection and selected contribution preview: `skills/salmon-workbench-skill/SKILL.md`.
 - Framework template/check: `skills/salmon-research-framework-skill/SKILL.md`.
 - One shared implementation: `scripts/workbench_project.py`; each skill has a portable wrapper.
+- Redacted optional-field readiness profile: `scripts/_workbench_readiness.py`; pinned shape and limits: `docs/research-workbench-contract.md`.
 - Contract/semantic/privacy regressions: `tests/test_workbench_project.py`.
 - No hosted client, model fitting, graph publication or human decision application is implemented in this path.
