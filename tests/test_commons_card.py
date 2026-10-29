@@ -163,18 +163,19 @@ class OfflineAdapterTests(unittest.TestCase):
         self.assertEqual(response["checkout"]["found_by"], "the working directory")
         self.assertEqual(response["checkout"]["path"], str(self.clone))
 
-    def test_validate_runs_the_pinned_copy_not_the_clones(self) -> None:
+    def test_validate_refuses_changed_rules_instead_of_reporting_a_historical_pass(self) -> None:
         (self.clone / "scripts" / "okf-check.py").write_text(
             'print(\'{"copy": "clone"}\')\n', encoding="utf-8"
         )
         response = self.call(action="validate")
-        self.assertTrue(response["ok"], response)
-        self.assertEqual(response["output"]["copy"], "pinned")
-        self.assertEqual(response["output"]["cwd"], str(self.clone))
-        self.assertEqual(response["ran"]["script"], "scripts/okf-check.py")
-        self.assertEqual(response["ran"]["commit"], self.pin)
-        self.assertEqual(response["ran"]["args"], [".", "--json", "--schema", "<pinned>/schema/concept.schema.json"])
+        self.assertFalse(response["ok"], response)
+        self.assertEqual(response["error"]["code"], "upstream_drift")
+        self.assertNotIn("ran", response)
         self.assertEqual(response["checkout"]["drift"], ["scripts/okf-check.py"])
+        self.assertEqual(response["pin"]["commit"], self.pin)
+        inspected = self.call(action="runtime")
+        self.assertTrue(inspected["ok"], inspected)
+        self.assertEqual(inspected["checkout"]["drift"], ["scripts/okf-check.py"])
 
     def test_validate_gaps_asks_for_the_gap_register(self) -> None:
         response = self.call(action="validate", gaps=True)
@@ -317,6 +318,75 @@ class LiveCommonsTests(unittest.TestCase):
         )
         self.assertEqual(run.returncode, 0, run.stderr)
         return json.loads(run.stdout)
+
+    @contextlib.contextmanager
+    def synthetic_bundle(self, writer: str, verifier: str | None):
+        """Use authorized tools with synthetic cards, leaving the source clone untouched."""
+        with tempfile.TemporaryDirectory() as tmp:
+            clone = Path(tmp) / "commons"
+            subprocess.run(
+                ["git", "clone", "--quiet", "--no-hardlinks", "--no-checkout", LIVE_CLONE, str(clone)],
+                capture_output=True, text=True, check=True,
+            )
+            git(clone, "checkout", "HEAD", "--", "scripts", "schema", "CONTRIBUTING.md")
+            (clone / "concepts").mkdir()
+            (clone / "index.md").write_text('---\nokf_version: "0.2"\n---\n\n# Synthetic controls\n')
+            card = {
+                "type": "Concept", "title": "Synthetic provenance control",
+                "description": "A synthetic adapter integration fixture.",
+                "status": "draft", "context": "data-informatics",
+                "generated": {"by": writer, "at": "2026-10-29T00:00:00Z"},
+                "sources": [{"id": "fixture", "resource": "https://example.org/source", "title": "Synthetic source"}],
+                "alignment": {"related": ["https://example.org/term"]},
+            }
+            if verifier is not None:
+                card["verified"] = [{"by": verifier, "at": "2026-10-29T00:00:00Z"}]
+            (clone / "concepts" / "control.md").write_text(
+                "---\n" + json.dumps(card) + "\n---\n\nSynthetic fixture claim.[^fixture]\n\n[^fixture]: Synthetic source.\n",
+                encoding="utf-8",
+            )
+            yield clone
+
+    def test_synthetic_provenance_is_checked_against_current_commons_rules(self) -> None:
+        cases = (
+            ("unverified-agent", "test-agent/1", None, None),
+            ("independent-human", "human:synthetic-writer", "human:synthetic-reader", None),
+            ("self-verification", "human:synthetic-writer", "human:synthetic-writer", "cannot verify their own card"),
+            ("agent-verification", "human:synthetic-writer", "process:synthetic-checker", "names an agent/process"),
+        )
+        for name, writer, verifier, error in cases:
+            with self.subTest(name=name), self.synthetic_bundle(writer, verifier) as clone:
+                response = self.run_adapter({"action": "validate", "commons_dir": str(clone)})
+                if error is None:
+                    self.assertTrue(response["ok"], response)
+                    self.assertEqual(response["output"]["errors"], [])
+                else:
+                    self.assertFalse(response["ok"], response)
+                    self.assertEqual(response["error"]["code"], "nonzero_exit")
+                    self.assertTrue(any(error in item["message"] for item in response["output"]["errors"]), response)
+
+    def test_current_rule_drift_blocks_checks_and_ledger_writes_through_the_cli(self) -> None:
+        with self.synthetic_bundle("test-agent/1", None) as clone:
+            rules = clone / "CONTRIBUTING.md"
+            rules.write_text(rules.read_text(encoding="utf-8") + "\nSynthetic changed contribution rule.\n")
+            card = clone / "concepts" / "control.md"
+            before = card.read_bytes()
+            with tempfile.TemporaryDirectory() as tmp:
+                ledger = Path(tmp) / "ledger.json"
+                ledger.write_text('{"rows": []}', encoding="utf-8")
+                requests = (
+                    {"action": "validate"},
+                    {"action": "check_card", "cards": ["concepts/control.md"]},
+                    {"action": "ledger_table", "cards": ["concepts/control.md"], "ledgers": [str(ledger)], "write": True},
+                )
+                for request in requests:
+                    with self.subTest(action=request["action"]):
+                        response = self.run_adapter({"commons_dir": str(clone), **request})
+                        self.assertFalse(response["ok"], response)
+                        self.assertEqual(response["error"]["code"], "upstream_drift")
+                        self.assertEqual(response["checkout"]["drift"], ["CONTRIBUTING.md"])
+                        self.assertNotIn("ran", response)
+                        self.assertEqual(card.read_bytes(), before)
 
     def test_runtime_is_ready(self) -> None:
         response = self.run_adapter({"action": "runtime"})

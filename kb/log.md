@@ -1,5 +1,29 @@
 # Knowledge Base Log
 
+## [2026-10-29] compatibility | commons-validation
+
+- Refreshed the Commons adapter's reviewed pin and retained pin/head/drift reporting.
+- Script actions stop when the checkout's tools, schema or contribution rules differ; runtime and checklist remain inspection actions.
+- Added synthetic provenance controls through the authorized adapter interface and retained ledger preview/write boundaries.
+- Private upstream conformance evidence stays outside this public repository.
+
+## [2026-10-29] source-safety | authenticated-session-boundaries
+
+- RMIS, PTAGIS and StreamNet now use environment-only credentials, fixed HTTPS source origins and same-origin authenticated redirects.
+- Agent-side RMIS login and inline credential fields/query parameters are refused; user-run setup is documented separately.
+- Normal output and saved JSON redact configured credentials and credential-shaped fields; authenticated HTTP error bodies and CLI tracebacks are withheld.
+- Regression fixtures use invented values, fake external API responses and local TLS servers; no live authenticated access was tested.
+- Follow-up guards validate the final outgoing URL and encode source identifiers as opaque path segments; raw query-string parsing preserves question marks in ordinary values.
+
+## [2026-10-24] local-workflows | research-workbench
+
+- Added two offline project/framework skills and canonical routing nodes.
+- Private exports, pending identity proposals and finite embargo review remain separate from publication.
+- Aligned plugin manifest versions at 0.1.0; corrected validation versus publication wording.
+- Existing SDK actions/pins unchanged; no hosted API or fitted model claim.
+- Browser-export alignment: revision-zero drafts preserve blank owner/timestamps and are explicitly unsaved; contribution preview requires a saved revision. Non-candidate source decisions need reasons.
+
+
 ## [2026-04-17] bootstrap | registry-and-wiki
 
 - Added `registry/` with platform-card and identity-record schemas.

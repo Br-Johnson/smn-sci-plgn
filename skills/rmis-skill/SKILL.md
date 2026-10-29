@@ -1,11 +1,12 @@
 ---
 name: rmis-skill
-description: Query the RMIS / RMPC API for release, recovery, location, catch-sample, description, and file records, and fetch the public RMIS version announcement. Use when the user needs coded-wire-tag data or RMIS status information and has RMIS credentials or an RMPC API key.
+description: Query the RMIS / RMPC API for release, recovery, location, catch-sample, description, and file records, and fetch the public RMIS version announcement. Use when the user needs coded-wire-tag data or RMIS status information and a permitted RMIS credential is configured in the local environment.
 ---
 
 ## Operating rules
 
 - Use `scripts/rmis_api.py` for all RMIS calls.
+- Credentials come only from the local environment. Never request or accept passwords, keys or tokens in chat or JSON. See [local authentication](../../docs/source-authentication.md).
 - RMIS data endpoints are authenticated.
 - The public `announcement` action works without credentials.
 - Prefer small, explicit queries first.
@@ -22,14 +23,15 @@ The API currently supports:
 - `xapikey` header
 - `Authorization` header with a JWT-style token
 
-You can also retrieve a token using the login endpoint if you have an RMIS email and password.
+Obtain a credential in your own source-approved browser or Terminal workflow.
+The adapter does not log in: the legacy `login` action returns
+`local_auth_required` without contacting the authentication service.
 
 ## Input
 
 - Read one JSON object from stdin.
 - Supported actions:
   - `announcement`
-  - `login`
   - `release`
   - `recovery`
   - `location`
@@ -40,11 +42,7 @@ You can also retrieve a token using the login endpoint if you have an RMIS email
 - Optional fields:
   - `params`
   - `path`
-  - `email`
-  - `password`
-  - `jwt`
   - `auth_mode`
-  - `auth_token`
   - `save_raw`
   - `raw_output_path`
   - `timeout_sec`

@@ -12,6 +12,9 @@ from typing import Iterable
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 LANE_PRIORITY = [
+    "lane:controlled-vocabulary-authoring",
+    "lane:private-research-workbench",
+    "lane:research-framework",
     "lane:stock-assessment",
     "lane:crosswalk-harmonization",
     "lane:ontology-semantic-resolution",
@@ -26,6 +29,14 @@ LANE_PRIORITY = [
 ]
 
 LANE_PATTERNS: dict[str, tuple[str, ...]] = {
+    "lane:controlled-vocabulary-authoring": (
+        r"\b(?:creat(?:e|ing)|build|author|publish|host|scaffold)\b.{0,100}\b(?:controlled vocabular(?:y|ies)|skos|vocabulary website)\b",
+        r"\b(?:creat(?:e|ing)|register|publish|prepare|host|mint)\b.{0,100}\bw3\s?id\b",
+        r"\bvocabular(?:y|ies)\b.{0,100}\bgithub pages\b",
+        r"\bgithub pages\b.{0,100}\bvocabular(?:y|ies)\b",
+    ),
+    "lane:private-research-workbench": (r"\bworkbench\b", r"\bproject export\b", r"\bcontribution preview\b"),
+    "lane:research-framework": (r"\bresearch framework\b", r"\blikely suspects\b", r"\banalytical framework\b"),
     "lane:stock-assessment": (
         r"\bstock\b",
         r"\bassessment\b",
@@ -206,6 +217,9 @@ NORMALIZER_LANES = {
 }
 
 LANE_SKILL_MAP: dict[str, tuple[str, ...]] = {
+    "lane:controlled-vocabulary-authoring": ("controlled-vocabulary",),
+    "lane:private-research-workbench": ("salmon-workbench-skill",),
+    "lane:research-framework": ("salmon-entity-normalizer-skill", "salmon-research-framework-skill"),
     "lane:stock-assessment": ("salmon-entity-normalizer-skill", "streamnet-api-skill", "salmon-literature-skill"),
     "lane:crosswalk-harmonization": ("salmon-entity-normalizer-skill", "critfc-crosswalk-skill"),
     "lane:telemetry-passage": ("salmon-entity-normalizer-skill", "ptagis-skill", "dart-query-skill"),

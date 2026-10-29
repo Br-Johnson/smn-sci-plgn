@@ -78,7 +78,8 @@
     "The current wrapper exposes only a narrow slice of the full API surface."
   ],
   "governance_constraints": [
-    "The agent must treat RMIS as access-controlled rather than public-by-default."
+    "The agent must treat RMIS as access-controlled rather than public-by-default.",
+    "Plugin credentials come only from the user-configured local environment; inline credentials and agent-side login are refused. Authenticated transport is HTTPS-only, with fixed source-origin and same-origin redirect policy; normal output and saved JSON redact credentials."
   ],
   "related_skills": [
     "rmis-skill"
@@ -89,7 +90,9 @@
     "https://www.rmis.org/include/rmis_announce.html",
     "skills/rmis-skill/SKILL.md",
     "skills/rmis-skill/references/rmis-access.md",
-    "skills/rmis-skill/scripts/rmis_api.py"
+    "skills/rmis-skill/scripts/rmis_api.py",
+    "docs/source-authentication.md",
+    "tests/test_source_credentials.py"
   ],
   "watch_fields": [
     "auth model",

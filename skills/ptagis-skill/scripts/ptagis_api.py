@@ -7,7 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import emit, getenv_any, http_get_json, load_input, result_error, write_raw
+from _source_auth import SourcePolicyError, source_path_segment
+from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, http_get_json, load_input, result_error, write_raw
 
 
 BASE_URL = "https://api.ptagis.org"
@@ -43,6 +44,9 @@ def main() -> None:
         emit(result_error("invalid_input", "expected a JSON object"))
         return
 
+    if inline_credentials_refused(payload):
+        return
+
     action = payload.get("action")
     timeout = int(payload.get("timeout_sec", 20))
 
@@ -52,7 +56,7 @@ def main() -> None:
         if not site_code or year is None:
             emit(result_error("missing_fields", "site_observations requires site_code and year"))
             return
-        path = f"/data/interrogation/site/{site_code}/year/{year}/observations"
+        path = f"/data/interrogation/site/{source_path_segment(site_code)}/year/{source_path_segment(year)}/observations"
         params = payload.get("params") or {}
     elif action == "interrogation_site_codes":
         path = "/eventlogs/interrogation/sitecodes/ptagis"
@@ -62,11 +66,11 @@ def main() -> None:
         project_code = payload.get("project_code")
         year = payload.get("year")
         if project_code and year is not None:
-            path = f"/files/mrr/sites/{project_code}/year/{year}"
+            path = f"/files/mrr/sites/{source_path_segment(project_code)}/year/{source_path_segment(year)}"
         elif site_code and year is not None:
-            path = f"/files/interrogation/sites/{site_code}/year/{year}"
+            path = f"/files/interrogation/sites/{source_path_segment(site_code)}/year/{source_path_segment(year)}"
         elif site_code:
-            path = f"/files/interrogation/sites/{site_code}"
+            path = f"/files/interrogation/sites/{source_path_segment(site_code)}"
         else:
             path = "/files/interrogation/sites"
         params = payload.get("params") or {}
@@ -78,14 +82,14 @@ def main() -> None:
             return
         domain = payload.get("domain")
         if kind == "mrr_codes" and domain:
-            path = f"/ValidationCodes/MrrCodes/{domain}"
+            path = f"/ValidationCodes/MrrCodes/{source_path_segment(domain)}"
         params = payload.get("params") or {}
     elif action == "reports":
         user_name = payload.get("user_name")
         if not user_name:
             emit(result_error("missing_user_name", "reports action requires user_name"))
             return
-        path = f"/reporting/reports/{user_name}"
+        path = f"/reporting/reports/{source_path_segment(user_name)}"
         params = payload.get("params") or {}
     elif action == "report_file":
         user_name = payload.get("user_name")
@@ -93,7 +97,7 @@ def main() -> None:
         if not user_name or not report_name:
             emit(result_error("missing_fields", "report_file requires user_name and report_name"))
             return
-        path = f"/reporting/reports/{user_name}/file/{report_name}"
+        path = f"/reporting/reports/{source_path_segment(user_name)}/file/{source_path_segment(report_name)}"
         params = payload.get("params") or {}
     elif action == "request":
         req_path = payload.get("path")
@@ -107,7 +111,7 @@ def main() -> None:
         return
 
     headers = {}
-    token = payload.get("auth_token") or getenv_any("PTAGIS_API_TOKEN", "PTAGIS_API_KEY")
+    token = getenv_any("PTAGIS_API_TOKEN", "PTAGIS_API_KEY")
     warnings = []
     if token:
         headers["Authorization"] = f"Bearer {token}"
@@ -116,7 +120,9 @@ def main() -> None:
 
     url = f"{BASE_URL}{path}"
     try:
-        data, full_url = http_get_json(url, params=params, headers=headers, timeout=timeout)
+        data, full_url = http_get_json(url, params=params, headers=headers, timeout=timeout, allowed_origins=(BASE_URL,))
+    except SourcePolicyError:
+        raise
     except RuntimeError as exc:
         detail = json.loads(str(exc))
         message = "PTAGIS request failed"
@@ -157,4 +163,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_source_cli(main)

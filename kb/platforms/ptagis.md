@@ -16,3 +16,12 @@ PTAGIS is the current scaffold's PIT-tag and interrogation metadata source.
 ## Why it matters
 
 PTAGIS is a major telemetry lane, but it remains access-sensitive and does not solve canonical cross-system identity on its own.
+
+
+## Plugin authentication boundary
+
+Credentials are configured in the user's local environment, never supplied in
+chat or JSON. Authenticated requests stay on the fixed HTTPS source origin;
+cross-origin and downgrade redirects are refused. Ordinary output and saved
+JSON redact credentials. See [local authentication](../../docs/source-authentication.md)
+for the user-run setup and synthetic verification path.

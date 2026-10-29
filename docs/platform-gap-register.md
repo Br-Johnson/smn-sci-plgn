@@ -91,3 +91,7 @@ Still open at parity-blocking severity:
 - scored behavior tests: an eval case exists for every skill, but none has been run against a live model
 - governance-aware access beyond `access_tier`
 - deterministic composite workflows beyond the stock-brief scaffold
+
+## Local project workflow boundary (2026-10-24)
+
+Private research exports and explicit framework proposals now have offline helpers and routing. Hosted client/authentication, scientific evidence verification, survival models, identity acceptance and publication remain outside this implementation. These offline helpers do not perform SDK creation or semantic review; use the existing metasalmon and sdp-semantic-review skills within their documented contracts. Live-model eval cases are supplied but unscored until explicitly run.

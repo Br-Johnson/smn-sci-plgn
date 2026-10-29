@@ -14,6 +14,9 @@ NON_PLATFORM_SKILLS = {
     "salmon-research-router-skill",
     "salmon-entity-normalizer-skill",
     "salmon-stock-brief-workflow-skill",
+    "salmon-workbench-skill",
+    "salmon-research-framework-skill",
+    "controlled-vocabulary",
 }
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -108,6 +111,12 @@ LOCAL_SEARCH_DEFINITION_RE = re.compile(
     r"^\s*def\s+(find_terms|search_terms|sources_for_role|get_term|_?score_\w*|_?rank_\w*)\s*\(",
     re.MULTILINE,
 )
+# The user-requested controlled-vocabulary writer emits these formats and
+# predicates from local authoring inputs. This exact-file exception permits
+# serialization only: discovery hosts, ontology imports and search/rank
+# definitions remain forbidden there, as they are in every other script.
+CV_AUTHORING_SCRIPT = "skills/controlled-vocabulary/scripts/controlled_vocabulary.py"
+CV_AUTHORING_LITERALS = frozenset({".ttl", ".jsonld", "skos/core#", "skos:prefLabel"})
 
 # Eval cases for `claude plugin eval`, in the published case format
 # (https://code.claude.com/docs/en/plugin-evals, read 2026-09-25). Running a
@@ -449,6 +458,8 @@ def check_no_local_term_search(repo_root: Path) -> dict:
         relative = path.relative_to(repo_root).as_posix()
         text = path.read_text(encoding="utf-8", errors="replace")
         for marker in TERM_SEARCH_MARKERS:
+            if relative == CV_AUTHORING_SCRIPT and marker in CV_AUTHORING_LITERALS:
+                continue
             if marker in text:
                 problems.append(f"{relative}: contains {marker!r}")
         for name in LOCAL_SEARCH_DEFINITION_RE.findall(text):

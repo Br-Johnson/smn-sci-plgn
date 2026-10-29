@@ -11,6 +11,11 @@ description: Query the documented StreamNet REST API for coordinated-assessment 
 - Return compact summaries unless the user explicitly asks for raw JSON.
 - If the user has no key, explain that the scaffold is ready but the live API requires authentication.
 
+Credentials come only from the local environment. Never request or accept
+passwords, keys or tokens in chat, JSON fields or query parameters. See
+[local authentication](../../docs/source-authentication.md) for the user-run
+route and the fixed HTTPS origin/redirect policy.
+
 ## Input
 
 - Read one JSON object from stdin.
@@ -28,7 +33,6 @@ description: Query the documented StreamNet REST API for coordinated-assessment 
   - `per_page`
   - `agency`
   - `updated_since`
-  - `api_key`
   - `timeout_sec`
   - `save_raw`
   - `raw_output_path`

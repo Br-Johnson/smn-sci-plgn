@@ -11,6 +11,11 @@ description: Query documented PTAGIS endpoints for site observations, file listi
 - Do not use tag-level lookups for bulk analysis in chat.
 - Return compact summaries unless the user explicitly asks for raw payloads.
 
+Credentials come only from the local environment. Never request or accept
+passwords, keys or tokens in chat, JSON fields or query parameters. See
+[local authentication](../../docs/source-authentication.md) for the user-run
+route and the fixed HTTPS origin/redirect policy.
+
 ## Input
 
 - Read one JSON object from stdin.
@@ -33,7 +38,6 @@ description: Query documented PTAGIS endpoints for site observations, file listi
   - `kind`
   - `path`
   - `params`
-  - `auth_token`
   - `timeout_sec`
   - `save_raw`
   - `raw_output_path`

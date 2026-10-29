@@ -45,6 +45,7 @@ What is real now:
 - a bounded Columbia Basin v0 identity slice with non-authoritative identity hints
 - a seed identity/crosswalk data layer with explicit schemas
 - three new source scaffolds: `CRITFC`, `NOAA SPS`, and `NPAFC`
+- offline private research-project inspection, contribution previews and framework proposal checks
 - a scaffolded stock-brief composite workflow
 - a maintainer-first in-repo knowledge base in `kb/`
 
@@ -264,6 +265,7 @@ Current coverage:
 - `ledger_table.py`: a card's in-card citation-ledger table from ledger JSON, as a dry run or written
 - `ledger_check.py --from-card`: the card-only ledger check
 - the commons' `CONTRIBUTING.md`, and which of those files the clone has changed since the pin
+- checks and ledger writes stop when tools, schema or contribution rules differ from the reviewed pin; runtime and checklist remain available for inspection
 
 ### `streamnet-api-skill`
 
@@ -292,7 +294,8 @@ Authenticated wrapper for the live RMIS / RMPC API plus public RMIS status looku
 
 Current coverage:
 - public RMIS version announcement lookup
-- API login for API key or JWT retrieval
+- environment-based authenticated reads with a fixed HTTPS origin policy; agent-side login is refused
+- [user-run local authentication](docs/source-authentication.md), credential redaction and redirect safeguards
 - authenticated `release`, `recovery`, `location`, `catchsample`, `description`, and `files` GET calls
 - generic request path for future expansion
 
@@ -502,3 +505,26 @@ The highest-current blockers remain:
 - [dfo-pacific-science/dfo-salmon-ontology](https://github.com/dfo-pacific-science/dfo-salmon-ontology)
 - [salmon-data-mobilization/metasalmon](https://github.com/salmon-data-mobilization/metasalmon)
 - [salmon-data-mobilization/metasalmonpy](https://github.com/salmon-data-mobilization/metasalmonpy)
+
+## Local research workbench and framework
+
+`salmon-workbench-skill` reads `salmon-research-project.v1` JSON exports; it does not connect to a hosted workbench. Drafts can be inspected, while contribution previews require a commitment, selected outputs, reason and finite date. Preview text is explicitly supplied and still needs disclosure review. Embargo expiry requests review without changing privacy.
+
+`salmon-research-framework-skill` creates and checks a local hypothesis/evidence proposal. First-winter age/cohort and direct-survival claims require explicit evidence entries. Entries remain unverified proposals; no model, scientific acceptance, identity bridge or publication occurs. Both skills use Python standard-library helpers and need no API key.
+
+The existing SDK adapter remains at its documented pin and implemented actions. These local helpers do not require a package-pin change or claim new SDK creation/review capabilities. Framework provenance and article capability evidence: [framing](skills/salmon-research-framework-skill/references/framing.md).
+
+## Controlled-vocabulary authoring
+
+`controlled-vocabulary` creates a small CSV-authoritative SKOS vocabulary with
+stable W3ID term IRIs, source-backed definitions, immutable local editions and
+a static GitHub Pages website. Its portable standard-library helper validates
+identifiers, labels, hierarchy and release integrity, then prepares a manual
+Pages workflow and reviewed W3ID redirect contribution. Local preparation does
+not register a namespace, change Pages settings or publish. Existing vocabulary
+and namespace contracts stay authoritative; term discovery remains in the
+package-backed `salmon-terms` skill.
+
+Start at [the skill](skills/controlled-vocabulary/SKILL.md). The reproducible
+fictional workflow and its publication limits are covered by
+`tests/test_controlled_vocabulary.py`.

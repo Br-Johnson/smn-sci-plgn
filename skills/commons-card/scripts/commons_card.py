@@ -21,7 +21,8 @@ it. Each call copies the pinned files out of the clone's git objects into a
 temporary directory, runs them from there with the clone as the working
 directory, and deletes the directory. The clone's own copies of those files are
 never run; where they differ from the pinned ones, ``checkout.drift`` lists
-them.
+them and script actions stop before running. ``runtime`` and ``checklist``
+remain available for inspection.
 
 Run it with uv, which reads the block above and installs the two libraries the
 commons' scripts import:
@@ -46,11 +47,11 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from _common import emit, load_input, result_error  # noqa: E402
 
 COMMONS_REPOSITORY = "salmon-data-mobilization/salmon-knowledge-commons"
-# The commons' main as read on 2026-10-15. Moving the pin is a plugin change:
+# The commons' main as read on 2026-10-29. Moving the pin is a plugin change:
 # read the three scripts' usage at the new commit, update
 # references/ledger-file.md if the ledger keys changed, and run the live tests
 # in tests/test_commons_card.py against a clone.
-COMMONS_PIN = "1b7594e6263933e08ae196b4374373eb907c137f"
+COMMONS_PIN = "20cd300512cddf378c3769bd21c4f346bed61046"
 
 VALIDATOR = "scripts/okf-check.py"
 TABLE_WRITER = "scripts/ledger/ledger_table.py"
@@ -295,6 +296,13 @@ def handle(request: object, pin: str = COMMONS_PIN) -> dict:
         base["checkout"] = clone = find_clone(request, pin)
         if action == "runtime":
             return {"ok": True, **base}
+        if action != "checklist" and clone["drift"]:
+            raise RequestError(
+                "upstream_drift",
+                "The clone's tools, schema or contribution rules differ from this plugin's pin. "
+                "No script ran: a historical check cannot establish readiness against the current rules. "
+                "Inspect runtime and checklist, then update the plugin to a reviewed compatible pin.",
+            )
         with tempfile.TemporaryDirectory(prefix="commons-card-") as scratch:
             staged = Path(scratch) / "pinned"
             extract_pinned(Path(clone["path"]), pin, staged)

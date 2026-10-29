@@ -77,7 +77,8 @@
     "The current wrapper is intentionally narrow."
   ],
   "governance_constraints": [
-    "Access should be treated as governance-aware rather than universally available."
+    "Access should be treated as governance-aware rather than universally available.",
+    "Plugin credentials come only from the user-configured local environment; inline credentials and agent-side login are refused. Authenticated transport is HTTPS-only, with fixed source-origin and same-origin redirect policy; normal output and saved JSON redact credentials."
   ],
   "related_skills": [
     "ptagis-skill"
@@ -86,7 +87,9 @@
   "evidence_links": [
     "https://www.ptagis.org/Content/DataSpecification/topics/api.htm",
     "skills/ptagis-skill/SKILL.md",
-    "skills/ptagis-skill/scripts/ptagis_api.py"
+    "skills/ptagis-skill/scripts/ptagis_api.py",
+    "docs/source-authentication.md",
+    "tests/test_source_credentials.py"
   ],
   "watch_fields": [
     "bearer-token requirements",

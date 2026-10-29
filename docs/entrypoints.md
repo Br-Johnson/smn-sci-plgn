@@ -30,6 +30,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Entity normalization: `skills/salmon-entity-normalizer-skill/SKILL.md`
 - Crosswalk and harmonization lookups: `skills/critfc-crosswalk-skill/SKILL.md`
 - Ontology term search, shared `smn` and DFO `gcdfo` alike: `skills/salmon-terms/SKILL.md`
+- Controlled-vocabulary authoring and W3ID/GitHub Pages publication preparation: `skills/controlled-vocabulary/SKILL.md`
 - Salmon Data Package workflows: `skills/metasalmon-skill/SKILL.md`
 - Judging a package's semantic review packet: `skills/sdp-semantic-review/SKILL.md`
 - Writing and checking salmon knowledge commons cards: `skills/commons-card/SKILL.md`
@@ -47,7 +48,11 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Package adapters, which only marshal JSON to metasalmonpy `v0.6.0`: `skills/salmon-terms/scripts/salmon_terms.py` and `skills/metasalmon-skill/scripts/metasalmon_api.py`
 - Plumbing the two adapters share, including the package pin: `scripts/_package_adapter.py`
 - Commons adapter, which runs the commons' own scripts at its pinned commit against the user's clone: `skills/commons-card/scripts/commons_card.py`
-- Shared stdlib helper utilities: `scripts/_common.py`
+  - `runtime`/`checklist` inspect the pin and drift; script actions return `upstream_drift` before running when tools, schema or contribution rules differ.
+  - Offline contract checks: `python3 -m unittest discover -s tests -p 'test_commons_card.py'`. With an authorized clone, set `SALMON_COMMONS_DIR` to enable the real-tool synthetic controls and read-only bundle/ledger checks.
+- Local CV authoring helper, copied into each new project and requiring only Python's standard library: `skills/controlled-vocabulary/scripts/controlled_vocabulary.py`. Run `init`, `validate`, `release`, `build`, or `prepare-publication`; publication preparation performs no external action. Regression seam: `tests/test_controlled_vocabulary.py`.
+- Shared stdlib helper utilities and credential-safe output/file handling: `scripts/_common.py`
+- Authenticated-source origin, redirect and redaction policy: `scripts/_source_auth.py`; user-run setup: `docs/source-authentication.md`; regressions: `tests/test_source_credentials.py`
 - Executable graph selector: `scripts/skill_graph_selector.py`
 - Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`
 - Stock-brief contract helper: `skills/salmon-stock-brief-workflow-skill/scripts/stock_brief_contract.py`
@@ -77,3 +82,11 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Change user-facing repo scope or setup: `README.md`
 - Change plugin metadata: `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json` together, since validation fails until they agree
 - Move the metasalmon or metasalmonpy pin: every copy in one change, meaning `scripts/_package_adapter.py`, the inline metadata block of both adapter scripts, and the docs that name the tag. Validation fails until they agree.
+
+## Private research project path
+
+- Workbench export inspection and selected contribution preview: `skills/salmon-workbench-skill/SKILL.md`.
+- Framework template/check: `skills/salmon-research-framework-skill/SKILL.md`.
+- One shared implementation: `scripts/workbench_project.py`; each skill has a portable wrapper.
+- Contract/semantic/privacy regressions: `tests/test_workbench_project.py`.
+- No hosted client, model fitting, graph publication or human decision application is implemented in this path.
