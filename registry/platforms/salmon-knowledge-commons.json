@@ -27,7 +27,7 @@
     },
     "metadata_schema": {
       "status": "supported",
-      "note": "The commons' own validator, at the pinned commit, checks every card against the commons' closed schema and its rules."
+      "note": "The commons' own validator, at the reviewed pinned commit, checks every card against the commons' closed schema and its rules. Script actions fail closed when the checkout's tools, schema or contribution rules differ from the pin."
     },
     "entity_lookup": {
       "status": "missing",
@@ -72,7 +72,8 @@
   },
   "blockers": [
     "The commons is private, so the skill needs a local clone that contains the pinned commit; the plugin cannot fetch it.",
-    "The adapter needs uv, or a Python with PyYAML and jsonschema, to run the commons' scripts."
+    "The adapter needs uv, or a Python with PyYAML and jsonschema, to run the commons' scripts.",
+    "Changed tools, schema or contribution rules block validation, card checks and ledger generation until the plugin has a reviewed compatible pin; runtime and checklist are inspection only."
   ],
   "governance_constraints": [
     "The public plugin carries no commons content: the skill reads the commons' scripts and CONTRIBUTING.md from the user's clone at run time and deletes its copies afterwards.",
@@ -81,7 +82,7 @@
   "related_skills": [
     "commons-card"
   ],
-  "last_verified_date": "2026-10-15",
+  "last_verified_date": "2026-10-29",
   "evidence_links": [
     "https://github.com/salmon-data-mobilization/salmon-knowledge-commons",
     "skills/commons-card/SKILL.md",

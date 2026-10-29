@@ -73,13 +73,22 @@ prints whose copy in the clone differs from the pinned one. Every action that
 runs a script also carries `ran` (the script, the pin and the arguments),
 `exit_code` and `stderr`; a non-zero exit gives `ok: false`.
 
+The pin was reviewed on 2026-10-29. If any pinned tool, schema or contribution
+rule differs in the checkout, `validate`, `check_card` and `ledger_table`
+return `ok: false` with `error.code: upstream_drift` before running a script.
+This also blocks ledger writes. `runtime` and `checklist` remain available to
+inspect the pin and the differences; their success is not a validation pass.
+There is no implicit mode that runs historical checks against changed rules.
+
 ## Writing or changing a card
 
 1. Run `runtime`. If it is not ok, its message says what to fix, and if a
    dependency reads false, run the adapter with uv as shown above. If `drift`
    is not empty, the commons has changed those files since this plugin's pin:
-   say so when you report, because the pinned run and the commons' CI can then
-   disagree, and the CI decides.
+   stop before writing or checking cards and report the differences. Update
+   the plugin to a reviewed compatible pin; do not change the clone's rules
+   to make a historical checker pass. The commons' own CI remains the
+   contribution authority.
 2. Run `checklist` and read it before writing anything. It is the commons' own
    statement of what a card must carry and of what an agent may and may not do
    there. If `differs_in_checkout` is true, read the clone's copy as well and
@@ -107,9 +116,11 @@ runs a script also carries `ran` (the script, the pin and the arguments),
 
 ## Rules
 
-- A pass means every citation has a checked trail, not that every claim is
-  right: no check here can tell whether the located passage says what the
-  card's sentence says. Say so when you report a pass.
+- A successful `check_card` means every citation has a checked trail, not that
+  every claim is right: no check here can tell whether the located passage says
+  what the card's sentence says. A successful `validate` checks the bundle's
+  schema and rules; it does not replace `check_card` or the commons' other CI
+  checks. Say which check passed when you report it.
 - Writing a card or its ledger is not verifying it. Never record yourself as a
   card's verifier, and never describe your ledger as a human check.
 - A ledger negative records a search that came back empty. It describes the

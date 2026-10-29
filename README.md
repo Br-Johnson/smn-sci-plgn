@@ -265,6 +265,7 @@ Current coverage:
 - `ledger_table.py`: a card's in-card citation-ledger table from ledger JSON, as a dry run or written
 - `ledger_check.py --from-card`: the card-only ledger check
 - the commons' `CONTRIBUTING.md`, and which of those files the clone has changed since the pin
+- checks and ledger writes stop when tools, schema or contribution rules differ from the reviewed pin; runtime and checklist remain available for inspection
 
 ### `streamnet-api-skill`
 

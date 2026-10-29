@@ -2,7 +2,7 @@
 
 - Platform card: [registry/platforms/salmon-knowledge-commons.json](../../registry/platforms/salmon-knowledge-commons.json)
 - Related skill: [commons-card](../../skills/commons-card/SKILL.md)
-- Repository: [salmon-data-mobilization/salmon-knowledge-commons](https://github.com/salmon-data-mobilization/salmon-knowledge-commons), private; the skill's pinned commit is `COMMONS_PIN` in its adapter, checked 2026-10-15
+- Repository: [salmon-data-mobilization/salmon-knowledge-commons](https://github.com/salmon-data-mobilization/salmon-knowledge-commons), private; the skill's pinned commit is `COMMONS_PIN` in its adapter, checked 2026-10-29
 
 ## Current role
 
@@ -28,4 +28,8 @@ The commons is private and this plugin is public, so the plugin can carry none
 of its content and can't fetch it. The skill therefore runs nothing of its own:
 it copies the pinned scripts out of the clone's git history for each call and
 deletes them afterwards. When the commons changes those scripts, the adapter
-reports the drift, and moving the pin is a plugin change.
+reports the drift and blocks script actions before they run, including ledger
+writes. Runtime and checklist remain available for inspection, and moving the
+pin is a reviewed plugin change. A bundle-validation pass and a card-ledger
+pass report different checks; neither substitutes for the commons' full CI or
+independent scientific review.

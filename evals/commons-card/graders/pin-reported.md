@@ -1,4 +1,4 @@
 ---
 type: regex
-pattern: '\b1b7594e'
+pattern: '\b20cd300'
 ---
