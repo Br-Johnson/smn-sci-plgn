@@ -1,0 +1,13 @@
+{
+  "adoption_status": "not_adopted",
+  "approval_status": "prototype_accepted",
+  "concept_ids": [
+    "PSC-CV-900004"
+  ],
+  "decision_authority": "Fictional authority",
+  "decision_date": "2026-01-01",
+  "domain_review_status": "pending",
+  "release": "v0.0.0-synthetic.1",
+  "schema_version": "1.0",
+  "semantic_status": "provisional"
+}
