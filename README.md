@@ -234,10 +234,11 @@ Current coverage:
 
 ### `sdp-semantic-review`
 
-Judges a Salmon Data Package's semantic review packet in the harness. Since
-0.6.0 the packages find ontology candidates for every unfilled IRI slot but no
-longer judge them: the package writes a packet, this skill chooses among each
-slot's candidates by index, the `metasalmon-skill` adapter writes the answers
+Judges a Salmon Data Package's semantic review packet in the harness, the
+recommended workflow added in 0.6.0. The legacy `llm_assess` provider route
+remains deprecated in v0.6.0, with removal scheduled for v0.7.0. In the harness
+workflow the package writes a packet, this skill chooses among each slot's
+candidates by index, the `metasalmon-skill` adapter writes the answers
 in the package's 30-column contract, and the package ingests, validates and
 records them. Nothing reaches the package's metadata until the user confirms
 each term in the package's review console, so the skill ends by handing the
