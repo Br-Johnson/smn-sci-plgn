@@ -231,7 +231,7 @@ def main() -> None:
     species_hits = []
     for species in SPECIES:
         for alias in species["aliases"]:
-            if alias in lower_text:
+            if re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", lower_text):
                 species_hits.append(
                     {
                         "canonical_name": species["canonical_name"],

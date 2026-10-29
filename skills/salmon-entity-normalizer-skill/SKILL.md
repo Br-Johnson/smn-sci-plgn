@@ -8,6 +8,7 @@ description: Normalize salmon species names, jurisdiction names, management-unit
 - Use `scripts/normalize_entities.py` for all current normalization work.
 - Treat this as a seed normalizer, not a full salmon identity graph.
 - Normalize species and management-unit systems before source selection.
+- Match species aliases as complete words or phrases; a word such as `cohort` supplies no species.
 - Preserve ambiguity when the text could map to more than one system.
 - Do not invent canonical IDs that are not present in the source text.
 - Treat Columbia Basin v0 identity hits as routing hints only, not authoritative identity truth.
