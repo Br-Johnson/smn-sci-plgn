@@ -18,8 +18,9 @@ CSV and portable tool. It does not create a repository.
   containing letters, digits and hyphens. A local collision check is bounded to
   the supplied checkout; refresh it before submission.
 - `version`: three-part semantic version, optionally with a prerelease suffix.
-- `issued`: an explicit ISO calendar date for this declared edition, not proof
-  that it has been published.
+- `issued`: an explicit valid calendar date in `YYYY-MM-DD` form for this
+  declared edition, not proof that it has been published. Compact and week-date
+  inputs are rejected so the emitted `xsd:date` retains a valid lexical form.
 - `language`: a BCP47-shaped language tag, such as `en` or `fr-CA`.
 - `license`: the chosen license IRI. The user must have the rights it describes.
 - `github_owner` / `github_repo`: the expected repository binding. The starter
