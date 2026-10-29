@@ -27,8 +27,6 @@ def texts(row, fields):
 
 
 def model_readiness(value):
-    if value is None:
-        return {"state": "absent"}
     if not isinstance(value, dict) or type(value.get("schemaVersion")) is not int:
         return {"state": "uninterpreted_shape"}
     if value["schemaVersion"] != 1:
@@ -55,8 +53,6 @@ def model_readiness(value):
 
 
 def annotation_readiness(value, sources):
-    if value is None:
-        return {"state": "absent"}
     if not isinstance(value, dict) or type(value.get("schemaVersion")) is not int:
         return {"state": "uninterpreted_shape"}
     if value["schemaVersion"] != 1:
@@ -87,8 +83,8 @@ def annotation_readiness(value, sources):
 
 def optional_readiness(project):
     return {"sourceCommit": SOURCE_COMMIT, "schemaVersion": 1,
-            "domainModel": model_readiness(project.get("domainModel")),
-            "annotationDraft": annotation_readiness(project.get("annotationDraft"), project["datasets"]),
+            "domainModel": model_readiness(project["domainModel"]) if "domainModel" in project else {"state": "absent"},
+            "annotationDraft": annotation_readiness(project["annotationDraft"], project["datasets"]) if "annotationDraft" in project else {"state": "absent"},
             "scientificAcceptance": False,
             "limitations": ["Readiness counts only; optional contents remain private and unapproved.",
                             "Unknown shapes and versions are preserved in the input and remain uninterpreted.",

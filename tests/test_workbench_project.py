@@ -104,6 +104,7 @@ class WorkbenchProjectTests(unittest.TestCase):
             {"schemaVersion": 1, "vocabulary": {"id": "private", "sha256": "a" * 64},
              "columns": [{"privateFuture": "PRIVATE FUTURE VALUE"}]},
             "PRIVATE FUTURE VALUE",
+            None,
         ]
         for field in ("domainModel", "annotationDraft"):
             for value in cases:
