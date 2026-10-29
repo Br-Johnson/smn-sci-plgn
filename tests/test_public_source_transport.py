@@ -33,6 +33,7 @@ AUTH_NAMES = ("RMIS_API_KEY", "RMPC_API_KEY", "RMIS_JWT", "RMIS_EMAIL", "RMIS_PA
 DRIVER = r'''
 import io, json, runpy, socket, ssl, sys, urllib.error, urllib.request
 fixture = json.loads(sys.argv[2])
+responses = fixture.pop("responses", [])
 class Response:
     status = 200
     def __init__(self, url):
@@ -43,6 +44,9 @@ class Response:
     def geturl(self): return fixture.get("final_url", self.url)
     def read(self, *args): return fixture.get("body", "<html><title>Fixture metadata</title></html>").encode()
 def fake_open(*args, **kwargs):
+    global fixture
+    if responses:
+        fixture = responses.pop(0)
     req = next(arg for arg in args if isinstance(arg, urllib.request.Request))
     if fixture.get("failure") == "timeout":
         raise TimeoutError("invented diagnostic must not be emitted")
@@ -130,6 +134,48 @@ class PublicSourceCliTests(unittest.TestCase):
         refused = run_cli("noaa", {"action": "home"}, {
             "status": 404, "final_url": "https://unrelated.example.invalid/final"})
         self.assertEqual(json.loads(refused.stdout)["error"]["code"], "destination_refused")
+
+    def test_http_200_source_error_envelopes_are_not_success_or_empty(self):
+        cases = [
+            ("pubmed", {"query": "synthetic"}, {"error": "FICTIONAL UPSTREAM DETAIL"}, "source_api_error", "unavailable"),
+            ("pubmed", {"query": "synthetic"}, {}, "unexpected_response", "invalid_response"),
+            ("pubmed", {"query": "synthetic"}, {"esearchresult": {}}, "unexpected_response", "invalid_response"),
+            ("critfc", {"action": "rest_root"}, {"error": {"code": 499, "message": "FICTIONAL UPSTREAM DETAIL"}}, "unauthorized", "unauthorized"),
+            ("critfc", {"action": "rest_root"}, {"error": {"code": 429, "message": "FICTIONAL UPSTREAM DETAIL"}}, "rate_limited", "rate_limited"),
+            ("critfc", {"action": "rest_root"}, {"error": {"code": 503, "message": "FICTIONAL UPSTREAM DETAIL"}}, "source_api_error", "unavailable"),
+        ]
+        for source, payload, body, code, outcome in cases:
+            with self.subTest(source=source, body=body):
+                result = run_cli(source, payload, {"content_type": "application/json", "body": json.dumps(body)})
+                response = json.loads(result.stdout)
+                self.assertEqual((response["ok"], response["error"]["code"], response["outcome"]), (False, code, outcome))
+                self.assertEqual(response["retrieval"][-1]["status"], 200)
+                self.assertNotIn("FICTIONAL UPSTREAM DETAIL", result.stdout + result.stderr)
+                self.assertLess(len(result.stdout.encode()), 4096)
+
+    def test_pubmed_summary_refusal_cannot_become_a_successful_empty_search(self):
+        for summary, code in (({"error": "FICTIONAL UPSTREAM DETAIL"}, "source_api_error"), ({"result": {}}, "unexpected_response")):
+            with self.subTest(summary=summary):
+                result = run_cli("pubmed", {"query": "synthetic"}, {"responses": [
+                    {"content_type": "application/json", "body": json.dumps({"esearchresult": {"idlist": ["123"]}})},
+                    {"content_type": "application/json", "body": json.dumps(summary)}]})
+                response = json.loads(result.stdout)
+                self.assertFalse(response["ok"])
+                self.assertEqual(response["error"]["code"], code)
+                self.assertNotIn("FICTIONAL UPSTREAM DETAIL", result.stdout + result.stderr)
+
+    def test_valid_pubmed_and_arcgis_documents_keep_supported_actions(self):
+        result = run_cli("pubmed", {"query": "synthetic"}, {"responses": [
+            {"content_type": "application/json", "body": json.dumps({"esearchresult": {"idlist": ["123"]}})},
+            {"content_type": "application/json", "body": json.dumps({"result": {"uids": ["123"], "123": {"title": "Fictional study", "authors": [{"name": "Fictional author"}]}}})}]})
+        response = json.loads(result.stdout)
+        self.assertTrue(response["ok"])
+        self.assertEqual(response["result_count"], 1)
+        self.assertEqual(response["records"][0]["title"], "Fictional study")
+        self.assertEqual(len(response["retrieval"]), 2)
+        result = run_cli("critfc", {"action": "rest_root"}, {
+            "content_type": "application/json", "body": json.dumps({"services": [], "folders": []})})
+        self.assertTrue(json.loads(result.stdout)["ok"])
 
     def test_malformed_json_is_a_typed_failure_in_every_json_consumer(self):
         payloads = {"critfc": {"action": "rest_root"}, "noaa": {"action": "request", "path": "/sps"}, "npafc": {"action": "dataset_search"}, "pubmed": {"query": "synthetic"}, "ptagis": {"action": "validation_codes", "kind": "revision_date"}, "streamnet": {"action": "tables"}, "rmis": {"action": "release"}}

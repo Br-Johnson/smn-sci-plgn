@@ -58,3 +58,19 @@ python3 -m unittest discover -s tests -p 'test_source_credentials.py' -v
 These tests use injected external responses, invented diagnostic values and
 local TLS servers. OpenSSL generates temporary fixture certificates; TLS tests
 report skips when it is unavailable. They perform no live source query or login.
+
+## Source error documents
+
+A successful HTTP status is not sufficient for a successful source result. The
+PubMed adapter requires the ESearch identifier-list and requested ESummary
+records; top-level or per-record NCBI errors return bounded typed refusals. A
+missing result envelope remains an invalid response, never a successful empty
+search. See [NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25499/).
+
+The CRITFC ArcGIS reader recognizes top-level JSON error documents. Source codes
+401/403/498/499 remain authorization failures, 429 remains rate-limited, and
+other source errors remain unavailable. Upstream error text is withheld. See
+[Esri token-required guidance](https://support.esri.com/en-us/knowledge-base/error-authentication-token-required-status-code-499-000022899).
+The retrieval ledger retains the actual HTTP status (including 200), while the
+typed outcome records the source refusal. No credentials are requested or
+forwarded as a fallback. These controls use fictional responses, not live data.

@@ -7,7 +7,7 @@ from urllib.parse import quote_plus
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import mark_source_empty, source_retrievals, source_outcome, run_source_cli, emit, http_get_json, load_input, result_error, write_raw
+from _common import SourceRequestError, mark_source_empty, source_retrievals, source_outcome, run_source_cli, emit, http_get_json, load_input, result_error, write_raw
 
 
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
@@ -36,7 +36,12 @@ def search_pubmed(query: str, retmax: int, mindate: str | None, maxdate: str | N
         params["datetype"] = "pdat"
 
     data, url = http_get_json(f"{EUTILS}/esearch.fcgi", params=params, timeout=timeout, allowed_origins=("https://eutils.ncbi.nlm.nih.gov",))
-    id_list = data.get("esearchresult", {}).get("idlist", [])
+    if isinstance(data, dict) and "error" in data:
+        raise SourceRequestError("source_api_error", "NCBI refused the search; upstream diagnostics are withheld.")
+    result = data.get("esearchresult") if isinstance(data, dict) else None
+    if not isinstance(result, dict) or not isinstance(result.get("idlist"), list) or not all(isinstance(v, str) for v in result["idlist"]):
+        raise SourceRequestError("unexpected_response", "NCBI did not return the expected search identifier list.", outcome="invalid_response")
+    id_list = result["idlist"]
     mark_source_empty(not id_list)
     return id_list, url, data
 
@@ -51,6 +56,13 @@ def summarize_pubmed(ids: list[str], timeout: int):
         "tool": "salmon-science-research",
     }
     data, url = http_get_json(f"{EUTILS}/esummary.fcgi", params=params, timeout=timeout, allowed_origins=("https://eutils.ncbi.nlm.nih.gov",))
+    if isinstance(data, dict) and "error" in data:
+        raise SourceRequestError("source_api_error", "NCBI refused the summaries; upstream diagnostics are withheld.")
+    result = data.get("result") if isinstance(data, dict) else None
+    if not isinstance(result, dict) or not all(isinstance(result.get(pmid), dict) for pmid in ids):
+        raise SourceRequestError("unexpected_response", "NCBI did not return all requested summary records.", outcome="invalid_response")
+    if any("error" in result[pmid] for pmid in ids):
+        raise SourceRequestError("source_api_error", "NCBI could not supply a requested summary; upstream diagnostics are withheld.")
     return data, url
 
 

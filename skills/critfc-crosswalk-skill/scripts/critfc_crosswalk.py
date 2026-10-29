@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
-from _common import resolve_source_url, load_input, source_retrievals, source_outcome, decode_source_json, decode_source_text, emit, http_get, run_source_cli
+from _common import SourceRequestError, resolve_source_url, load_input, source_retrievals, source_outcome, decode_source_json, decode_source_text, emit, http_get, run_source_cli
 from _source_auth import SourcePolicyError
 
 
@@ -97,6 +97,14 @@ def main() -> None:
 
     if "json" in content_type.lower() or final_url.endswith("?f=pjson"):
         data = decode_source_json(body, content_type=content_type)
+        if isinstance(data, dict) and "error" in data:
+            error = data["error"]
+            code = error.get("code") if isinstance(error, dict) else None
+            if code in (401, 403, 498, 499):
+                raise SourceRequestError("unauthorized", "The ArcGIS service requires valid authorization.", outcome="unauthorized")
+            if code == 429:
+                raise SourceRequestError("rate_limited", "The ArcGIS service rate limit was reached.", outcome="rate_limited")
+            raise SourceRequestError("source_api_error", "The ArcGIS service refused the request; upstream diagnostics are withheld.")
     else:
         data = body
 
