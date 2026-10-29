@@ -9,6 +9,10 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urljoin
 from urllib.request import Request, urlopen
 
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts"))
+from _source_output import emit_source_result
+
 
 API_BASE = "https://data.npafc.org/api/3/action"
 STATS_URL = "https://www.npafc.org/statistics/"
@@ -188,7 +192,7 @@ def main() -> None:
                     records = raw_body
             else:
                 records = html_preview(raw_body, final_url)
-            summary = json_preview(records) if "json" in content_type.lower() else {
+            summary = {"format": "json"} if "json" in content_type.lower() else {
                 "format": "html",
                 "title": records.get("title") if isinstance(records, dict) else None,
                 "link_count": len(records.get("links", [])) if isinstance(records, dict) else 0,
@@ -211,23 +215,14 @@ def main() -> None:
         })
         return
 
-    raw_output_path = None
-    if payload.get("save_raw"):
-        output_path = Path(payload.get("raw_output_path") or "npafc-raw.txt")
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(raw_body if isinstance(raw_body, str) else json.dumps(raw_body, ensure_ascii=True, indent=2), encoding="utf-8")
-        raw_output_path = str(output_path)
-
-    emit({
+    emit_source_result({
         "ok": True,
         "source": "NPAFC",
         "action": action,
         "url": final_url,
         "summary": summary,
-        "records": records,
-        "raw_output_path": raw_output_path,
         "warnings": warnings,
-    })
+    }, payload, records, default_name="npafc-raw.txt", raw_payload=raw_body)
 
 
 if __name__ == "__main__":

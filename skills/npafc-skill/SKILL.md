@@ -32,6 +32,7 @@ description: Query the public NPAFC CKAN catalogue and statistics pages for data
   - `timeout_sec`
   - `save_raw`
   - `raw_output_path`
+  - `raw_stdout` (boolean; only `true` returns the full redacted payload)
 
 Example:
 
@@ -49,3 +50,11 @@ echo '{"action":"dataset_search","q":"salmon"}' | python3 skills/npafc-skill/scr
 - `records`
 - `raw_output_path`
 - `warnings`
+- `output` (preview mode, count, limits and truncation)
+
+Default output is at most five rows per collection and 16 KiB of serialized
+stdout. Small resource metadata remains available; dataset results and resource
+lists are previews. `save_raw` saves the response locally without duplicating
+bulk data into stdout. See [source output controls](../../docs/source-output.md)
+for details. Use `raw_stdout: true` only for an explicit user request for bulk
+records in the transcript.
