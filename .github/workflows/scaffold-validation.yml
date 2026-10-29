@@ -5,6 +5,19 @@ on:
   pull_request:
 
 jobs:
+  vocabulary-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # These parsers independently check generated local artifacts. The
+      # authoring helper itself remains Python-standard-library only.
+      - run: python3 -m pip install rdflib==7.6.0 PyYAML==6.0.3
+      - run: python3 -m unittest discover -s tests -p 'test_vocabulary_artifacts.py' -v
+
   validate-and-test:
     runs-on: ubuntu-latest
     timeout-minutes: 15

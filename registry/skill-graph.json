@@ -1,6 +1,6 @@
 {
   "graph_version": "0.0.1",
-  "last_updated": "2026-10-24",
+  "last_updated": "2026-10-29",
   "description": "Typed skill graph for the salmon scaffold. Seed candidate lanes lexically or semantically, normalize the entities, then expand through typed skill, platform, and governance edges while respecting access tiers and scaffold boundaries.",
   "nodes": [
     {
@@ -465,6 +465,24 @@
       "lane_tags": [
         "lane:research-framework"
       ]
+    },
+    {
+      "id": "skill:controlled-vocabulary",
+      "type": "skill",
+      "label": "controlled-vocabulary",
+      "description": "Local controlled-vocabulary authoring, immutable editions and reviewable W3ID/GitHub Pages publication preparation.",
+      "entrypoint": "skills/controlled-vocabulary/SKILL.md",
+      "role": "authoring",
+      "input_contract": "Local CSV/JSON concept authority inputs and chosen namespace/repository ownership; outputs validated SKOS, website and unexecuted publication proposals.",
+      "lane_tags": [
+        "lane:controlled-vocabulary-authoring"
+      ]
+    },
+    {
+      "id": "lane:controlled-vocabulary-authoring",
+      "type": "lane",
+      "label": "Controlled vocabulary authoring",
+      "description": "Create and publish a small maintained vocabulary with stable identifiers; distinct from term lookup."
     }
   ],
   "edges": [
@@ -1163,6 +1181,24 @@
       "rationale": "Normalisation preserves candidate species and unit ambiguity before a framework proposal.",
       "evidence_refs": [
         "skills/salmon-research-framework-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:controlled-vocabulary-authoring",
+      "rationale": "Authoring or publishing a vocabulary needs a maintained local workflow rather than source discovery alone.",
+      "evidence_refs": [
+        "skills/controlled-vocabulary/SKILL.md"
+      ]
+    },
+    {
+      "source": "lane:controlled-vocabulary-authoring",
+      "relation": "routes_to",
+      "target": "skill:controlled-vocabulary",
+      "rationale": "Use local CSV/JSON authoring and dry-run publication preparation; external actions require their own authorization.",
+      "evidence_refs": [
+        "skills/controlled-vocabulary/SKILL.md"
       ]
     }
   ]

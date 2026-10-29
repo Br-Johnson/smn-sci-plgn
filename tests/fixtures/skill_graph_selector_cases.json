@@ -504,5 +504,45 @@
         "salmon-research-framework-skill"
       ]
     }
+  },
+  {
+    "request": "Create a controlled vocabulary using W3ID and host it on GitHub Pages.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:controlled-vocabulary-authoring",
+        "lane:ontology-semantic-resolution"
+      ],
+      "selected_skills": [
+        "controlled-vocabulary",
+        "salmon-terms"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "controlled-vocabulary-authoring",
+        "controlled-vocabulary"
+      ]
+    }
+  },
+  {
+    "request": "Find ontology terms for escapement using the shared vocabulary.",
+    "expected": {
+      "seeded_lanes": [
+        "lane:ontology-semantic-resolution",
+        "lane:stock-assessment"
+      ],
+      "selected_skills": [
+        "salmon-entity-normalizer-skill",
+        "salmon-terms",
+        "streamnet-api-skill",
+        "salmon-literature-skill"
+      ],
+      "blocked_skills": [],
+      "unsupported_lanes": [],
+      "reason_contains": [
+        "ontology-semantic-resolution",
+        "salmon-terms"
+      ]
+    }
   }
 ]

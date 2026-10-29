@@ -30,6 +30,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Entity normalization: `skills/salmon-entity-normalizer-skill/SKILL.md`
 - Crosswalk and harmonization lookups: `skills/critfc-crosswalk-skill/SKILL.md`
 - Ontology term search, shared `smn` and DFO `gcdfo` alike: `skills/salmon-terms/SKILL.md`
+- Controlled-vocabulary authoring and W3ID/GitHub Pages publication preparation: `skills/controlled-vocabulary/SKILL.md`
 - Salmon Data Package workflows: `skills/metasalmon-skill/SKILL.md`
 - Judging a package's semantic review packet: `skills/sdp-semantic-review/SKILL.md`
 - Writing and checking salmon knowledge commons cards: `skills/commons-card/SKILL.md`
@@ -49,6 +50,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Commons adapter, which runs the commons' own scripts at its pinned commit against the user's clone: `skills/commons-card/scripts/commons_card.py`
   - `runtime`/`checklist` inspect the pin and drift; script actions return `upstream_drift` before running when tools, schema or contribution rules differ.
   - Offline contract checks: `python3 -m unittest discover -s tests -p 'test_commons_card.py'`. With an authorized clone, set `SALMON_COMMONS_DIR` to enable the real-tool synthetic controls and read-only bundle/ledger checks.
+- Local CV authoring helper, copied into each new project and requiring only Python's standard library: `skills/controlled-vocabulary/scripts/controlled_vocabulary.py`. Run `init`, `validate`, `release`, `build`, or `prepare-publication`; publication preparation performs no external action. Regression seam: `tests/test_controlled_vocabulary.py`.
 - Shared stdlib helper utilities and credential-safe output/file handling: `scripts/_common.py`
 - Authenticated-source origin, redirect and redaction policy: `scripts/_source_auth.py`; user-run setup: `docs/source-authentication.md`; regressions: `tests/test_source_credentials.py`
 - Executable graph selector: `scripts/skill_graph_selector.py`
