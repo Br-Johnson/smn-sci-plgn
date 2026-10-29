@@ -102,6 +102,24 @@ class PluginChecksTests(unittest.TestCase):
         )
         self.assert_rejected(vs.validate_manifests, self.root, fragment="must not set version")
 
+    def test_native_catalog_missing_is_rejected(self) -> None:
+        (self.root / ".agents/plugins/marketplace.json").unlink()
+        self.assert_rejected(vs.validate_manifests, self.root, fragment="native Codex marketplace missing")
+
+    def test_native_catalog_wrong_plugin_is_rejected(self) -> None:
+        self.edit_json(
+            ".agents/plugins/marketplace.json",
+            lambda data: data["plugins"][0].update(name="different-plugin"),
+        )
+        self.assert_rejected(vs.validate_manifests, self.root, fragment="native Codex marketplace plugin name")
+
+    def test_native_catalog_external_source_is_rejected(self) -> None:
+        self.edit_json(
+            ".agents/plugins/marketplace.json",
+            lambda data: data["plugins"][0].update(source={"source": "local", "path": "../other"}),
+        )
+        self.assert_rejected(vs.validate_manifests, self.root, fragment="native Codex marketplace source")
+
     # Skill names and references -----------------------------------------------
 
     def test_frontmatter_name_mismatch_is_rejected(self) -> None:

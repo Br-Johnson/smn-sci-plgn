@@ -63,6 +63,13 @@ full response to a file.
 
 ## Operating rules
 
+The pinned `v0.6.0` pair rejects `semapv:AgentBasedMatching` as a mapping
+justification. Keep the original justification, evidence and review status;
+report the package's refusal instead of relabeling the mapping. Support merged
+on upstream main is not part of this release pin. Released-pair adoption remains
+tracked in [plugin #21](https://github.com/Br-Johnson/smn-sci-plgn/issues/21)
+and [metasalmon #283](https://github.com/salmon-data-mobilization/metasalmon/issues/283).
+
 For a complete local authoring exercise, follow the
 [fictional CSV-to-reviewed-SDP recipe](references/local-csv-recipe.md). It uses
 the released SDK directly, demonstrates strict draft refusal, requires separate
