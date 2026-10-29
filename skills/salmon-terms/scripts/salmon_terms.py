@@ -27,14 +27,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import emit, load_input, result_error, write_raw  # noqa: E402
+from _common import emit, load_input, result_error  # noqa: E402
 from _package_adapter import (  # noqa: E402
+    InvalidRequest,
     captured_warnings,
     import_metasalmonpy,
     missing_package_error,
     pin_warnings,
+    request_bool,
+    request_positive_int,
+    request_string,
     runtime_info,
+    save_response,
     to_json_value,
+    validate_common_request,
 )
 
 ACTIONS = ("find_terms", "sources_for_role", "runtime")
@@ -54,10 +60,7 @@ SUPPORTED_SOURCES = ("smn", "gcdfo", "ols", "nvs", "zooma", "bioportal", "qudt",
 
 def _role(payload: dict) -> str | None:
     """The role as the package expects it: a non-empty string, or None."""
-    role = payload.get("role")
-    if role is None or str(role).strip() == "":
-        return None
-    return str(role).strip()
+    return request_string(payload, "role") or None
 
 
 def _source_error(sources) -> dict | None:
@@ -73,19 +76,16 @@ def _source_error(sources) -> dict | None:
 
 
 def handle_find_terms(package, payload: dict) -> dict:
-    query = str(payload.get("query", "")).strip()
+    query = request_string(payload, "query", "")
     if not query:
         return result_error("missing_query", "find_terms requires query")
-    try:
-        max_items = int(payload.get("max_items", 10))
-    except (TypeError, ValueError):
-        return result_error("invalid_input", "max_items must be an integer")
+    max_items = request_positive_int(payload, "max_items", 10)
     role = _role(payload)
     sources = payload.get("sources")  # None lets the package use its role default
     source_error = _source_error(sources)
     if source_error is not None:
         return source_error
-    expand_query = bool(payload.get("expand_query", True))
+    expand_query = request_bool(payload, "expand_query", True)
 
     with captured_warnings() as caught:
         frame = package.find_terms(
@@ -132,6 +132,11 @@ def main() -> None:
     if not isinstance(payload, dict):
         emit(result_error("invalid_input", "expected a JSON object"))
         return
+    try:
+        validate_common_request(payload, "find_terms")
+    except InvalidRequest as exc:
+        emit(result_error("invalid_input", str(exc)))
+        return
 
     package = import_metasalmonpy()
     if package is None:
@@ -139,7 +144,7 @@ def main() -> None:
         return
     runtime = runtime_info(package)
 
-    action = payload.get("action", "find_terms")
+    action = request_string(payload, "action", "find_terms")
     try:
         fields = REQUEST_FIELDS.get(action) if isinstance(action, str) else None
         unexpected = sorted(set(payload) - fields) if fields is not None else []
@@ -155,18 +160,14 @@ def main() -> None:
             response = result_error(
                 "invalid_action", f"action must be one of {', '.join(ACTIONS)}"
             )
+    except InvalidRequest as exc:
+        response = result_error("invalid_input", str(exc), action=action)
     except Exception as exc:  # noqa: BLE001 - report the package's own message
         response = result_error("package_error", str(exc), action=action)
 
     response["runtime"] = runtime
     response["warnings"] = pin_warnings(runtime) + list(response.get("warnings", []))
-    if response.get("ok"):
-        response["raw_output_path"] = write_raw(
-            response,
-            requested=bool(payload.get("save_raw")),
-            raw_output_path=payload.get("raw_output_path"),
-            default_name="salmon-terms-raw.json",
-        )
+    save_response(response, payload, "salmon-terms-raw.json")
     emit(response)
 
 

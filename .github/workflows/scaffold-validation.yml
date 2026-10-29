@@ -107,3 +107,4 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p 'test_package_adapters.py' -v
           python3 -m unittest discover -s tests -p 'test_term_snapshot_controls.py' -v
+          python3 -m unittest discover -s tests -p 'test_package_adapter_requests.py' -v
