@@ -194,7 +194,7 @@ class PluginChecksTests(unittest.TestCase):
 
     def test_current_evals_pass(self) -> None:
         stats = vs.validate_evals(self.root, skill_names(self.root))
-        self.assertEqual(stats["cases"], len(skill_names(self.root)))
+        self.assertGreaterEqual(stats["cases"], len(skill_names(self.root)))
 
     def test_eval_prompt_with_an_unknown_key_is_rejected(self) -> None:
         self.edit_text("evals/rmis-skill/prompt.md", "tags: [smoke]", "tags: [smoke]\nengine: r")

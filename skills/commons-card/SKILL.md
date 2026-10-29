@@ -1,15 +1,19 @@
 ---
 name: commons-card
-description: Write or check a concept card for the salmon knowledge commons, with its in-card citation-ledger table, by running the commons' own validator and ledger tools at a pinned commons commit against the user's clone. Use when the user adds or edits a commons card, has citation-ledger JSON to turn into a card's ledger table, wants the card-only ledger check or the bundle validation, or is getting a commons pull request ready.
+description: Retrieve authorized local Salmon Knowledge Commons evidence with citations and recorded review context for research interpretation; separately write or check Commons cards through the pinned upstream validator and ledger tools. Use for Commons research, card edits, citation ledgers, or contribution checks.
 ---
 
 # commons-card
 
+For research interpretation, use the local `search` and `read` actions in
+[references/research.md](references/research.md). Admit the local distribution
+and trusted commit/hash before reading; no content is acquired automatically.
+Card contribution and verification remain separate from research retrieval.
+
 The [salmon knowledge commons](https://github.com/salmon-data-mobilization/salmon-knowledge-commons)
 holds source-backed concept cards about salmon. It is private: only its members
-can read it. Its rules and its checks live in the commons itself, and this
-skill runs them at one pinned commons commit, against the user's own clone, and
-returns what they print:
+can read it. Its rules and its checks live in the commons itself, and the contribution actions run them at one pinned Commons commit, against
+the user's own clone, and return what they print:
 
 | Action | Runs, at the pin | For |
 |---|---|---|

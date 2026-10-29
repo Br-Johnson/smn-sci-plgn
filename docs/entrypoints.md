@@ -90,3 +90,5 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - One shared implementation: `scripts/workbench_project.py`; each skill has a portable wrapper.
 - Contract/semantic/privacy regressions: `tests/test_workbench_project.py`.
 - No hosted client, model fitting, graph publication or human decision application is implemented in this path.
+
+- Local Commons research search/read and citation limits: [research contract](../skills/commons-card/references/research.md).
