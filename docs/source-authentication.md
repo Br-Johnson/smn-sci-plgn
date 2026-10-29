@@ -44,6 +44,11 @@ Use the corresponding environment name and script for PTAGIS or StreamNet.
 Their skill files list metadata actions. Public actions that do not require
 credentials remain available without a local secret.
 
+Supply source identifiers as their original text, not as pre-encoded URLs.
+The adapters encode each identifier as one path segment and check the final
+request URL for credential-shaped input. RMIS raw `params` is always a query
+string; question marks inside an ordinary query value remain part of that value.
+
 Authenticated transport requires HTTPS and the adapter's explicit origin
 policy. Same-origin HTTPS redirects retain authentication; a different host,
 port or scheme is refused before the destination is contacted. A source move

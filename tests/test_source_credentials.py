@@ -18,6 +18,7 @@ import tempfile
 import threading
 import unittest
 import urllib.error
+from urllib.parse import parse_qsl, urlsplit
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,6 +49,8 @@ class Response:
     def geturl(self): return "https://fixture.invalid/response"
 def open_fixture(*args, **kwargs):
     fixture = json.loads(sys.argv[2])
+    if fixture.get("fixture_forbid_transport"):
+        raise AssertionError("refused fixture reached external transport")
     if fixture.get("fixture_http_error"):
         raise urllib.error.HTTPError("https://fixture.invalid/response", 401, "Unauthorized", {}, io.BytesIO(json.dumps(fixture).encode()))
     return Response()
@@ -131,6 +134,58 @@ class SourceCredentialCliTests(unittest.TestCase):
                 self.assertEqual(json.loads(result.stdout)["error"]["code"], "inline_credentials_refused")
 
 
+    def test_rmis_raw_query_credentials_are_refused_when_the_value_contains_question_marks(self):
+        inline = "invented-inline-fixture-token-629?continued?value"
+        result = run_cli("rmis", {"action": "release", "params": "api_key=" + inline}, {"fixture_forbid_transport": True}, {"RMIS_API_KEY": TOKEN})
+        self.assertNotIn(inline, result.stdout + result.stderr)
+        self.assertEqual(json.loads(result.stdout)["error"]["code"], "inline_credentials_refused")
+
+
+    def test_identifier_fields_cannot_introduce_credential_query_parameters(self):
+        inline = "invented-inline-fixture-token-629"
+        cases = (
+            ("streamnet", {"action": "table", "table_id": "fixture"}, "table_id"),
+            ("streamnet", {"action": "records", "record_id": "fixture"}, "record_id"),
+            ("ptagis", {"action": "site_observations", "site_code": "TEST", "year": 2000}, "site_code"),
+            ("ptagis", {"action": "site_observations", "site_code": "TEST", "year": 2000}, "year"),
+            ("ptagis", {"action": "interrogation_files", "project_code": "TEST", "year": 2000}, "project_code"),
+            ("ptagis", {"action": "interrogation_files", "site_code": "TEST", "year": 2000}, "site_code"),
+            ("ptagis", {"action": "interrogation_files", "site_code": "TEST", "year": 2000}, "year"),
+            ("ptagis", {"action": "validation_codes", "kind": "mrr_codes", "domain": "fixture"}, "domain"),
+            ("ptagis", {"action": "reports", "user_name": "fixture"}, "user_name"),
+            ("ptagis", {"action": "report_file", "user_name": "fixture", "report_name": "fixture"}, "report_name"),
+        )
+        for source, payload, field in cases:
+            with self.subTest(source=source, action=payload["action"], field=field):
+                result = run_cli(source, {**payload, field: "fixture?api_key=" + inline}, {"fixture_forbid_transport": True}, {"STREAMNET_API_KEY" if source == "streamnet" else "PTAGIS_API_TOKEN": TOKEN})
+                self.assertNotIn(inline, result.stdout + result.stderr)
+                self.assertEqual(json.loads(result.stdout)["error"]["code"], "inline_credentials_refused")
+
+
+    def test_legitimate_raw_query_values_keep_their_question_marks(self):
+        for params in ("search=cohort?age=1&perpage=1", "?search=cohort?age=1&perpage=1"):
+            with self.subTest(params=params):
+                result = run_cli("rmis", {"action": "release", "params": params}, extra_env={"RMIS_API_KEY": TOKEN})
+                response = json.loads(result.stdout)
+                self.assertTrue(response["ok"], response)
+                self.assertEqual(parse_qsl(urlsplit(response["url"]).query), [("search", "cohort?age=1"), ("perpage", "1")])
+
+    def test_identifiers_are_encoded_as_opaque_segments_without_changing_ordinary_ids(self):
+        cases = (
+            ("streamnet", {"action": "table", "table_id": "stock/one ?version#β"}, "https://api.streamnet.org/api/v1/ca/tables/stock%2Fone%20%3Fversion%23%CE%B2"),
+            ("streamnet", {"action": "records", "record_id": 123}, "https://api.streamnet.org/api/v1/ca/123"),
+            ("ptagis", {"action": "site_observations", "site_code": "TEST-1", "year": 2000}, "https://api.ptagis.org/data/interrogation/site/TEST-1/year/2000/observations"),
+            ("ptagis", {"action": "interrogation_files", "project_code": "TEST_1", "year": 2000}, "https://api.ptagis.org/files/mrr/sites/TEST_1/year/2000"),
+            ("ptagis", {"action": "report_file", "user_name": "analyst@example.invalid", "report_name": "Annual / effort?2026#draft β"}, "https://api.ptagis.org/reporting/reports/analyst%40example.invalid/file/Annual%20%2F%20effort%3F2026%23draft%20%CE%B2"),
+        )
+        for source, payload, expected_url in cases:
+            with self.subTest(source=source, action=payload["action"]):
+                result = run_cli(source, payload)
+                response = json.loads(result.stdout)
+                self.assertTrue(response["ok"], response)
+                self.assertEqual(response["url"], expected_url)
+
+
 class AuthenticatedHttpPolicyTests(unittest.TestCase):
     def test_credentials_need_an_explicit_destination_policy(self):
         class Response:
@@ -150,6 +205,31 @@ class AuthenticatedHttpPolicyTests(unittest.TestCase):
             with self.assertRaises(RuntimeError) as refused:
                 http_get_json("https://fixture.invalid/metadata", headers={"Authorization": TOKEN}, allowed_origins=("https://fixture.invalid",))
         self.assertNotIn(TOKEN, str(refused.exception))
+
+
+    def test_final_url_credentials_are_refused_before_any_transport(self):
+        class Response:
+            status = 200
+            headers = {}
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def read(self): return b'{}'
+        inline = "invented-inline-fixture-token-629"
+        urls = (
+            "https://fixture.invalid/metadata?api_key=" + inline,
+            "https://fixture.invalid/metadata?search=normal&api%5Fkey=" + inline,
+            "https://fixture.invalid/metadata#access_token=" + inline,
+            "https://fixture.invalid/metadata/fixture%3Fapi_key%3D" + inline,
+        )
+        for url in urls:
+            for headers in ({}, {"Authorization": TOKEN}):
+                with self.subTest(url=url, authenticated=bool(headers)):
+                    with patch("urllib.request.urlopen", return_value=Response()) as anonymous, patch("urllib.request.OpenerDirector.open", return_value=Response()) as authenticated:
+                        with self.assertRaises(RuntimeError) as refused:
+                            http_get_json(url, headers=headers, allowed_origins=("https://fixture.invalid",))
+                        self.assertNotIn(inline, str(refused.exception))
+                        anonymous.assert_not_called()
+                        authenticated.assert_not_called()
 
 
 @unittest.skipUnless(shutil.which("openssl"), "local TLS fixtures require openssl")
@@ -244,6 +324,16 @@ class AuthenticatedHttpRedirectTests(unittest.TestCase):
                 with self.assertRaises(RuntimeError):
                     rmis.fetch(self.origin + route, headers=headers, allowed_origins=(self.origin,))
         self.assertFalse(any(event["port"] in {self.servers[1].server_port, self.servers[2].server_port} for event in self.received))
+
+
+    def test_same_origin_redirect_cannot_introduce_query_credentials(self):
+        inline = "invented-inline-fixture-token-629"
+        self.redirects["/credential-query"] = self.origin + "/metadata?api_key=" + inline
+        self.addCleanup(self.redirects.pop, "/credential-query")
+        with self.assertRaises(RuntimeError) as refused:
+            http_get_json(self.origin + "/credential-query", headers={"Authorization": TOKEN}, allowed_origins=(self.origin,))
+        self.assertNotIn(inline, str(refused.exception))
+        self.assertFalse(any(event["path"].startswith("/metadata") for event in self.received))
 
 
 if __name__ == "__main__":
