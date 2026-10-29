@@ -76,7 +76,8 @@
     "Page-level HTML discovery leaves parameter and schema handling implicit."
   ],
   "governance_constraints": [
-    "The current public-page workflow is open, but downstream structured reuse still depends on page stability."
+    "The current public-page workflow is open, but downstream structured reuse still depends on page stability.",
+    "Named-source HTTP reads enforce explicit HTTPS origins and redirect destinations; successful reads carry final-origin retrieval provenance and failures use bounded non-sensitive typed JSON."
   ],
   "related_skills": [
     "dart-query-skill"
@@ -85,7 +86,9 @@
   "evidence_links": [
     "https://www.cbr.washington.edu/dart/overview",
     "skills/dart-query-skill/SKILL.md",
-    "skills/dart-query-skill/scripts/dart_query_catalog.py"
+    "skills/dart-query-skill/scripts/dart_query_catalog.py",
+    "docs/source-transport.md",
+    "tests/test_public_source_transport.py"
   ],
   "watch_fields": [
     "query-page paths",

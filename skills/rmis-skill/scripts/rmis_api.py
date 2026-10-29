@@ -4,13 +4,12 @@ import json
 import re
 import sys
 from pathlib import Path
-from urllib import error, parse, request
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _source_auth import authenticated_headers, source_urlopen
-from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, load_input, result_error, write_raw
+from _common import build_url as build_source_url, source_retrievals, source_outcome, decode_source_json, decode_source_text, http_get, SourceRequestError, run_source_cli, inline_credentials_refused, emit, getenv_any, load_input, result_error
+from _source_output import emit_source_result
 
 
 API_BASE = "https://phish.rmis.org"
@@ -27,22 +26,7 @@ ACTION_TO_PATH = {
 
 
 def build_url(base: str, params) -> str:
-    if not params:
-        return base
-    if isinstance(params, str):
-        query = params.lstrip("?")
-        joiner = "&" if "?" in base else "?"
-        return f"{base}{joiner}{query}"
-    if isinstance(params, dict):
-        query = parse.urlencode(
-            [(key, value) for key, value in params.items() if value is not None],
-            doseq=True,
-        )
-        if not query:
-            return base
-        joiner = "&" if "?" in base else "?"
-        return f"{base}{joiner}{query}"
-    raise ValueError("params must be a string, object, or null")
+    return build_source_url(base, params)
 
 
 def fetch(
@@ -54,26 +38,16 @@ def fetch(
     timeout: int = 20,
     allowed_origins: tuple[str, ...] | None = None,
 ) -> tuple[int, bytes, dict[str, str], str]:
-    payload = None
-    request_headers = headers.copy() if headers else {}
-    if body is not None:
-        payload = json.dumps(body).encode("utf-8")
-        request_headers.setdefault("Content-Type", "application/json")
-    req = request.Request(url, data=payload, headers=request_headers, method=method)
-    try:
-        with source_urlopen(req, timeout=timeout, allowed_origins=allowed_origins) as response:
-            return response.status, response.read(), dict(response.headers.items()), url
-    except error.HTTPError as exc:
-        return exc.code, b"" if authenticated_headers(headers) else exc.read(), {}, url
+    if method != "GET" or body is not None:
+        raise SourceRequestError("unsupported_method", "This source adapter performs read-only requests.", outcome="refused")
+    raw, response_headers, status, final_url = http_get(url, headers=headers, timeout=timeout,
+        allowed_origins=allowed_origins or ("https://www.rmis.org", "https://rmis.org"))
+    return status, raw, response_headers, final_url
 
 
 def parse_json_response(status: int, body: bytes):
-    text = body.decode("utf-8", errors="replace")
-    try:
-        payload = json.loads(text)
-    except json.JSONDecodeError:
-        payload = None
-    return text, payload
+    text = decode_source_text(body)
+    return text, decode_source_json(text, status=status)
 
 
 def summarize(data):
@@ -134,6 +108,8 @@ def fetch_announcement(timeout: int) -> dict:
         "source": "RMIS announcement page",
         "url": url,
         "current_version": version_match.group(1) if version_match else None,
+            "retrieval": source_retrievals(),
+            "outcome": source_outcome(),
         "effective_date": effective_date,
         "status_code": status,
     }
@@ -195,43 +171,20 @@ def main() -> None:
     status, raw, _, final_url = fetch(url, headers=headers, timeout=timeout, allowed_origins=(API_BASE,))
     text, data = parse_json_response(status, raw)
 
-    if status != 200 or data is None:
-        message = "RMIS request failed"
-        if status == 401:
-            message = "RMIS request was unauthorized; provide RMIS_API_KEY, RMPC_API_KEY, or RMIS_JWT"
-        emit(
-            result_error(
-                "http_error",
-                message,
-                action=action,
-                status=status,
-                url=final_url,
-                body_preview=text[:400],
-                warnings=warnings,
-            )
-        )
-        return
 
-    raw_output_path = write_raw(
-        data,
-        requested=bool(payload.get("save_raw")),
-        raw_output_path=payload.get("raw_output_path"),
-        default_name="rmis-raw.json",
-    )
-
-    emit(
+    emit_source_result(
         {
             "ok": True,
             "source": "RMIS API",
             "action": action,
             "url": final_url,
+            "retrieval": source_retrievals(),
+            "outcome": source_outcome(),
             "summary": summarize(data),
-            "records": data,
-            "raw_output_path": raw_output_path,
             "warnings": warnings,
-        }
+        }, payload, data, default_name="rmis-raw.json",
     )
 
 
 if __name__ == "__main__":
-    run_source_cli(main)
+    run_source_cli(main, source='RMIS API')

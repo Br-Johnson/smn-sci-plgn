@@ -22,7 +22,10 @@
         "lane:climate-ocean-context",
         "lane:ontology-semantic-resolution",
         "lane:literature-reports-dataset-discovery",
-        "lane:package-metadata-validation"
+        "lane:package-metadata-validation",
+        "lane:local-commons-evidence",
+        "lane:psc-vocabulary-discovery",
+        "lane:local-graph-discovery"
       ],
       "selection_note": "Seed 1 to 3 lanes, then expand to the smallest defensible connected subgraph."
     },
@@ -208,10 +211,13 @@
       "id": "skill:commons-card",
       "type": "skill",
       "label": "commons-card",
-      "description": "Writes and checks salmon knowledge commons cards with the commons' own validator and citation-ledger tools, run at a pinned commons commit against the user's clone; holds no checks of its own.",
+      "description": "Retrieve admitted local compiled Commons evidence, or write and check cards with pinned upstream contribution tools.",
       "entrypoint": "skills/commons-card/SKILL.md",
       "role": "knowledge",
-      "input_contract": "A clone of the commons, card paths, and citation-ledger JSON files; returns the validator's findings, the in-card ledger sections, the card-only check, and CONTRIBUTING.md at the pin."
+      "input_contract": "Research: an explicitly authorized local distribution, exact commit and trusted catalog hash, literal query or card ID. Contribution: an authorized clone and the existing validator or ledger inputs.",
+      "lane_tags": [
+        "lane:local-commons-evidence"
+      ]
     },
     {
       "id": "platform:streamnet",
@@ -483,6 +489,65 @@
       "type": "lane",
       "label": "Controlled vocabulary authoring",
       "description": "Create and publish a small maintained vocabulary with stable identifiers; distinct from term lookup."
+    },
+    {
+      "id": "lane:local-commons-evidence",
+      "type": "lane",
+      "label": "local-commons-evidence",
+      "description": "Authorized local Commons research evidence with recorded review and citation context.",
+      "entrypoint": "skills/commons-card/references/research.md"
+    },
+    {
+      "id": "skill:psc-vocabulary",
+      "type": "skill",
+      "label": "psc-vocabulary",
+      "description": "Explicit PSC concept discovery from a hash-pinned authorized local catalog and immutable release; not operational stock lookup.",
+      "entrypoint": "skills/psc-vocabulary/SKILL.md",
+      "role": "source",
+      "input_contract": "Explicit local source and read binding; no automatic acquisition, writes or scientific acceptance.",
+      "lane_tags": [
+        "lane:psc-vocabulary-discovery"
+      ]
+    },
+    {
+      "id": "platform:psc-vocabularies",
+      "type": "platform",
+      "label": "psc-vocabularies",
+      "description": "Explicit PSC concept discovery from a hash-pinned authorized local catalog and immutable release; not operational stock lookup.",
+      "platform_id": "psc-vocabularies",
+      "platform_card": "registry/platforms/psc-vocabularies.json"
+    },
+    {
+      "id": "lane:psc-vocabulary-discovery",
+      "type": "lane",
+      "label": "psc-vocabulary-discovery",
+      "description": "Explicit PSC concept discovery from a hash-pinned authorized local catalog and immutable release; not operational stock lookup."
+    },
+    {
+      "id": "skill:graph-discovery",
+      "type": "skill",
+      "label": "graph-discovery",
+      "description": "Read-only connected discovery through the pinned local graph library with preserved evidence and pending status.",
+      "entrypoint": "skills/graph-discovery/SKILL.md",
+      "role": "source",
+      "input_contract": "Explicit local source and read binding; no automatic acquisition, writes or scientific acceptance.",
+      "lane_tags": [
+        "lane:local-graph-discovery"
+      ]
+    },
+    {
+      "id": "platform:smn-data-graph",
+      "type": "platform",
+      "label": "smn-data-graph",
+      "description": "Read-only connected discovery through the pinned local graph library with preserved evidence and pending status.",
+      "platform_id": "smn-data-graph",
+      "platform_card": "registry/platforms/smn-data-graph.json"
+    },
+    {
+      "id": "lane:local-graph-discovery",
+      "type": "lane",
+      "label": "local-graph-discovery",
+      "description": "Read-only connected discovery through the pinned local graph library with preserved evidence and pending status."
     }
   ],
   "edges": [
@@ -1199,6 +1264,96 @@
       "rationale": "Use local CSV/JSON authoring and dry-run publication preparation; external actions require their own authorization.",
       "evidence_refs": [
         "skills/controlled-vocabulary/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:local-commons-evidence",
+      "rationale": "Research interpretation can consult admitted local Commons evidence before synthesis.",
+      "evidence_refs": [
+        "skills/salmon-research-router-skill/SKILL.md"
+      ]
+    },
+    {
+      "source": "lane:local-commons-evidence",
+      "relation": "routes_to",
+      "target": "skill:commons-card",
+      "rationale": "Search and read the existing compiler distribution with intact citations and recorded review status; no automatic acquisition or contribution.",
+      "evidence_refs": [
+        "skills/commons-card/references/research.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:psc-vocabulary-discovery",
+      "rationale": "Explicit PSC concept discovery from a hash-pinned authorized local catalog and immutable release; not operational stock lookup.",
+      "evidence_refs": [
+        "skills/psc-vocabulary/SKILL.md"
+      ]
+    },
+    {
+      "source": "lane:psc-vocabulary-discovery",
+      "relation": "routes_to",
+      "target": "skill:psc-vocabulary",
+      "rationale": "Explicit PSC concept discovery from a hash-pinned authorized local catalog and immutable release; not operational stock lookup.",
+      "evidence_refs": [
+        "skills/psc-vocabulary/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:psc-vocabulary",
+      "relation": "uses_platform",
+      "target": "platform:psc-vocabularies",
+      "rationale": "Use the documented local source contract and preserve its provenance.",
+      "evidence_refs": [
+        "registry/platforms/psc-vocabularies.json"
+      ]
+    },
+    {
+      "source": "skill:psc-vocabulary",
+      "relation": "constrained_by",
+      "target": "governance:private-content",
+      "rationale": "Read only within the caller-admitted local context; retrieval does not authorize disclosure.",
+      "evidence_refs": [
+        "skills/psc-vocabulary/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:salmon-research-router-skill",
+      "relation": "routes_to",
+      "target": "lane:local-graph-discovery",
+      "rationale": "Read-only connected discovery through the pinned local graph library with preserved evidence and pending status.",
+      "evidence_refs": [
+        "skills/graph-discovery/SKILL.md"
+      ]
+    },
+    {
+      "source": "lane:local-graph-discovery",
+      "relation": "routes_to",
+      "target": "skill:graph-discovery",
+      "rationale": "Read-only connected discovery through the pinned local graph library with preserved evidence and pending status.",
+      "evidence_refs": [
+        "skills/graph-discovery/SKILL.md"
+      ]
+    },
+    {
+      "source": "skill:graph-discovery",
+      "relation": "uses_platform",
+      "target": "platform:smn-data-graph",
+      "rationale": "Use the documented local source contract and preserve its provenance.",
+      "evidence_refs": [
+        "registry/platforms/smn-data-graph.json"
+      ]
+    },
+    {
+      "source": "skill:graph-discovery",
+      "relation": "constrained_by",
+      "target": "governance:private-content",
+      "rationale": "Read only within the caller-admitted local context; retrieval does not authorize disclosure.",
+      "evidence_refs": [
+        "skills/graph-discovery/SKILL.md"
       ]
     }
   ]

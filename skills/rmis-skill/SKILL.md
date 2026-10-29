@@ -46,6 +46,16 @@ The adapter does not log in: the legacy `login` action returns
   - `save_raw`
   - `raw_output_path`
   - `timeout_sec`
+  - `raw_stdout` (boolean; only `true` returns the full redacted payload)
+
+## Output
+
+Data responses default to a preview of at most five rows per collection and
+16 KiB of serialized stdout, retaining source pagination metadata. `save_raw`
+saves locally while stdout stays compact. The public announcement remains a
+compact metadata action. See [source output controls](../../docs/source-output.md)
+for counts, truncation and typed save failures. Use `raw_stdout: true` only
+when the user explicitly needs bulk records in the tool transcript.
 
 Examples:
 
@@ -66,3 +76,11 @@ The RMIS API uses query-string filters such as:
 - standard comparisons like `brood_year>=2020`
 
 See [references/rmis-access.md](references/rmis-access.md) for the current query model and access notes.
+
+
+## Transport and provenance
+
+Use the [source transport contract](../../docs/source-transport.md) for allowed
+origins, redirect rules, retrieval provenance and typed failures. An unavailable
+source is reported separately from a successful empty result; another evidence
+lane can continue.

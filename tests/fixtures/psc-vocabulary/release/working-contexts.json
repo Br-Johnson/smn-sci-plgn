@@ -1,0 +1,7 @@
+[
+  {
+    "context_id": "fictional-workshop",
+    "description": "Synthetic bounded context.",
+    "label": "Fictional workshop"
+  }
+]

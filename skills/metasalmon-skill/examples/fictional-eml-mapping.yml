@@ -1,0 +1,51 @@
+version: 1
+status: final
+dataset_id: fictional-counts
+series_key: fictional-counts
+system: knb
+language: eng
+publication_date: '2026-01-01'
+semantic_vocabulary:
+  path: metadata/semantic_vocabulary.csv
+  sha256: pending-sdk-closure
+semantic_review:
+  path: reviewed_semantic_selections.csv
+  sha256: pending-sdk-closure
+publication:
+  public: false
+rights_authorization:
+  status: unconfirmed
+  evidence: Local fictional exercise only; no real research disclosure or publication authorized.
+source_provenance:
+  source_citation: Fictional SDP recipe. Synthetic fixture; no field observations.
+  provenance_note: All values and non-unit concepts are invented solely for software testing.
+  supporting_document:
+    citation: Bundled fictional-counts.csv; its example.org URL is illustrative and is not retrieved.
+    url: https://example.org/fictional-sdp-recipe/fictional-counts.csv
+    sha256: pending-local-source-digest
+creators:
+  - organization_name: Fictional Recipe Authors
+metadata_providers:
+  - organization_name: Fictional Recipe Authors
+    email: nobody@example.invalid
+contacts:
+  - organization_name: Fictional Recipe Authors
+    email: nobody@example.invalid
+publisher:
+  organization_name: Fictional Recipe Authors
+intellectual_rights:
+  paragraphs:
+    - Fictional local exercise; no publication or research rights approval is conveyed.
+methods:
+  - description: Invented sums of replicate counts at fictional sites; no real observations were used.
+tables:
+  counts:
+    attributes:
+      site:
+        measurement_scale: nominal
+      adult_count_sum:
+        measurement_scale: ratio
+        eml_unit: number
+        number_type: whole
+        minimum: 0
+        minimum_exclusive: false

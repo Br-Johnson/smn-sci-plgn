@@ -31,6 +31,13 @@ Install the complete plugin checkout: the wrappers require its shared
   independently verify server persistence. A contribution preview requires a
   saved revision, commitment, selected output types, reason and finite date.
 - Source decisions other than `candidate` require a nonblank reason.
+- Optional `domainModel` and `annotationDraft` fields receive private readiness
+  counts against the pinned schemaVersion 1 export profile. Missing choices and
+  stale recorded source bindings remain review work. A recorded vocabulary pin
+  is not verified, and a populated choice is not an accepted scientific meaning.
+  Unknown shapes and versions stay uninterpreted; no optional text, IRIs, hashes
+  or native column names enter the counts or contribution preview. See
+  `docs/research-workbench-contract.md` in the plugin checkout for exact limits.
 - An expired embargo becomes `review_due`; visibility stays private. Dates use
   explicit `--as-of` or the export timestamp, never an implicit current clock.
 - `selected-fields.json` must contain only explicitly supplied sanitized text

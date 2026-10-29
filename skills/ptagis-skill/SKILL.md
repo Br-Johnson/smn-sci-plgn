@@ -41,9 +41,26 @@ route and the fixed HTTPS origin/redirect policy.
   - `timeout_sec`
   - `save_raw`
   - `raw_output_path`
+  - `raw_stdout` (boolean; only `true` returns the full redacted payload)
+
+## Output
+
+Results default to a preview of at most five rows per collection and 16 KiB of
+serialized stdout, with counts, truncation and source provenance. `save_raw`
+saves locally while retaining compact stdout. See [source output controls](../../docs/source-output.md)
+for preview semantics and typed save failures. Request `raw_stdout: true` only
+when the user explicitly needs bulk records in the tool transcript.
 
 Example:
 
 ```bash
 echo '{"action":"validation_codes","kind":"mrr_projects"}' | python skills/ptagis-skill/scripts/ptagis_api.py
 ```
+
+
+## Transport and provenance
+
+Use the [source transport contract](../../docs/source-transport.md) for allowed
+origins, redirect rules, retrieval provenance and typed failures. An unavailable
+source is reported separately from a successful empty result; another evidence
+lane can continue.

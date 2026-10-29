@@ -6,12 +6,14 @@ description: Judge a Salmon Data Package's semantic review packet in this harnes
 # SDP Semantic Review
 
 metasalmon and metasalmonpy find ontology candidates for every semantic slot a
-Salmon Data Package still has to fill, but they no longer judge them. Since the
-review-packet contract that 0.6.0 added, the judging happens here: the package
+Salmon Data Package still has to fill. The recommended workflow uses the
+review-packet contract added in 0.6.0, with judgement in this harness: the package
 writes a packet, you answer it, and the package reads your answers back,
 validates them against what it offered, and records them. The user then
 confirms each accepted term in the package's review console. Your job is the
-judgement, and only the judgement.
+judgement, and only the judgement. The legacy package provider route remains
+deprecated in v0.6.0, with removal scheduled for v0.7.0; this workflow does not
+invoke it.
 
 ## Run it
 
@@ -89,6 +91,10 @@ the plugin. Each action reads one JSON object on stdin and writes one on stdout.
    user's act, so do not call `accept_suggestion()`, `reject_suggestion()` or
    `apply_sdp_semantics()` yourself unless they ask you to.
 
+For year/age coordinates, effective female-spawner estimates and sample-scoped
+sex values, read [references/year-age-and-adjusted-spawners.md](references/year-age-and-adjusted-spawners.md).
+It separates source roles, draft proposals, adjustment provenance and domain review.
+
 ## Rules
 
 - Choose only from the slot's candidates, by index, and echo that candidate's
@@ -102,8 +108,8 @@ the plugin. Each action reads one JSON object on stdin and writes one on stdout.
 - Write only through `write_assessments`. Never edit the packet, the record in
   `review/semantic-llm-assessments.csv`, or the package's metadata files
   (`dataset.csv`, `tables.csv`, `column_dictionary.csv`, `codes.csv`).
-- Leave the packages' own model call alone. `llm_assess = TRUE` is deprecated
-  and is removed in 0.7.0; this skill replaces it.
+- Use the harness route here. The legacy `llm_assess = TRUE` provider route
+  remains deprecated in v0.6.0, with removal scheduled for v0.7.0.
 - An accepted IRI is a semantic choice. Its rationale says what fits, such as
   the definition matching the column, never only that it ranked first.
 - Put no credentials or other secrets in any answer.

@@ -1,0 +1,5 @@
+concept_id,scheme_id,pref_label_en,definition_en,scope_note_en,notation,concept_kind,broader_id,status,issued,modified,provenance,lifecycle_status,replaced_by_iri
+PSC-CV-900001,fictional-measure,Fictional count,The exact fictional count definition.,Synthetic fixture only.,,atomic,,provisional,2026-01-01,2026-01-01,Fictional workshop source,active,
+PSC-CV-900002,fictional-measure,Legacy fictional weight,The historical fictional definition.,Synthetic fixture only.,,atomic,,provisional,2026-01-01,2026-01-01,Fictional workshop source,deprecated,https://example.org/source#FictionalWeight
+PSC-CV-900003,stock-reference-kind,Fictional stock kind,"A kind of fictional stock reference, never an individual stock.",Synthetic fixture only.,,atomic,,provisional,2026-01-01,2026-01-01,Fictional workshop source,active,
+PSC-CV-900004,fictional-measure,Fictional prototype measure,The exact fictional prototype definition.,Synthetic fixture only.,,compound_measurement_variable,,provisional,2026-01-01,2026-01-01,Fictional workshop source,active,

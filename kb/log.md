@@ -1,5 +1,11 @@
 # Knowledge Base Log
 
+## [2026-10-29] source-transport | attributable-reads-and-typed-failures
+
+- Routed all eight network adapters through shared transport with explicit HTTPS source origins and checked redirect destinations.
+- Added actual final-origin/UTC retrieval provenance and bounded typed transport, HTTP, decode and HTML access-page outcomes; empty successes stay distinct from unavailable sources.
+- Preserved authenticated-origin restrictions and query parameters, with synthetic CLI and local TLS regressions. No live service availability or source data query is claimed.
+
 ## [2026-10-29] compatibility | commons-validation
 
 - Refreshed the Commons adapter's reviewed pin and retained pin/head/drift reporting.
@@ -79,3 +85,29 @@
 - The commons is private, so the adapter copies the pinned files out of the clone's git objects into a temporary directory for each call and deletes them afterwards; the plugin carries no commons content. When the clone's copies differ from the pinned ones, every response lists them as drift.
 - Added a platform card and wiki page for the commons, its skill-platform mapping, and three skill-graph edges, with a new `governance:private-content` tag.
 - The eval case grades that the skill fires, runs its adapter, and reports the pinned commit. The offline tests build a small clone of their own; the live tests run only where `SALMON_COMMONS_DIR` names a real clone, and passed against the commons' main on 2026-10-15.
+
+## 2026-10-29 — Local Commons research evidence
+
+Added admitted local compiler-distribution search/read to commons-card, separate
+from contribution tools. The reader verifies the trusted catalog and consumed
+research artifacts, preserves recorded citations/review/conflicts, and acquires
+or transmits no source. Added an interpretation/Commons routing lane (#16).
+
+## [2026-10-29] local discovery | PSC and graph routing
+
+- Added source-specific PSC concept discovery and local admitted-graph discovery
+  to platform cards, mappings and the skill graph. Both require explicit local
+  source bindings; no automatic acquisition or contribution is added.
+- Kept generic vocabulary authoring and package-backed ontology search distinct.
+  Recorded pending/review state, native provenance and incomplete-evidence
+  refusals remain visible; no operational identity or scientific acceptance is inferred.
+
+## [2026-10-29] public-source availability | owner discovery
+
+- Recorded owner-document availability separately from unverified live records.
+  NOAA's no-slash `/sps` path redirects to its archive-selection UI; an explicit
+  InPort metadata action offers discovery context. CRITFC still advertises its
+  legacy REST host and marks map tools offline; no replacement is invented.
+- Source failures keep their typed outcome and owner-documentation link rather
+  than masquerading as successful records. Documentation reads used no credentials
+  or research uploads; no new live plugin data-query test was run.

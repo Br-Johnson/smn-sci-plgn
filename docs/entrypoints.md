@@ -7,6 +7,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Validate the scaffold: `python3 scripts/validate_scaffold.py`
 - Run the offline regression suite (selector routes, validator guards, adapter startup): `python3 -m unittest discover -s tests -p 'test_*.py'`
 - Run the live package-adapter tests, which need uv and network access: `SMN_PLUGIN_LIVE_ADAPTERS=1 python3 -m unittest discover -s tests -p 'test_package_adapters.py'`
+- Run exact-release snapshot adapter controls without ontology-service access: `SMN_PLUGIN_PINNED_PYTHON=/path/to/existing/pinned-release/python python3 -m unittest discover -s tests -p 'test_term_snapshot_controls.py' -v`. The interpreter must carry the actual v0.6.0 Git commit; CI's existing live-adapter profile can acquire that interpreter through uv instead.
 - Run one eval case against a live model: `claude plugin eval . --no-publish --ablation none --runs 1 --case <case> --allow-tools Bash`, plus `Write` for the stock-brief case and one `"WebFetch(domain:<host>)"` grant for each host the case's `description` names. It needs Claude Code 2.1.269 or later, and every run is billed model usage. `scripts/validate_scaffold.py` checks the case files offline, and no case has been scored yet.
 - Install for Codex / OpenAI: `python3 scripts/install_codex_plugin.py`
 - Install for Claude Code as a plugin: `claude plugin marketplace add Br-Johnson/smn-sci-plgn`, then `claude plugin install salmon-science-research@smn-sci-plgn`
@@ -30,6 +31,8 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Entity normalization: `skills/salmon-entity-normalizer-skill/SKILL.md`
 - Crosswalk and harmonization lookups: `skills/critfc-crosswalk-skill/SKILL.md`
 - Ontology term search, shared `smn` and DFO `gcdfo` alike: `skills/salmon-terms/SKILL.md`
+- PSC concept discovery from a pinned authorized local catalog/release: `skills/psc-vocabulary/SKILL.md`
+- Read-only admitted local graph connections: `skills/graph-discovery/SKILL.md`
 - Controlled-vocabulary authoring and W3ID/GitHub Pages publication preparation: `skills/controlled-vocabulary/SKILL.md`
 - Salmon Data Package workflows: `skills/metasalmon-skill/SKILL.md`
 - Judging a package's semantic review packet: `skills/sdp-semantic-review/SKILL.md`
@@ -46,12 +49,14 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 ## Canonical Scripts
 
 - Package adapters, which only marshal JSON to metasalmonpy `v0.6.0`: `skills/salmon-terms/scripts/salmon_terms.py` and `skills/metasalmon-skill/scripts/metasalmon_api.py`
+  - `salmon-terms` forwards `release` / `snapshot_dir` and returns unchanged `ontology_release` provenance; its pinned-source/field guards prevent silent unsupported or misspelled requests. Regression seam: the JSON CLI in `tests/test_term_snapshot_controls.py`.
 - Plumbing the two adapters share, including the package pin: `scripts/_package_adapter.py`
 - Commons adapter, which runs the commons' own scripts at its pinned commit against the user's clone: `skills/commons-card/scripts/commons_card.py`
   - `runtime`/`checklist` inspect the pin and drift; script actions return `upstream_drift` before running when tools, schema or contribution rules differ.
   - Offline contract checks: `python3 -m unittest discover -s tests -p 'test_commons_card.py'`. With an authorized clone, set `SALMON_COMMONS_DIR` to enable the real-tool synthetic controls and read-only bundle/ledger checks.
 - Local CV authoring helper, copied into each new project and requiring only Python's standard library: `skills/controlled-vocabulary/scripts/controlled_vocabulary.py`. Run `init`, `validate`, `release`, `build`, or `prepare-publication`; publication preparation performs no external action. Regression seam: `tests/test_controlled_vocabulary.py`.
-- Shared stdlib helper utilities and credential-safe output/file handling: `scripts/_common.py`
+- Shared HTTP reads, typed source failures, retrieval ledger and credential-safe output/file handling: `scripts/_common.py`; contract: `docs/source-transport.md`; regressions: `tests/test_public_source_transport.py`
+- Bounded PTAGIS/RMIS/NPAFC previews and local raw-save receipts: `scripts/_source_output.py`; output contract: `docs/source-output.md`; regressions: `tests/test_source_output.py`.
 - Authenticated-source origin, redirect and redaction policy: `scripts/_source_auth.py`; user-run setup: `docs/source-authentication.md`; regressions: `tests/test_source_credentials.py`
 - Executable graph selector: `scripts/skill_graph_selector.py`
 - Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`
@@ -88,5 +93,8 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Workbench export inspection and selected contribution preview: `skills/salmon-workbench-skill/SKILL.md`.
 - Framework template/check: `skills/salmon-research-framework-skill/SKILL.md`.
 - One shared implementation: `scripts/workbench_project.py`; each skill has a portable wrapper.
+- Redacted optional-field readiness profile: `scripts/_workbench_readiness.py`; pinned shape and limits: `docs/research-workbench-contract.md`.
 - Contract/semantic/privacy regressions: `tests/test_workbench_project.py`.
 - No hosted client, model fitting, graph publication or human decision application is implemented in this path.
+
+- Local Commons research search/read and citation limits: [research contract](../skills/commons-card/references/research.md).

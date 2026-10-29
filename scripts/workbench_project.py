@@ -13,6 +13,8 @@ from pathlib import Path
 import re
 import sys
 
+from _workbench_readiness import optional_readiness
+
 FORMAT = "salmon-research-project.v1"
 FRAMEWORK_FORMAT = "salmon-research-framework.v1"
 OUTPUTS = {"metadata", "workflow", "commons", "ontology", "crosswalk"}
@@ -150,6 +152,7 @@ def inspect_bundle(data, as_of=None):
             "embargoState": ("not_committed" if not p["contribution"]["committed"] else
                              "review_due" if date(p["contribution"]["embargoUntil"], "embargoUntil") <= today else "private_until_review"),
             "commitmentComplete": p["contribution"]["committed"],
+            "optionalReadiness": optional_readiness(p),
             "publicationAuthorized": False, "scientificAcceptance": False,
             "limitations": ["Structural checks only; private notes and IDs are not contribution content.",
                             "Expiry requests review and never changes visibility.",

@@ -59,6 +59,16 @@
       "skill": "commons-card",
       "platform_id": "salmon-knowledge-commons",
       "kb_page": "kb/platforms/salmon-knowledge-commons.md"
+    },
+    {
+      "skill": "psc-vocabulary",
+      "platform_id": "psc-vocabularies",
+      "kb_page": "kb/platforms/psc-vocabularies.md"
+    },
+    {
+      "skill": "graph-discovery",
+      "platform_id": "smn-data-graph",
+      "kb_page": "kb/platforms/smn-data-graph.md"
     }
   ]
 }

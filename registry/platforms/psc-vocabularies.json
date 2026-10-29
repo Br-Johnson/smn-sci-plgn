@@ -1,0 +1,92 @@
+{
+  "platform_id": "psc-vocabularies",
+  "platform_name": "PSC controlled vocabularies",
+  "owner": "Pacific Salmon Commission",
+  "canonical_urls": [
+    "https://w3id.org/psc/vocab/"
+  ],
+  "docs_urls": [
+    "skills/psc-vocabulary/references/source-contract.md"
+  ],
+  "access_tier": "mixed",
+  "auth_access_model": "Public definitions may be published, but this reader needs an explicitly authorized local catalog and release with trusted independent SHA-256 pins; no acquisition, credentials or network.",
+  "data_domains": [
+    "Controlled vocabulary definitions and lifecycle",
+    "Legacy concept identity and mapping review"
+  ],
+  "identifier_systems": [
+    "Canonical concept IRIs",
+    "Explicit legacy replacements",
+    "Immutable release and catalog SHA-256"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "supported",
+      "note": "Local pinned catalog search and exact-IRI lookup, cross-checked against released definitions; no general ontology ranking."
+    },
+    "metadata_schema": {
+      "status": "partial",
+      "note": "Only the reviewed schema-2.0 catalog and immutable release artifact contract."
+    },
+    "entity_lookup": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "identifier_crosswalks": {
+      "status": "partial",
+      "note": "Explicit legacy identity reuse and informational mapping status; candidate/rejected/deferred mappings never canonicalize records."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "hatchery": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "provenance_versioning": {
+      "status": "supported",
+      "note": "Independent catalog and manifest pins plus released artifact hash verification."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "Bounded local JSON CLI; no remote service or automatic export retrieval."
+    }
+  },
+  "blockers": [
+    "An authorized compatible local export and trusted catalog/manifest hashes are required.",
+    "Vocabulary concepts do not resolve operational stock records or population membership."
+  ],
+  "governance_constraints": [
+    "Preserve exact definitions and provisional/domain-review status.",
+    "Local read authorization does not grant disclosure or scientific acceptance."
+  ],
+  "related_skills": [
+    "psc-vocabulary"
+  ],
+  "last_verified_date": "2026-10-29",
+  "evidence_links": [
+    "skills/psc-vocabulary/references/source-contract.md",
+    "skills/psc-vocabulary/SKILL.md"
+  ],
+  "watch_fields": [
+    "Catalog schema and lifecycle/review fields",
+    "Immutable release manifest and catalog hash binding"
+  ]
+}

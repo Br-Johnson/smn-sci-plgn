@@ -95,3 +95,11 @@ Still open at parity-blocking severity:
 ## Local project workflow boundary (2026-10-24)
 
 Private research exports and explicit framework proposals now have offline helpers and routing. Hosted client/authentication, scientific evidence verification, survival models, identity acceptance and publication remain outside this implementation. These offline helpers do not perform SDK creation or semantic review; use the existing metasalmon and sdp-semantic-review skills within their documented contracts. Live-model eval cases are supplied but unscored until explicitly run.
+
+## Local audit corrections, 2026-10-29
+
+PSC vocabulary discovery now reads an explicitly admitted catalog/release with
+independent hash pins. Local graph discovery calls the existing pinned read-only
+library. Commons research reads an admitted compiled distribution. These are
+implemented local file/library capabilities with synthetic tests; no hosted
+endpoint, production access, scientific approval or plugin release is established.

@@ -38,6 +38,9 @@ What is real now:
 - ontology term search through metasalmonpy (`salmon-terms`)
 - a thin `metasalmon-skill` adapter to metasalmonpy, with R as the documented alternative
 - a `commons-card` skill that runs the salmon knowledge commons' own card and citation-ledger checks at a pinned commons commit, against the user's clone
+- authorized local Commons research search/read with card/claim/source citations and recorded review context
+- explicit PSC vocabulary discovery from independently pinned local catalog/release artifacts
+- read-only connections through the existing pinned local Salmon data graph library
 - a living parity-gap register in `docs/platform-gap-register.md`
 - a machine-readable platform registry in `registry/`
 - a typed router-adjacent skill graph in `registry/skill-graph.json`
@@ -60,10 +63,11 @@ What is still intentionally thin:
 
 Requirements:
 - Python 3.10+
-- the source skills use the Python standard library only
+- the public HTTP source wrappers and local Commons/PSC readers use the Python standard library only
+- graph discovery requires Python>=3.13 and the exact library/dependency contract in [graph-discovery](skills/graph-discovery/SKILL.md)
 - [uv](https://docs.astral.sh/uv/) for `salmon-terms`, `metasalmon-skill` and `sdp-semantic-review` (which runs the `metasalmon-skill` adapter), whose scripts declare `metasalmonpy` `v0.6.0` inline, so uv installs it on first use
 - optional: R with `metasalmon` `v0.6.0` for the documented R route
-- for `commons-card`: git, uv, and a clone of the private salmon knowledge commons; its script declares PyYAML and jsonschema inline for the commons' scripts
+- for `commons-card` contribution checks: git, uv, and an authorized clone of the private salmon knowledge commons; its script declares PyYAML and jsonschema inline for those upstream checks. Research reads a separately admitted local compiled distribution without those dependencies; see [the research contract](skills/commons-card/references/research.md).
 
 Install for Codex / OpenAI:
 
@@ -215,6 +219,7 @@ logic of its own; the package searches the shared `smn` ontology, the DFO
 
 Current coverage:
 - `find_terms()`: role-aware search returning labels, IRIs, definitions, scores, and per-source diagnostics
+- Exact smn/gcdfo release or local-snapshot selection, with the package's unchanged version/hash/manifest provenance and explicit refusal on invalid selections
 - `sources_for_role()`: which sources each semantic role searches by default
 - runtime and package-version inspection
 
@@ -234,10 +239,11 @@ Current coverage:
 
 ### `sdp-semantic-review`
 
-Judges a Salmon Data Package's semantic review packet in the harness. Since
-0.6.0 the packages find ontology candidates for every unfilled IRI slot but no
-longer judge them: the package writes a packet, this skill chooses among each
-slot's candidates by index, the `metasalmon-skill` adapter writes the answers
+Judges a Salmon Data Package's semantic review packet in the harness, the
+recommended workflow added in 0.6.0. The legacy `llm_assess` provider route
+remains deprecated in v0.6.0, with removal scheduled for v0.7.0. In the harness
+workflow the package writes a packet, this skill chooses among each slot's
+candidates by index, the `metasalmon-skill` adapter writes the answers
 in the package's 30-column contract, and the package ingests, validates and
 records them. Nothing reaches the package's metadata until the user confirms
 each term in the package's review console, so the skill ends by handing the
@@ -249,16 +255,19 @@ Evaluation:
   vendored with their conformance fixtures; `controls` checks the instrument
   and `cohort` scores recorded skill runs
 - `evals/sdp-semantic-review/cohort/` holds three blind runs of the skill on
-  the six Theme A packets, recorded 2026-10-10 against the current guide; all
+  the six Theme A packets, recorded 2026-10-10 against the guide at recording time; all
   three pass every case, and none is promoted yet
 
 ### `commons-card`
 
-The citation-ledger skill for the salmon knowledge commons. It runs the
-commons' own scripts at a pinned commons commit, against the user's clone, and
-holds no checks of its own. The commons is private, so the plugin carries none
-of it: each call copies the pinned scripts out of the clone's git history and
-deletes them afterwards.
+The contribution path runs the Commons' own citation-ledger and card checks at
+a pinned commit against an authorized clone. Research `search` and `read` consume
+an explicitly admitted compiled distribution with commit and trusted catalog
+hash pins. They preserve card/claim/source citations, recorded review and
+generation/verification state, staleness and conflicts. The public plugin carries
+no private corpus text, performs no acquisition, and grants no scientific or
+publication approval. Contribution checks copy pinned tools temporarily; the
+research reader verifies only the catalog and research artifacts it consumes.
 
 Current coverage:
 - `okf-check.py`: the whole bundle against the commons' schema and rules, or its gap register
@@ -266,6 +275,17 @@ Current coverage:
 - `ledger_check.py --from-card`: the card-only ledger check
 - the commons' `CONTRIBUTING.md`, and which of those files the clone has changed since the pin
 - checks and ledger writes stop when tools, schema or contribution rules differ from the reviewed pin; runtime and checklist remain available for inspection
+- literal bounded local `search` and exact-card `read`; no semantic ranking or automatic promotion
+
+### `psc-vocabulary` and `graph-discovery`
+
+[PSC discovery](skills/psc-vocabulary/SKILL.md) preserves authoritative concept
+identity, exact definitions, legacy replacements and recorded review status from
+an authorized pinned local catalog/release. It does not resolve individual stock
+records. [Graph discovery](skills/graph-discovery/SKILL.md) forwards the existing
+local library's complete paths, provenance, pending states and refusals from an
+already admitted store. It does not query observations or write contributions.
+Their source-specific router lanes remain separate from vocabulary authoring.
 
 ### `streamnet-api-skill`
 

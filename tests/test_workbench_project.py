@@ -11,6 +11,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 spec = importlib.util.spec_from_file_location("workbench_project", ROOT / "scripts/workbench_project.py")
 wp = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(wp)
@@ -50,6 +51,98 @@ class WorkbenchProjectTests(unittest.TestCase):
         self.assertFalse(out["publicationAuthorized"])
         self.assertEqual(b, original)
         self.assertNotIn("PRIVATE NOTE VALUE", json.dumps(out))
+
+    def test_optional_domain_model_readiness_is_private_counts_only(self):
+        b = bundle()
+        b["project"]["domainModel"] = {"schemaVersion": 1,
+            "concepts": [{"id": "PRIVATE CONCEPT", "label": "Private label", "definition": "",
+                          "evidence": "", "uncertainty": "Unreviewed", "alternatives": ""}],
+            "relationships": [], "bindings": [], "layout": []}
+        original = deepcopy(b)
+        out = wp.inspect_bundle(b)
+        readiness = out["optionalReadiness"]
+        self.assertEqual(readiness["sourceCommit"], "dfdc7a98b3e3a7ffffe97399419f3c48dbf83932")
+        self.assertEqual(readiness["domainModel"]["counts"], {
+            "concepts": 1, "relationships": 0, "bindings": 0,
+            "conceptsMissingDefinition": 1, "conceptsMissingEvidence": 1})
+        self.assertEqual(readiness["domainModel"]["state"], "awaiting_review")
+        self.assertFalse(readiness["scientificAcceptance"])
+        self.assertNotIn("PRIVATE CONCEPT", json.dumps(out))
+        self.assertNotIn("Private label", json.dumps(out))
+        self.assertEqual(b, original)
+
+    def test_optional_annotation_readiness_never_verifies_a_recorded_pin(self):
+        b = bundle()
+        b["project"]["annotationDraft"] = {"schemaVersion": 1,
+            "vocabulary": {"id": "PRIVATE SNAPSHOT", "sha256": "b" * 64},
+            "columns": [{"sourceId": "native-source", "sourceSha256": "a" * 64,
+                         "columnName": "secret_code", "conceptId": "", "columnRole": "",
+                         "valueType": "integer", "termType": "skos_concept",
+                         "termIri": "https://example.org/PRIVATE TERM", "propertyIri": "", "entityIri": "",
+                         "unitIri": "", "constraintIri": "", "statisticalModifierIri": ""}]}
+        original = deepcopy(b)
+        out = wp.inspect_bundle(b)
+        annotations = out["optionalReadiness"]["annotationDraft"]
+        self.assertEqual(annotations["state"], "awaiting_review")
+        self.assertTrue(annotations["vocabularyPinRecorded"])
+        self.assertFalse(annotations["vocabularyVerified"])
+        self.assertEqual(annotations["counts"]["columns"], 1)
+        self.assertEqual(annotations["counts"]["columnsMissingRole"], 1)
+        self.assertEqual(annotations["counts"]["sourceBindingsMismatched"], 0)
+        for private in ("PRIVATE SNAPSHOT", "PRIVATE TERM", "secret_code"):
+            self.assertNotIn(private, json.dumps(out))
+        self.assertEqual(b, original)
+        b["project"]["datasets"][0]["sourceSha256"] = "c" * 64
+        stale = wp.inspect_bundle(b)["optionalReadiness"]["annotationDraft"]
+        self.assertEqual(stale["counts"]["sourceBindingsMismatched"], 1)
+
+    def test_future_optional_shapes_stay_uninterpreted_without_leaking_or_mutation(self):
+        cases = [
+            {"schemaVersion": 2, "privateFuture": "PRIVATE FUTURE VALUE"},
+            {"schemaVersion": 1, "concepts": [], "relationships": [], "bindings": [], "layout": [],
+             "privateFuture": "PRIVATE FUTURE VALUE"},
+            {"schemaVersion": 1, "vocabulary": {"id": "private", "sha256": "a" * 64},
+             "columns": [{"privateFuture": "PRIVATE FUTURE VALUE"}]},
+            "PRIVATE FUTURE VALUE",
+            None,
+        ]
+        for field in ("domainModel", "annotationDraft"):
+            for value in cases:
+                with self.subTest(field=field, value=value):
+                    b = bundle(); b["project"][field] = value; original = deepcopy(b)
+                    inspected = wp.inspect_bundle(b)["optionalReadiness"][field]
+                    self.assertIn(inspected["state"], ("uninterpreted_version", "uninterpreted_shape"))
+                    self.assertNotIn("counts", inspected)
+                    self.assertNotIn("PRIVATE FUTURE", json.dumps(inspected))
+                    self.assertEqual(b, original)
+        absent = wp.inspect_bundle(bundle())["optionalReadiness"]
+        self.assertEqual(absent["domainModel"]["state"], "absent")
+        self.assertEqual(absent["annotationDraft"]["state"], "absent")
+
+    def test_cli_optional_readiness_preserves_disclosure_and_saved_revision_gates(self):
+        b = bundle()
+        b["project"]["domainModel"] = {"schemaVersion": 1, "concepts": [], "relationships": [], "bindings": [], "layout": []}
+        b["project"]["annotationDraft"] = {"schemaVersion": 1, "vocabulary": {"id": "PRIVATE SNAPSHOT", "sha256": "b" * 64}, "columns": []}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); project = root / "project.json"; selected = root / "selected.json"
+            project.write_text(json.dumps(b)); before = project.read_bytes()
+            args = [sys.executable, "-B", str(ROOT / "scripts/workbench_project.py")]
+            inspection = subprocess.run(args + ["inspect", "--bundle", str(project)], capture_output=True, check=True)
+            self.assertEqual(json.loads(inspection.stdout)["optionalReadiness"]["annotationDraft"]["state"], "awaiting_review")
+            self.assertNotIn(b"PRIVATE SNAPSHOT", inspection.stdout)
+            selected.write_text(json.dumps({"title": "Explicit safe method"}))
+            preview = subprocess.run(args + ["contribution-preview", "--bundle", str(project), "--sanitized", str(selected)], capture_output=True, check=True)
+            self.assertNotIn("optionalReadiness", json.loads(preview.stdout))
+            self.assertNotIn(b"PRIVATE SNAPSHOT", preview.stdout)
+            self.assertFalse(json.loads(preview.stdout)["publicationAuthorized"])
+            self.assertEqual(project.read_bytes(), before)
+            selected.write_text(json.dumps({"annotationDraft": "private"}))
+            refused = subprocess.run(args + ["contribution-preview", "--bundle", str(project), "--sanitized", str(selected)], capture_output=True)
+            self.assertEqual(refused.returncode, 2)
+            b["project"]["revision"] = 0; project.write_text(json.dumps(b))
+            selected.write_text(json.dumps({"title": "Explicit safe method"}))
+            refused = subprocess.run(args + ["contribution-preview", "--bundle", str(project), "--sanitized", str(selected)], capture_output=True)
+            self.assertEqual(refused.returncode, 2)
 
     def test_expiry_and_explicit_asof_never_publish(self):
         b = bundle()

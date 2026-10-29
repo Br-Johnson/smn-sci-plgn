@@ -1,0 +1,2 @@
+concept_iri,source_id,pref_label_en,definition_en,scope_note_en,source_scheme_iris,broader_iris,source_version,source_sha256
+https://example.org/source#FictionalWeight,fictional,Fictional weight,The exact upstream fictional weight definition.,Synthetic source projection.,https://example.org/source#Scheme,,fictional-1,1111111111111111111111111111111111111111111111111111111111111111

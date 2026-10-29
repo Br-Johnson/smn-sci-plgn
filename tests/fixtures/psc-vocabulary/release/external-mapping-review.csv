@@ -1,0 +1,5 @@
+target_source,subject_id,predicate_id,object_id,object_label,workflow_status,mapping_justification,confidence,evidence_ref,reviewer_role,rationale,mapping_date
+fictional-target,PSC-CV-900001,skos:exactMatch,https://example.org/mapping#candidate,Fictional candidate,candidate,manual,0.5,synthetic-evidence,fictional-reviewer,Synthetic mapping review.,2026-01-01
+fictional-target,PSC-CV-900001,skos:exactMatch,https://example.org/mapping#rejected,Fictional rejected,rejected,manual,0.5,synthetic-evidence,fictional-reviewer,Synthetic mapping review.,2026-01-01
+fictional-target,PSC-CV-900001,skos:exactMatch,https://example.org/mapping#deferred,Fictional deferred,deferred,manual,0.5,synthetic-evidence,fictional-reviewer,Synthetic mapping review.,2026-01-01
+fictional-target,PSC-CV-900001,skos:exactMatch,https://example.org/mapping#prototype_accepted,Fictional prototype_accepted,prototype_accepted,manual,0.5,synthetic-evidence,fictional-reviewer,Synthetic mapping review.,2026-01-01

@@ -3,10 +3,11 @@
   "platform_name": "NOAA SPS",
   "owner": "NOAA/NWFSC",
   "canonical_urls": [
-    "https://www.webapps.nwfsc.noaa.gov/sps/",
+    "https://www.webapps.nwfsc.noaa.gov/sps",
     "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm"
   ],
   "docs_urls": [
+    "https://www.fisheries.noaa.gov/inport/item/17904",
     "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm",
     "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/map_query.htm"
   ],
@@ -26,7 +27,7 @@
   "capabilities": {
     "discovery_search": {
       "status": "partial",
-      "note": "The site offers data and map query flows, but not a documented public search API."
+      "note": "Readable owner SPS archive-selection UI plus explicit NOAA InPort metadata discovery; no documented JSON records API."
     },
     "metadata_schema": {
       "status": "partial",
@@ -41,8 +42,8 @@
       "note": "The site is not a crosswalk service."
     },
     "abundance_assessment": {
-      "status": "supported",
-      "note": "The site exists to provide salmon population summary and demographic data used in recovery planning."
+      "status": "partial",
+      "note": "Owner documentation describes demographic data; this adapter provides page/metadata context and has not verified live record retrieval."
     },
     "telemetry_passage": {
       "status": "missing",
@@ -75,23 +76,37 @@
   },
   "blockers": [
     "The public surface is a legacy web app, not a modern documented API.",
-    "The scaffold only fetches page/help content and does not reverse-engineer private query endpoints."
+    "The scaffold only fetches page/help content and does not reverse-engineer private query endpoints.",
+    "Page or metadata success does not prove record retrieval. A failed endpoint returns a typed unavailable result with an owner-documentation link; no data fallback is invented."
   ],
   "governance_constraints": [
-    "Treat SPS as browser-first recovery-planning context rather than a general-purpose machine API."
+    "Treat SPS as browser-first recovery-planning context rather than a general-purpose machine API.",
+    "Named-source HTTP reads enforce explicit HTTPS origins and redirect destinations; successful reads carry final-origin retrieval provenance and failures use bounded non-sensitive typed JSON."
   ],
   "related_skills": [
     "noaa-sps-skill"
   ],
-  "last_verified_date": "2026-04-17",
+  "last_verified_date": "2026-10-29",
   "evidence_links": [
+    "https://www.fisheries.noaa.gov/inport/item/17904",
     "https://www.webapps.nwfsc.noaa.gov/sps/",
     "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm",
-    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/map_query.htm"
+    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/map_query.htm",
+    "docs/source-transport.md",
+    "tests/test_public_source_transport.py"
   ],
   "watch_fields": [
     "public home-page layout",
     "help-document URLs",
     "archive/data-query page behavior"
-  ]
+  ],
+  "availability": {
+    "checked_date": "2026-10-29",
+    "verification_scope": "Owner-document reads using web retrieval, not live plugin data-query tests.",
+    "home_entrypoint": "https://www.webapps.nwfsc.noaa.gov/sps",
+    "observed_owner_redirect": "https://www.webapps.nwfsc.noaa.gov/apex/f?p=261:1::::::",
+    "owner_metadata": "https://www.fisheries.noaa.gov/inport/item/17904",
+    "records_retrieval": "not_verified",
+    "note": "No-slash /sps owner page is readable and redirects to archive-selection UI; prior /sps/ returned404. InPort metadata is a separate discovery fallback, not a replacement records API."
+  }
 }

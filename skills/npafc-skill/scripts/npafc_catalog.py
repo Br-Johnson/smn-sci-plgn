@@ -5,45 +5,31 @@ import re
 import sys
 from html import unescape
 from pathlib import Path
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode, urljoin
-from urllib.request import Request, urlopen
+from urllib.parse import urljoin
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts"))
+from _common import resolve_source_url, mark_source_empty, load_input, source_retrievals, source_outcome, decode_source_json, decode_source_text, SourceRequestError, emit, http_get, run_source_cli
+from _source_auth import SourcePolicyError
+
+
+ALLOWED_ORIGINS = ("https://data.npafc.org", "https://www.npafc.org", "https://npafc.org")
+
+from _source_output import emit_source_result
 
 
 API_BASE = "https://data.npafc.org/api/3/action"
 STATS_URL = "https://www.npafc.org/statistics/"
 
 
-def emit(payload) -> None:
-    sys.stdout.write(json.dumps(payload, ensure_ascii=True))
-    sys.stdout.write("\n")
-
-
 def read_input():
-    raw = sys.stdin.read()
-    return json.loads(raw)
+    return load_input()
 
 
 def fetch(url: str, params: dict | None = None, timeout: int = 20):
-    if params:
-        query = urlencode(params, doseq=True)
-        url = f"{url}{'&' if '?' in url else '?'}{query}"
-    request = Request(url, headers={"User-Agent": "smn-sci-plgn/1.0"})
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            body = response.read()
-            final_url = response.geturl()
-            content_type = response.headers.get("Content-Type", "")
-    except HTTPError as exc:
-        body = exc.read() if exc.fp else b""
-        raise RuntimeError(json.dumps({
-            "status": exc.code,
-            "url": exc.geturl() or url,
-            "body": body.decode("utf-8", "replace"),
-        })) from exc
-    except (URLError, TimeoutError) as exc:
-        raise RuntimeError(json.dumps({"status": None, "url": url, "body": str(exc)})) from exc
-    return body.decode("utf-8", "replace"), final_url, content_type
+    body, headers, _, final_url = http_get(url, params=params, timeout=timeout,
+        headers={"User-Agent": "smn-sci-plgn/1.0"}, allowed_origins=ALLOWED_ORIGINS)
+    return decode_source_text(body), final_url, headers.get("Content-Type", "")
 
 
 def html_preview(html: str, base_url: str) -> dict:
@@ -69,11 +55,11 @@ def html_preview(html: str, base_url: str) -> dict:
 
 def api_call(endpoint: str, params: dict | None = None, timeout: int = 20):
     body, final_url, content_type = fetch(f"{API_BASE}/{endpoint}", params=params, timeout=timeout)
-    if "json" not in content_type.lower() and not body.lstrip().startswith(("{", "[")):
-        raise RuntimeError(json.dumps({"status": None, "url": final_url, "body": body}))
-    data = json.loads(body)
-    if not isinstance(data, dict) or not data.get("success"):
-        raise RuntimeError(json.dumps({"status": None, "url": final_url, "body": body}))
+    data = decode_source_json(body, content_type=content_type)
+    if not isinstance(data, dict) or not data.get("success") or "result" not in data:
+        raise SourceRequestError("source_api_error", "The source API refused the catalogue request.", outcome="invalid_response")
+    if endpoint == "package_search":
+        mark_source_empty(not data["result"].get("results") and data["result"].get("count", 0) == 0)
     return data["result"], final_url, body, content_type
 
 
@@ -175,20 +161,13 @@ def main() -> None:
             if not url:
                 emit({"ok": False, "error": "missing_url", "detail": "request action requires url or path"})
                 return
-            if not str(url).startswith(("http://", "https://")):
-                if str(url).startswith("/api/"):
-                    url = f"https://data.npafc.org{url}"
-                else:
-                    url = f"https://www.npafc.org/{str(url).lstrip('/')}"
+            url = resolve_source_url(url, "https://data.npafc.org" if str(url).startswith("/api/") else "https://www.npafc.org")
             raw_body, final_url, content_type = fetch(url, params=payload.get("params") or {}, timeout=timeout)
             if "json" in content_type.lower():
-                try:
-                    records = json.loads(raw_body)
-                except Exception:
-                    records = raw_body
+                records = decode_source_json(raw_body, content_type=content_type)
             else:
                 records = html_preview(raw_body, final_url)
-            summary = json_preview(records) if "json" in content_type.lower() else {
+            summary = {"format": "json"} if "json" in content_type.lower() else {
                 "format": "html",
                 "title": records.get("title") if isinstance(records, dict) else None,
                 "link_count": len(records.get("links", [])) if isinstance(records, dict) else 0,
@@ -196,39 +175,20 @@ def main() -> None:
         else:
             emit({"ok": False, "error": "invalid_action", "detail": "action must be dataset_search, dataset_show, resource_show, statistics_page, or request"})
             return
-    except RuntimeError as exc:
-        detail = json.loads(str(exc))
-        emit({
-            "ok": False,
-            "source": "NPAFC",
-            "action": action,
-            "error": "http_error",
-            "detail": "NPAFC request failed",
-            "status": detail.get("status"),
-            "url": detail.get("url"),
-            "body_preview": str(detail.get("body", ""))[:300],
-            "warnings": warnings,
-        })
-        return
+    except (SourcePolicyError, SourceRequestError):
+        raise
 
-    raw_output_path = None
-    if payload.get("save_raw"):
-        output_path = Path(payload.get("raw_output_path") or "npafc-raw.txt")
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(raw_body if isinstance(raw_body, str) else json.dumps(raw_body, ensure_ascii=True, indent=2), encoding="utf-8")
-        raw_output_path = str(output_path)
-
-    emit({
+    emit_source_result({
         "ok": True,
         "source": "NPAFC",
         "action": action,
         "url": final_url,
+        "retrieval": source_retrievals(),
+        "outcome": source_outcome(),
         "summary": summary,
-        "records": records,
-        "raw_output_path": raw_output_path,
         "warnings": warnings,
-    })
+    }, payload, records, default_name="npafc-raw.txt", raw_payload=raw_body)
 
 
 if __name__ == "__main__":
-    main()
+    run_source_cli(main, source='NPAFC')

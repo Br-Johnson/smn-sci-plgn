@@ -5,45 +5,30 @@ import re
 import sys
 from html import unescape
 from pathlib import Path
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode, urljoin
-from urllib.request import Request, urlopen
+from urllib.parse import urljoin
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts"))
+from _common import resolve_source_url, load_input, source_retrievals, source_outcome, decode_source_json, decode_source_text, emit, http_get, run_source_cli
+from _source_auth import SourcePolicyError
 
 
-HOME_URL = "https://www.webapps.nwfsc.noaa.gov/sps/"
+ALLOWED_ORIGINS = ("https://www.webapps.nwfsc.noaa.gov", "https://webapps.nwfsc.noaa.gov", "https://www.fisheries.noaa.gov")
+
+
+HOME_URL = "https://www.webapps.nwfsc.noaa.gov/sps"
+METADATA_URL = "https://www.fisheries.noaa.gov/inport/item/17904"
 HELP_URL = "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm"
 
 
-def emit(payload) -> None:
-    sys.stdout.write(json.dumps(payload, ensure_ascii=True))
-    sys.stdout.write("\n")
-
-
 def read_input():
-    raw = sys.stdin.read()
-    return json.loads(raw)
+    return load_input()
 
 
 def fetch(url: str, params: dict | None = None, timeout: int = 20):
-    if params:
-        query = urlencode(params, doseq=True)
-        url = f"{url}{'&' if '?' in url else '?'}{query}"
-    request = Request(url, headers={"User-Agent": "smn-sci-plgn/1.0"})
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            body = response.read()
-            final_url = response.geturl()
-            content_type = response.headers.get("Content-Type", "")
-    except HTTPError as exc:
-        body = exc.read() if exc.fp else b""
-        raise RuntimeError(json.dumps({
-            "status": exc.code,
-            "url": exc.geturl() or url,
-            "body": body.decode("utf-8", "replace"),
-        })) from exc
-    except (URLError, TimeoutError) as exc:
-        raise RuntimeError(json.dumps({"status": None, "url": url, "body": str(exc)})) from exc
-    return body.decode("utf-8", "replace"), final_url, content_type
+    body, headers, _, final_url = http_get(url, params=params, timeout=timeout,
+        headers={"User-Agent": "smn-sci-plgn/1.0"}, allowed_origins=ALLOWED_ORIGINS)
+    return decode_source_text(body), final_url, headers.get("Content-Type", "")
 
 
 def html_preview(html: str, base_url: str) -> dict:
@@ -96,40 +81,24 @@ def main() -> None:
     elif action == "help":
         url = HELP_URL
         params = payload.get("params") or {}
+    elif action == "metadata":
+        url = METADATA_URL
+        params = {}
     elif action == "request":
         url = payload.get("url") or payload.get("path")
         if not url:
             emit({"ok": False, "error": "missing_url", "detail": "request action requires url or path"})
             return
-        if not str(url).startswith(("http://", "https://")):
-            url = f"https://www.webapps.nwfsc.noaa.gov/{str(url).lstrip('/')}"
+        url = resolve_source_url(url, "https://www.webapps.nwfsc.noaa.gov")
         params = payload.get("params") or {}
     else:
-        emit({"ok": False, "error": "invalid_action", "detail": "action must be home, help, or request"})
+        emit({"ok": False, "error": "invalid_action", "detail": "action must be home, help, metadata, or request"})
         return
 
-    try:
-        body, final_url, content_type = fetch(url, params=params, timeout=timeout)
-    except RuntimeError as exc:
-        detail = json.loads(str(exc))
-        emit({
-            "ok": False,
-            "source": "NOAA SPS",
-            "action": action,
-            "error": "http_error",
-            "detail": "SPS request failed",
-            "status": detail.get("status"),
-            "url": detail.get("url"),
-            "body_preview": str(detail.get("body", ""))[:300],
-            "warnings": warnings,
-        })
-        return
+    body, final_url, content_type = fetch(url, params=params, timeout=timeout)
 
     if "json" in content_type.lower():
-        try:
-            data = json.loads(body)
-        except Exception:
-            data = body
+        data = decode_source_json(body, content_type=content_type)
     else:
         data = body
 
@@ -151,7 +120,10 @@ def main() -> None:
         "ok": True,
         "source": "NOAA SPS",
         "action": action,
+        "discovery_scope": "owner_metadata_only" if action == "metadata" else "source_response_only",
         "url": final_url,
+        "retrieval": source_retrievals(),
+        "outcome": source_outcome(),
         "summary": summary,
         "records": records,
         "raw_output_path": raw_output_path,
@@ -160,4 +132,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_source_cli(main, source='NOAA SPS', owner_documentation=METADATA_URL)

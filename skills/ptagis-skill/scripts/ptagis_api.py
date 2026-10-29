@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from _source_auth import SourcePolicyError, source_path_segment
-from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, http_get_json, load_input, result_error, write_raw
+from _common import source_retrievals, source_outcome, run_source_cli, inline_credentials_refused, emit, getenv_any, http_get_json, load_input, result_error
+from _source_output import emit_source_result
 
 
 BASE_URL = "https://api.ptagis.org"
@@ -119,48 +120,21 @@ def main() -> None:
         warnings.append("no PTAGIS auth token provided; some endpoints may reject the request")
 
     url = f"{BASE_URL}{path}"
-    try:
-        data, full_url = http_get_json(url, params=params, headers=headers, timeout=timeout, allowed_origins=(BASE_URL,))
-    except SourcePolicyError:
-        raise
-    except RuntimeError as exc:
-        detail = json.loads(str(exc))
-        message = "PTAGIS request failed"
-        if detail.get("status") in {401, 403}:
-            message = "PTAGIS request was unauthorized; check PTAGIS_API_TOKEN or PTAGIS_API_KEY"
-        emit(
-            result_error(
-                "http_error",
-                message,
-                action=action,
-                status=detail.get("status"),
-                url=detail.get("url"),
-                body_preview=detail.get("body", "")[:300],
-                warnings=warnings,
-            )
-        )
-        return
+    data, full_url = http_get_json(url, params=params, headers=headers, timeout=timeout, allowed_origins=(BASE_URL,))
 
-    raw_output_path = write_raw(
-        data,
-        requested=bool(payload.get("save_raw")),
-        raw_output_path=payload.get("raw_output_path"),
-        default_name="ptagis-raw.json",
-    )
-
-    emit(
+    emit_source_result(
         {
             "ok": True,
             "source": "PTAGIS API",
             "action": action,
             "url": full_url,
+            "retrieval": source_retrievals(),
+            "outcome": source_outcome(),
             "summary": summarize(action, data),
-            "records": data,
-            "raw_output_path": raw_output_path,
             "warnings": warnings,
-        }
+        }, payload, data, default_name="ptagis-raw.json",
     )
 
 
 if __name__ == "__main__":
-    run_source_cli(main)
+    run_source_cli(main, source='PTAGIS API')
