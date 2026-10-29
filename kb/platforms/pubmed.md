@@ -16,3 +16,11 @@ PubMed is the scaffold's literature-discovery surface for salmon topics.
 ## Why it matters
 
 PubMed is not a salmon platform, but it is one of the main evidence lanes for research synthesis and gap discovery.
+
+
+## Transport contract
+
+The adapter uses the shared [source transport contract](../../docs/source-transport.md):
+explicit HTTPS origins, checked redirects, real final-origin provenance and
+typed failures. The synthetic transport tests establish these local behaviors;
+they do not establish current service availability.

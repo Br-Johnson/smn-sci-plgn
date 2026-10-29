@@ -47,3 +47,11 @@ Example:
 ```bash
 echo '{"action":"validation_codes","kind":"mrr_projects"}' | python skills/ptagis-skill/scripts/ptagis_api.py
 ```
+
+
+## Transport and provenance
+
+Use the [source transport contract](../../docs/source-transport.md) for allowed
+origins, redirect rules, retrieval provenance and typed failures. An unavailable
+source is reported separately from a successful empty result; another evidence
+lane can continue.

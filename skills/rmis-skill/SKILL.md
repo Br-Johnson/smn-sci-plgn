@@ -66,3 +66,11 @@ The RMIS API uses query-string filters such as:
 - standard comparisons like `brood_year>=2020`
 
 See [references/rmis-access.md](references/rmis-access.md) for the current query model and access notes.
+
+
+## Transport and provenance
+
+Use the [source transport contract](../../docs/source-transport.md) for allowed
+origins, redirect rules, retrieval provenance and typed failures. An unavailable
+source is reported separately from a successful empty result; another evidence
+lane can continue.

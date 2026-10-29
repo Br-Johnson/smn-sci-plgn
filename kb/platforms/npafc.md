@@ -16,3 +16,11 @@ NPAFC is the public catalogue and statistics scaffold for North Pacific salmon-r
 ## Why it matters
 
 It adds a clean public metadata/API lane that is broader and more documented than the legacy web-app sources.
+
+
+## Transport contract
+
+The adapter uses the shared [source transport contract](../../docs/source-transport.md):
+explicit HTTPS origins, checked redirects, real final-origin provenance and
+typed failures. The synthetic transport tests establish these local behaviors;
+they do not establish current service availability.

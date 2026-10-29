@@ -7,7 +7,7 @@ from urllib.parse import quote_plus
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import emit, http_get_json, load_input, result_error, write_raw
+from _common import mark_source_empty, source_retrievals, source_outcome, run_source_cli, emit, http_get_json, load_input, result_error, write_raw
 
 
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
@@ -35,8 +35,9 @@ def search_pubmed(query: str, retmax: int, mindate: str | None, maxdate: str | N
         params["maxdate"] = maxdate
         params["datetype"] = "pdat"
 
-    data, url = http_get_json(f"{EUTILS}/esearch.fcgi", params=params, timeout=timeout)
+    data, url = http_get_json(f"{EUTILS}/esearch.fcgi", params=params, timeout=timeout, allowed_origins=("https://eutils.ncbi.nlm.nih.gov",))
     id_list = data.get("esearchresult", {}).get("idlist", [])
+    mark_source_empty(not id_list)
     return id_list, url, data
 
 
@@ -49,7 +50,7 @@ def summarize_pubmed(ids: list[str], timeout: int):
         "retmode": "json",
         "tool": "salmon-science-research",
     }
-    data, url = http_get_json(f"{EUTILS}/esummary.fcgi", params=params, timeout=timeout)
+    data, url = http_get_json(f"{EUTILS}/esummary.fcgi", params=params, timeout=timeout, allowed_origins=("https://eutils.ncbi.nlm.nih.gov",))
     return data, url
 
 
@@ -128,6 +129,8 @@ def main() -> None:
             "search_url": search_url,
             "summary_url": summary_url,
             "result_count": len(records),
+            "retrieval": source_retrievals(),
+            "outcome": source_outcome(),
             "records": records,
             "raw_output_path": raw_output_path,
         }
@@ -135,4 +138,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_source_cli(main, source='PubMed via NCBI E-utilities')

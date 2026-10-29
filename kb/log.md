@@ -1,5 +1,11 @@
 # Knowledge Base Log
 
+## [2026-10-29] source-transport | attributable-reads-and-typed-failures
+
+- Routed all eight network adapters through shared transport with explicit HTTPS source origins and checked redirect destinations.
+- Added actual final-origin/UTC retrieval provenance and bounded typed transport, HTTP, decode and HTML access-page outcomes; empty successes stay distinct from unavailable sources.
+- Preserved authenticated-origin restrictions and query parameters, with synthetic CLI and local TLS regressions. No live service availability or source data query is claimed.
+
 ## [2026-10-29] compatibility | commons-validation
 
 - Refreshed the Commons adapter's reviewed pin and retained pin/head/drift reporting.

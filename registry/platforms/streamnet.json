@@ -75,7 +75,8 @@
   ],
   "governance_constraints": [
     "Credential-gated access means the agent must distinguish unsupported from unauthorized.",
-    "Plugin credentials come only from the user-configured local environment; inline credentials and agent-side login are refused. Authenticated transport is HTTPS-only, with fixed source-origin and same-origin redirect policy; normal output and saved JSON redact credentials."
+    "Plugin credentials come only from the user-configured local environment; inline credentials and agent-side login are refused. Authenticated transport is HTTPS-only, with fixed source-origin and same-origin redirect policy; normal output and saved JSON redact credentials.",
+    "Named-source HTTP reads enforce explicit HTTPS origins and redirect destinations; successful reads carry final-origin retrieval provenance and failures use bounded non-sensitive typed JSON."
   ],
   "related_skills": [
     "streamnet-api-skill"
@@ -86,7 +87,9 @@
     "skills/streamnet-api-skill/SKILL.md",
     "skills/streamnet-api-skill/scripts/streamnet_api.py",
     "docs/source-authentication.md",
-    "tests/test_source_credentials.py"
+    "tests/test_source_credentials.py",
+    "docs/source-transport.md",
+    "tests/test_public_source_transport.py"
   ],
   "watch_fields": [
     "auth model",

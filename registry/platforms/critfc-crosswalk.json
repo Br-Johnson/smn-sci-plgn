@@ -77,7 +77,8 @@
     "The current scaffold does not model the full population query UI."
   ],
   "governance_constraints": [
-    "Treat the project as source-specific crosswalk context, not a universal salmon identity authority."
+    "Treat the project as source-specific crosswalk context, not a universal salmon identity authority.",
+    "Named-source HTTP reads enforce explicit HTTPS origins and redirect destinations; successful reads carry final-origin retrieval provenance and failures use bounded non-sensitive typed JSON."
   ],
   "related_skills": [
     "critfc-crosswalk-skill"
@@ -86,7 +87,9 @@
   "evidence_links": [
     "https://critfc.org/fish-and-watersheds/fishery-science/data-resources/columbia-basin-salmon-and-steelhead-crosswalk-project/",
     "https://critfc.org/wp-content/uploads/2013/07/crosswalk_user_guide.pdf",
-    "https://gis.critfc.org/arcgis/rest/services"
+    "https://gis.critfc.org/arcgis/rest/services",
+    "docs/source-transport.md",
+    "tests/test_public_source_transport.py"
   ],
   "watch_fields": [
     "population query tool availability",

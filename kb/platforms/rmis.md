@@ -25,3 +25,11 @@ chat or JSON. Authenticated requests stay on the fixed HTTPS source origin;
 cross-origin and downgrade redirects are refused. Ordinary output and saved
 JSON redact credentials. See [local authentication](../../docs/source-authentication.md)
 for the user-run setup and synthetic verification path.
+
+
+## Transport contract
+
+The adapter uses the shared [source transport contract](../../docs/source-transport.md):
+explicit HTTPS origins, checked redirects, real final-origin provenance and
+typed failures. The synthetic transport tests establish these local behaviors;
+they do not establish current service availability.

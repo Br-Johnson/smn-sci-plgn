@@ -7,10 +7,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import emit, http_get, load_input, result_error
+from _common import resolve_source_url, source_retrievals, source_outcome, decode_source_text, run_source_cli, emit, http_get, load_input, result_error
 
 
 BASE_URL = "https://www.cbr.washington.edu"
+ALLOWED_ORIGINS = (BASE_URL, "https://cbr.washington.edu")
 
 CATALOG = {
     "adult_passage_counts": {
@@ -108,10 +109,10 @@ def main() -> None:
     if not path:
         emit(result_error("missing_path", "page action requires name or path"))
         return
-    full_url = f"{BASE_URL}{path}" if str(path).startswith("/") else str(path)
+    full_url = resolve_source_url(path, BASE_URL)
 
-    body, _, _, url = http_get(full_url, timeout=int(payload.get("timeout_sec", 20)))
-    html = body.decode("utf-8", errors="replace")
+    body, _, _, url = http_get(full_url, timeout=int(payload.get("timeout_sec", 20)), allowed_origins=ALLOWED_ORIGINS)
+    html = decode_source_text(body)
 
     emit(
         {
@@ -119,6 +120,8 @@ def main() -> None:
             "source": "Columbia River DART",
             "action": "page",
             "url": url,
+            "retrieval": source_retrievals(),
+            "outcome": source_outcome(),
             "title": title_from_html(html),
             "description": description_from_html(html),
             "matched_catalog_entry": entry,
@@ -127,4 +130,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_source_cli(main, source='Columbia River DART')
