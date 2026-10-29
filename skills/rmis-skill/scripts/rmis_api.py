@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from _source_auth import authenticated_headers, source_urlopen
-from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, load_input, result_error, write_raw
+from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, load_input, result_error
+from _source_output import emit_source_result
 
 
 API_BASE = "https://phish.rmis.org"
@@ -212,24 +213,15 @@ def main() -> None:
         )
         return
 
-    raw_output_path = write_raw(
-        data,
-        requested=bool(payload.get("save_raw")),
-        raw_output_path=payload.get("raw_output_path"),
-        default_name="rmis-raw.json",
-    )
-
-    emit(
+    emit_source_result(
         {
             "ok": True,
             "source": "RMIS API",
             "action": action,
             "url": final_url,
             "summary": summarize(data),
-            "records": data,
-            "raw_output_path": raw_output_path,
             "warnings": warnings,
-        }
+        }, payload, data, default_name="rmis-raw.json",
     )
 
 

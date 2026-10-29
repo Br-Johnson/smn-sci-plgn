@@ -46,6 +46,16 @@ The adapter does not log in: the legacy `login` action returns
   - `save_raw`
   - `raw_output_path`
   - `timeout_sec`
+  - `raw_stdout` (boolean; only `true` returns the full redacted payload)
+
+## Output
+
+Data responses default to a preview of at most five rows per collection and
+16 KiB of serialized stdout, retaining source pagination metadata. `save_raw`
+saves locally while stdout stays compact. The public announcement remains a
+compact metadata action. See [source output controls](../../docs/source-output.md)
+for counts, truncation and typed save failures. Use `raw_stdout: true` only
+when the user explicitly needs bulk records in the tool transcript.
 
 Examples:
 

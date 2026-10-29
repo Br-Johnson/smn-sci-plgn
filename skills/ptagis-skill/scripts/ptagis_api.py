@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from _source_auth import SourcePolicyError, source_path_segment
-from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, http_get_json, load_input, result_error, write_raw
+from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, http_get_json, load_input, result_error
+from _source_output import emit_source_result
 
 
 BASE_URL = "https://api.ptagis.org"
@@ -141,24 +142,15 @@ def main() -> None:
         )
         return
 
-    raw_output_path = write_raw(
-        data,
-        requested=bool(payload.get("save_raw")),
-        raw_output_path=payload.get("raw_output_path"),
-        default_name="ptagis-raw.json",
-    )
-
-    emit(
+    emit_source_result(
         {
             "ok": True,
             "source": "PTAGIS API",
             "action": action,
             "url": full_url,
             "summary": summarize(action, data),
-            "records": data,
-            "raw_output_path": raw_output_path,
             "warnings": warnings,
-        }
+        }, payload, data, default_name="ptagis-raw.json",
     )
 
 

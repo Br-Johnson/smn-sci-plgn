@@ -52,6 +52,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
   - Offline contract checks: `python3 -m unittest discover -s tests -p 'test_commons_card.py'`. With an authorized clone, set `SALMON_COMMONS_DIR` to enable the real-tool synthetic controls and read-only bundle/ledger checks.
 - Local CV authoring helper, copied into each new project and requiring only Python's standard library: `skills/controlled-vocabulary/scripts/controlled_vocabulary.py`. Run `init`, `validate`, `release`, `build`, or `prepare-publication`; publication preparation performs no external action. Regression seam: `tests/test_controlled_vocabulary.py`.
 - Shared stdlib helper utilities and credential-safe output/file handling: `scripts/_common.py`
+- Bounded PTAGIS/RMIS/NPAFC previews and local raw-save receipts: `scripts/_source_output.py`; output contract: `docs/source-output.md`; regressions: `tests/test_source_output.py`.
 - Authenticated-source origin, redirect and redaction policy: `scripts/_source_auth.py`; user-run setup: `docs/source-authentication.md`; regressions: `tests/test_source_credentials.py`
 - Executable graph selector: `scripts/skill_graph_selector.py`
 - Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`
