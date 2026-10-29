@@ -5,6 +5,19 @@ on:
   pull_request:
 
 jobs:
+  graph-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # Dependency acquisition is separate from the synthetic tests, which
+      # refuse network access and only open their disposable admitted stores.
+      - run: python -m pip install "smn-data-graph @ git+https://github.com/salmon-data-mobilization/smn-data-graph@4036bad502ac0319e1207f233386ac7f766de2f6#subdirectory=python"
+      - run: python -B -m unittest discover -s tests -p 'test_graph_discovery.py' -v
+
   vocabulary-artifacts:
     runs-on: ubuntu-latest
     timeout-minutes: 10
