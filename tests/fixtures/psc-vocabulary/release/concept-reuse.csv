@@ -1,0 +1,2 @@
+legacy_concept_id,concept_iri,source_id,selection_status,decision_ref,rationale
+PSC-CV-900002,https://example.org/source#FictionalWeight,fictional,draft,synthetic-reuse-decision,"Explicit fictional identity reuse, independent of mappings."

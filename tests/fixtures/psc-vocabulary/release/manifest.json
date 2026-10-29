@@ -1,0 +1,73 @@
+{
+  "accepted_statuses": [
+    "prototype_accepted",
+    "domain_approved"
+  ],
+  "artifacts": [
+    {
+      "bytes": 106,
+      "media_type": "text/markdown",
+      "path": "NOTICE.md",
+      "role": "synthetic_test_artifact",
+      "sha256": "27e67c4f54ba26a345f6b93e46b6cde9ee7052d4e5a73572394a816ec20692af"
+    },
+    {
+      "bytes": 240,
+      "media_type": "text/csv",
+      "path": "concept-reuse.csv",
+      "role": "synthetic_test_artifact",
+      "sha256": "8f61443b7dde50aa7e7cb77f69222e5fe8e1178640f752b14f4f6ce35a26bab9"
+    },
+    {
+      "bytes": 1039,
+      "media_type": "text/csv",
+      "path": "concepts.csv",
+      "role": "synthetic_test_artifact",
+      "sha256": "f43bf8b244a0b589359ebd302dc8f3f9e11a94633696ae0903a0d7027a4ee68c"
+    },
+    {
+      "bytes": 508,
+      "media_type": "text/csv",
+      "path": "context-selections.csv",
+      "role": "synthetic_test_artifact",
+      "sha256": "f33f4678823cae43a2ccb2962b8a332db7b7c1cccb6f95a9c6109585d6071f07"
+    },
+    {
+      "bytes": 384,
+      "media_type": "text/csv",
+      "path": "external-concepts.csv",
+      "role": "synthetic_test_artifact",
+      "sha256": "b45074de687ab72bb8eb15aa9089a2b65eeaabc1bed788bc9dfef7fb57a7b525"
+    },
+    {
+      "bytes": 985,
+      "media_type": "text/csv",
+      "path": "external-mapping-review.csv",
+      "role": "synthetic_test_artifact",
+      "sha256": "9d5b9933a03087bc15a35f30ddcda0223e4a8b2f1cf30395d92b86d75dfccb37"
+    },
+    {
+      "bytes": 341,
+      "media_type": "application/json",
+      "path": "provenance/stock-recruit-measurements/promotion.json",
+      "role": "synthetic_test_artifact",
+      "sha256": "621b6d87fb9aaeb456d12d07f7591f01d5b831b52d7ae885f4e7217b37a23551"
+    },
+    {
+      "bytes": 135,
+      "media_type": "application/json",
+      "path": "working-contexts.json",
+      "role": "synthetic_test_artifact",
+      "sha256": "2dedc7f37f25e749e095e6daa1908802c4f5c037f2e8ef42715014c387a3299f"
+    }
+  ],
+  "channel": "prerelease",
+  "context_selection_status": "draft",
+  "external_sources": [],
+  "issued": "2026-01-01",
+  "namespace": "https://w3id.org/psc/vocab/",
+  "schema_version": "1.0",
+  "status": "provisional-not-adopted-psc-standard",
+  "version": "v0.0.0-synthetic.1",
+  "vocabulary_id": "psc-salmon-vocabularies"
+}

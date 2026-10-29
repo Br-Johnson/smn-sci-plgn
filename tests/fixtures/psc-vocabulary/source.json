@@ -1,0 +1,9 @@
+{
+  "catalog_path": "catalog.json",
+  "catalog_sha256": "3172a1ea8e7acffe80a77ab6179e6ec9157d22424344e35584d4dc88b9e36ebf",
+  "manifest_sha256": "b5cbd083326a3d206ab54e4b54add4579bedda6cab51746f37e3aca725108d0e",
+  "release_directory": "release",
+  "release_version": "v0.0.0-synthetic.1",
+  "schema_version": "psc-vocabulary.source/v1",
+  "source_ref": "synthetic fixture only"
+}

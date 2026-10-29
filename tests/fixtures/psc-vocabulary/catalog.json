@@ -1,0 +1,154 @@
+{
+  "contexts": [
+    {
+      "context_id": "fictional-workshop",
+      "description": "Synthetic bounded context.",
+      "label": "Fictional workshop"
+    }
+  ],
+  "legacy_replacements": [
+    {
+      "concept_iri": "https://example.org/source#FictionalWeight",
+      "legacy_iri": "https://w3id.org/psc/vocab/concept/PSC-CV-900002"
+    }
+  ],
+  "released_version": "v0.0.0-synthetic.1",
+  "schema_version": "2.0",
+  "terms": [
+    {
+      "aliases": [],
+      "contexts": [
+        "fictional-workshop"
+      ],
+      "definition": "The exact fictional count definition.",
+      "display_id": "PSC-CV-900001",
+      "iri": "https://w3id.org/psc/vocab/concept/PSC-CV-900001",
+      "label": "Fictional count",
+      "path": "synthetic/",
+      "scheme_ids": [
+        "fictional-measure"
+      ],
+      "scope_note": "Synthetic fixture only.",
+      "search_text": "https://w3id.org/psc/vocab/concept/PSC-CV-900001 Fictional count The exact fictional count definition.",
+      "selection_statuses": [
+        "draft"
+      ],
+      "selections": [
+        {
+          "concept_iri": "https://w3id.org/psc/vocab/concept/PSC-CV-900001",
+          "context_id": "fictional-workshop",
+          "decision_ref": "synthetic-selection",
+          "scheme_id": "fictional-measure",
+          "selection_status": "draft"
+        }
+      ],
+      "source_id": "psc",
+      "source_label": "Fictional",
+      "source_status": "provisional",
+      "source_version": "v0.0.0-synthetic.1"
+    },
+    {
+      "aliases": [],
+      "contexts": [
+        "fictional-workshop"
+      ],
+      "definition": "The exact fictional prototype definition.",
+      "display_id": "PSC-CV-900004",
+      "iri": "https://w3id.org/psc/vocab/concept/PSC-CV-900004",
+      "label": "Fictional prototype measure",
+      "path": "synthetic/",
+      "scheme_ids": [
+        "fictional-measure"
+      ],
+      "scope_note": "Synthetic fixture only.",
+      "search_text": "https://w3id.org/psc/vocab/concept/PSC-CV-900004 Fictional prototype measure The exact fictional prototype definition.",
+      "selection_statuses": [
+        "draft"
+      ],
+      "selections": [
+        {
+          "concept_iri": "https://w3id.org/psc/vocab/concept/PSC-CV-900004",
+          "context_id": "fictional-workshop",
+          "decision_ref": "synthetic-selection",
+          "scheme_id": "fictional-measure",
+          "selection_status": "draft"
+        }
+      ],
+      "source_id": "psc",
+      "source_label": "Fictional",
+      "source_status": "provisional",
+      "source_version": "v0.0.0-synthetic.1"
+    },
+    {
+      "aliases": [],
+      "contexts": [
+        "fictional-workshop"
+      ],
+      "definition": "A kind of fictional stock reference, never an individual stock.",
+      "display_id": "PSC-CV-900003",
+      "iri": "https://w3id.org/psc/vocab/concept/PSC-CV-900003",
+      "label": "Fictional stock kind",
+      "path": "synthetic/",
+      "scheme_ids": [
+        "stock-reference-kind"
+      ],
+      "scope_note": "Synthetic fixture only.",
+      "search_text": "https://w3id.org/psc/vocab/concept/PSC-CV-900003 Fictional stock kind A kind of fictional stock reference, never an individual stock.",
+      "selection_statuses": [
+        "draft"
+      ],
+      "selections": [
+        {
+          "concept_iri": "https://w3id.org/psc/vocab/concept/PSC-CV-900003",
+          "context_id": "fictional-workshop",
+          "decision_ref": "synthetic-selection",
+          "scheme_id": "stock-reference-kind",
+          "selection_status": "draft"
+        }
+      ],
+      "source_id": "psc",
+      "source_label": "Fictional",
+      "source_status": "provisional",
+      "source_version": "v0.0.0-synthetic.1"
+    },
+    {
+      "aliases": [
+        {
+          "concept_id": "PSC-CV-900002",
+          "iri": "https://w3id.org/psc/vocab/concept/PSC-CV-900002",
+          "label": "Legacy fictional weight"
+        }
+      ],
+      "contexts": [
+        "fictional-workshop"
+      ],
+      "definition": "The exact upstream fictional weight definition.",
+      "display_id": "fictional:FictionalWeight",
+      "iri": "https://example.org/source#FictionalWeight",
+      "label": "Fictional weight",
+      "path": "synthetic/",
+      "scheme_ids": [
+        "fictional-measure"
+      ],
+      "scope_note": "Synthetic source projection.",
+      "search_text": "https://example.org/source#FictionalWeight Fictional weight The exact upstream fictional weight definition. PSC-CV-900002 Legacy fictional weight",
+      "selection_statuses": [
+        "draft"
+      ],
+      "selections": [
+        {
+          "concept_iri": "https://example.org/source#FictionalWeight",
+          "context_id": "fictional-workshop",
+          "decision_ref": "synthetic-selection",
+          "scheme_id": "fictional-measure",
+          "selection_status": "draft"
+        }
+      ],
+      "source_id": "fictional",
+      "source_label": "Fictional",
+      "source_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "source_status": "source-defined",
+      "source_version": "fictional-1"
+    }
+  ]
+}
