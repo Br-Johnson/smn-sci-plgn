@@ -86,7 +86,11 @@ def config_check(meta):
     require(isinstance(meta["slug"], str) and re.fullmatch(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", meta["slug"]) and len(meta["slug"]) <= 64, "slug must be lowercase letters/digits/hyphens, starting with a letter")
     require(isinstance(meta["version"], str) and VERSION_RE.fullmatch(meta["version"]), "version must be a three-part semantic version, optionally with a prerelease suffix")
     version_key(meta["version"])
-    date.fromisoformat(meta["issued"])
+    require(isinstance(meta["issued"], str) and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", meta["issued"]), "issued must be a calendar date in YYYY-MM-DD form")
+    try:
+        date.fromisoformat(meta["issued"])
+    except ValueError:
+        raise ValueError("issued must be a valid calendar date in YYYY-MM-DD form") from None
     require(LANG_RE.fullmatch(meta["language"]), "language must use the profile's BCP47-shaped tag")
     url(meta["license"], "license")
     require(re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?", meta["github_owner"]), "github_owner must be a GitHub owner name")

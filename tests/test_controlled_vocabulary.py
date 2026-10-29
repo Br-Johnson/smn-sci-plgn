@@ -61,6 +61,23 @@ class ControlledVocabularyTests(unittest.TestCase):
         self.assertEqual(checked["namespace_collision_check"], "not_performed")
         self.assertTrue((self.project / "tools" / "controlled_vocabulary.py").is_file())
 
+    def test_issued_requires_a_valid_canonical_calendar_date_before_rdf_release(self):
+        self.run_tool("init", self.project, "--demo")
+        path = self.project / "vocabulary.json"
+        meta = json.loads(path.read_text())
+        for issued in ("20260101", "2026-W01-1", "2026-02-30"):
+            with self.subTest(issued=issued):
+                meta["issued"] = issued
+                path.write_text(json.dumps(meta))
+                refused = self.run_tool("validate", self.project, expected=1)
+                self.assertIn("issued", refused["error"])
+                self.assertFalse((self.project / "releases").exists())
+        meta["issued"] = "2024-02-29"
+        path.write_text(json.dumps(meta))
+        self.run_tool("release", self.project)
+        graph = json.loads((self.project / "releases" / "0.1.0" / "vocabulary.jsonld").read_text())["@graph"]
+        self.assertEqual(graph[0]["dcterms:issued"], {"@value": "2024-02-29", "@type": "xsd:date"})
+
     def test_prepared_release_and_website_are_reproducible_and_keep_term_identity(self):
         self.run_tool("init", self.project, "--demo")
         released = self.run_tool("release", self.project)
