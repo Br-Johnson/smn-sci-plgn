@@ -5,6 +5,32 @@ on:
   pull_request:
 
 jobs:
+  review-and-recipe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: salmon-data-mobilization/smn-data-pkg
+          ref: 6806319c6e88d14064688be7f981e8735269c558
+          path: .ci/sdp-spec
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.9.21"
+          enable-cache: "false"
+      # Acquire the released SDK, EML extras and independent schema checker.
+      # These subprocess tests then refuse provider and network operations.
+      - name: Replay role boundaries through the actual released package
+        run: uv run -q --no-project --with "metasalmonpy[eml] @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.6.0" --with "jsonschema==4.26.0" python -B -m unittest discover -s tests -p 'test_semantic_role_replay.py' -v
+      - name: Execute the fictional recipe and independent validation
+        env:
+          SMN_RECIPE_SDP_VALIDATOR: ${{ github.workspace }}/.ci/sdp-spec/scripts/validate_package.py
+        run: uv run -q --no-project --with "metasalmonpy[eml] @ git+https://github.com/salmon-data-mobilization/metasalmonpy@v0.6.0" --with "jsonschema==4.26.0" python -B -m unittest discover -s tests -p 'test_local_package_recipe.py' -v
+
   graph-discovery:
     runs-on: ubuntu-latest
     timeout-minutes: 10
