@@ -12,6 +12,8 @@ from typing import Iterable
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 LANE_PRIORITY = [
+    "lane:psc-vocabulary-discovery",
+    "lane:local-graph-discovery",
     "lane:local-commons-evidence",
     "lane:controlled-vocabulary-authoring",
     "lane:private-research-workbench",
@@ -30,6 +32,14 @@ LANE_PRIORITY = [
 ]
 
 LANE_PATTERNS: dict[str, tuple[str, ...]] = {
+    "lane:psc-vocabulary-discovery": (
+        r"\b(?:psc|pacific salmon commission)\b.{0,100}\b(?:vocabulary|term|concept|iri|definition|catalog)\b",
+        r"\b(?:vocabulary|term|concept|iri|definition|catalog)\b.{0,100}\b(?:psc|pacific salmon commission)\b",
+    ),
+    "lane:local-graph-discovery": (
+        r"\blocal graph\b",
+        r"\b(?:graph connections|connected discovery|admitted store|salmongraph)\b",
+    ),
     "lane:local-commons-evidence": (
         r"\b(?:interpret|interpretation|synthesi[sz]e|evidence synthesis)\b",
         r"\b(?:search|read|retrieve|consult|find|what)\b.{0,100}\b(?:salmon knowledge )?commons\b",
@@ -223,6 +233,8 @@ NORMALIZER_LANES = {
 }
 
 LANE_SKILL_MAP: dict[str, tuple[str, ...]] = {
+    "lane:psc-vocabulary-discovery": ("psc-vocabulary",),
+    "lane:local-graph-discovery": ("graph-discovery",),
     "lane:local-commons-evidence": ("commons-card",),
     "lane:controlled-vocabulary-authoring": ("controlled-vocabulary",),
     "lane:private-research-workbench": ("salmon-workbench-skill",),

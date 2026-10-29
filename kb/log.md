@@ -86,3 +86,12 @@ Added admitted local compiler-distribution search/read to commons-card, separate
 from contribution tools. The reader verifies the trusted catalog and consumed
 research artifacts, preserves recorded citations/review/conflicts, and acquires
 or transmits no source. Added an interpretation/Commons routing lane (#16).
+
+## [2026-10-29] local discovery | PSC and graph routing
+
+- Added source-specific PSC concept discovery and local admitted-graph discovery
+  to platform cards, mappings and the skill graph. Both require explicit local
+  source bindings; no automatic acquisition or contribution is added.
+- Kept generic vocabulary authoring and package-backed ontology search distinct.
+  Recorded pending/review state, native provenance and incomplete-evidence
+  refusals remain visible; no operational identity or scientific acceptance is inferred.

@@ -20,6 +20,9 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 
 ## Local research workflows
 
+- For explicitly requested PSC terms use `psc-vocabulary` with an authorized pinned local catalog and release. Preserve provisional/domain-review and mapping status. It does not look up operational stock records. Generic `salmon-terms` does not dispatch a PSC source.
+- For connections in an admitted local graph use `graph-discovery` with the exact local project/dataset binding. Preserve source authority/version, native metadata, pending state, relationship direction and evidence refusals. It provides no hosted graph API, observations query or contribution.
+
 - For interpretation or synthesis, consult `commons-card` research search/read when an authorized local compiled distribution is admitted. Preserve card/commit/claim/source citations, draft and generated state, staleness and unresolved conflicts. If access is absent, report that evidence lane unavailable and continue the other lanes. Retrieval grants no contribution or disclosure authority.
 
 - For private project exports and contribution previews use `salmon-workbench-skill`.

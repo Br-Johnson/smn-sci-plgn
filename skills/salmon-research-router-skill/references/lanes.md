@@ -41,3 +41,6 @@ If those are needed, say so clearly instead of pretending the current scaffold c
 These lanes require no network or model credentials. A successful contract check does not grant scientific or publication approval.
 
 - `lane:local-commons-evidence`: interpretation, synthesis or explicit Commons evidence → `commons-card` research search/read over an admitted local distribution; absent authorization returns unavailable. Contribution remains separate.
+
+- `lane:psc-vocabulary-discovery`: PSC vocabulary concepts, definitions and existing IRIs → `psc-vocabulary`; explicit authorized catalog/release pins, no operational stock lookup.
+- `lane:local-graph-discovery`: admitted local graph connections → `graph-discovery`; exact dataset/read binding, preserved evidence, no observation query or contribution.

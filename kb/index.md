@@ -32,6 +32,9 @@ Canonical structured truth:
 - [metasalmon and metasalmonpy](platforms/metasalmon.md)
 - [Salmon knowledge commons](platforms/salmon-knowledge-commons.md)
 
+- [PSC controlled vocabularies](platforms/psc-vocabularies.md)
+- [Local graph discovery](platforms/smn-data-graph.md)
+
 ## Gaps
 
 - [Identity graph gap](gaps/identity-graph-gap.md)

@@ -45,6 +45,24 @@ class SkillGraphSelectorTests(unittest.TestCase):
         self.assertNotIn('commons-card',route('Contribute a Commons card')['selected_skills'])
 
 
+    def test_local_discovery_routes_stay_distinct_from_authoring_and_stock_records(self):
+        for request, skill in (
+            ("Find graph connections in my admitted local graph", "graph-discovery"),
+            ("Look up the PSC vocabulary definition for effective female spawners", "psc-vocabulary"),
+            ("Find the Pacific Salmon Commission term IRI in my local catalog", "psc-vocabulary"),
+        ):
+            with self.subTest(request=request):
+                proc = subprocess.run([sys.executable, str(SCRIPT_PATH), "--request", request],
+                                      text=True, capture_output=True, check=True)
+                self.assertIn(skill, json.loads(proc.stdout)["selected_skills"])
+        for request in ("Create a controlled vocabulary using W3ID and GitHub Pages",
+                        "Find PSC stock records and population membership"):
+            proc = subprocess.run([sys.executable, str(SCRIPT_PATH), "--request", request],
+                                  text=True, capture_output=True, check=True)
+            selected = json.loads(proc.stdout)["selected_skills"]
+            self.assertNotIn("graph-discovery", selected)
+            self.assertNotIn("psc-vocabulary", selected)
+
     def test_cli_emits_json(self) -> None:
         case = self.cases[0]
         proc = subprocess.run(

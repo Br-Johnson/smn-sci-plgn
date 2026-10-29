@@ -1,0 +1,94 @@
+{
+  "platform_id": "smn-data-graph",
+  "platform_name": "Salmon data graph local discovery",
+  "owner": "salmon-data-mobilization",
+  "canonical_urls": [
+    "https://github.com/salmon-data-mobilization/smn-data-graph"
+  ],
+  "docs_urls": [
+    "https://github.com/salmon-data-mobilization/smn-data-graph/blob/4036bad502ac0319e1207f233386ac7f766de2f6/python/README.md",
+    "skills/graph-discovery/references/local-discovery.md"
+  ],
+  "access_tier": "project_gated",
+  "auth_access_model": "An already admitted local store and explicit authorized project/dataset binding; caller attestation is not independent service ACL proof. No hosted endpoint or credential acquisition.",
+  "data_domains": [
+    "Metadata and provenance connections",
+    "Pending scoped mappings and suggestions"
+  ],
+  "identifier_systems": [
+    "Exact IRIs with authority/version",
+    "Native metadata references",
+    "Declared relationship direction"
+  ],
+  "capabilities": {
+    "discovery_search": {
+      "status": "supported",
+      "note": "Pinned local salmongraph.discovery.discover API, using an admitted store and explicit project datasets."
+    },
+    "metadata_schema": {
+      "status": "partial",
+      "note": "Discovery/native metadata context only; no construction or observation query."
+    },
+    "entity_lookup": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "identifier_crosswalks": {
+      "status": "partial",
+      "note": "Explicit pending scoped_mapping/suggestion modes preserve direction and review status, never identity equivalence."
+    },
+    "abundance_assessment": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "telemetry_passage": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "hatchery": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "harvest_fishery": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "genetics_gsi": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "package_metadata_export": {
+      "status": "missing",
+      "note": "Outside this local reader contract."
+    },
+    "provenance_versioning": {
+      "status": "supported",
+      "note": "Upstream source/version/native-reference and complete evidence/refusal states forwarded unchanged."
+    },
+    "bulk_access_api_ergonomics": {
+      "status": "partial",
+      "note": "Local read-only library with bounded query limit; no HTTP service."
+    }
+  },
+  "blockers": [
+    "Requires Python>=3.13 and reviewed smn-data-graph4036bad with PyOxigraph0.5.13.",
+    "Store admission and read permissions must already exist; the plugin does not prove service ACLs or open observations."
+  ],
+  "governance_constraints": [
+    "Pending excluded by default; explicit pending modes do not approve identity or scientific claims.",
+    "No graph writes, source mutation, contribution or workbench-preview admission."
+  ],
+  "related_skills": [
+    "graph-discovery"
+  ],
+  "last_verified_date": "2026-10-29",
+  "evidence_links": [
+    "https://github.com/salmon-data-mobilization/smn-data-graph/blob/4036bad502ac0319e1207f233386ac7f766de2f6/python/README.md",
+    "skills/graph-discovery/references/local-discovery.md",
+    "skills/graph-discovery/SKILL.md"
+  ],
+  "watch_fields": [
+    "Immutable library commit/source integrity",
+    "Discover response/evidence and namespace configuration contract"
+  ]
+}

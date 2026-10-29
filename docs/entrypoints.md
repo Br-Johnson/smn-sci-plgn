@@ -30,6 +30,8 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Entity normalization: `skills/salmon-entity-normalizer-skill/SKILL.md`
 - Crosswalk and harmonization lookups: `skills/critfc-crosswalk-skill/SKILL.md`
 - Ontology term search, shared `smn` and DFO `gcdfo` alike: `skills/salmon-terms/SKILL.md`
+- PSC concept discovery from a pinned authorized local catalog/release: `skills/psc-vocabulary/SKILL.md`
+- Read-only admitted local graph connections: `skills/graph-discovery/SKILL.md`
 - Controlled-vocabulary authoring and W3ID/GitHub Pages publication preparation: `skills/controlled-vocabulary/SKILL.md`
 - Salmon Data Package workflows: `skills/metasalmon-skill/SKILL.md`
 - Judging a package's semantic review packet: `skills/sdp-semantic-review/SKILL.md`
