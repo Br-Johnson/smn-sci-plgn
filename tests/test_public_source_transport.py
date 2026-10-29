@@ -51,7 +51,7 @@ def fake_open(*args, **kwargs):
     if fixture.get("failure") == "dns":
         raise urllib.error.URLError(socket.gaierror(-2, "invented diagnostic must not be emitted"))
     if fixture.get("status", 200) >= 400:
-        raise urllib.error.HTTPError(req.full_url, fixture["status"], "invented diagnostic must not be emitted", {"Retry-After": "60"}, io.BytesIO(b"invented diagnostic must not be emitted" * 1000))
+        raise urllib.error.HTTPError(fixture.get("final_url", req.full_url), fixture["status"], "invented diagnostic must not be emitted", {"Retry-After": "60"}, io.BytesIO(b"invented diagnostic must not be emitted" * 1000))
     if fixture.get("forbid_transport"):
         raise AssertionError("request reached forbidden external fixture")
     return Response(req.full_url)
@@ -116,6 +116,20 @@ class PublicSourceCliTests(unittest.TestCase):
                     self.assertNotIn("invented diagnostic", result.stdout + result.stderr)
                     self.assertLess(len(result.stdout.encode()), 4096)
 
+
+    def test_http_redirect_failure_retains_validated_final_origin(self):
+        for status, code in ((404, "not_found"), (429, "rate_limited")):
+            with self.subTest(status=status):
+                result = run_cli("noaa", {"action": "home"}, {
+                    "status": status, "final_url": "https://webapps.nwfsc.noaa.gov/final?note=fictional"})
+                response = json.loads(result.stdout)
+                self.assertEqual(response["error"]["code"], code)
+                self.assertEqual(response["retrieval"][0]["requested_url"], "https://www.webapps.nwfsc.noaa.gov")
+                self.assertEqual(response["retrieval"][0]["final_origin"], "https://webapps.nwfsc.noaa.gov")
+                self.assertNotIn("fictional", result.stdout)
+        refused = run_cli("noaa", {"action": "home"}, {
+            "status": 404, "final_url": "https://unrelated.example.invalid/final"})
+        self.assertEqual(json.loads(refused.stdout)["error"]["code"], "destination_refused")
 
     def test_malformed_json_is_a_typed_failure_in_every_json_consumer(self):
         payloads = {"critfc": {"action": "rest_root"}, "noaa": {"action": "request", "path": "/sps"}, "npafc": {"action": "dataset_search"}, "pubmed": {"query": "synthetic"}, "ptagis": {"action": "validation_codes", "kind": "revision_date"}, "streamnet": {"action": "tables"}, "rmis": {"action": "release"}}

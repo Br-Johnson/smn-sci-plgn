@@ -159,6 +159,8 @@ def http_get(
             _check_html_access_page(body, response_headers.get("Content-Type", ""))
             return body, response_headers, status, final_url
     except error.HTTPError as exc:
+        final_url = exc.geturl() or full_url
+        validate_source_destination(final_url, allowed_origins, authenticated_origin=full_url if authenticated_headers(headers) else None)
         _record_unavailable(full_url, final_url, exc.code)
         # Never echo HTTP bodies, reason strings or arbitrary headers, even for
         # public endpoints: an upstream login/error page can contain secrets.
