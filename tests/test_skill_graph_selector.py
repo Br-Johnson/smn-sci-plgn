@@ -35,6 +35,16 @@ class SkillGraphSelectorTests(unittest.TestCase):
                 for fragment in expected["reason_contains"]:
                     self.assertIn(fragment, reasons)
 
+    def test_interpretation_routes_to_authorized_commons_but_contribution_does_not(self):
+        script=SCRIPT_PATH
+        def route(question):
+            proc=subprocess.run([sys.executable,str(script),'--request',question],text=True,capture_output=True,check=True)
+            return json.loads(proc.stdout)
+        self.assertIn('commons-card',route('Interpret this research result using the Salmon Knowledge Commons')['selected_skills'])
+        self.assertIn('commons-card',route('Search the Commons for winter evidence')['selected_skills'])
+        self.assertNotIn('commons-card',route('Contribute a Commons card')['selected_skills'])
+
+
     def test_cli_emits_json(self) -> None:
         case = self.cases[0]
         proc = subprocess.run(

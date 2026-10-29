@@ -39,3 +39,5 @@ If those are needed, say so clearly instead of pretending the current scaffold c
 - `lane:research-framework`: explicit life-phase hypotheses, outcomes, exposures and evidence requirements → `salmon-research-framework-skill`; entity normalisation remains non-authoritative.
 
 These lanes require no network or model credentials. A successful contract check does not grant scientific or publication approval.
+
+- `lane:local-commons-evidence`: interpretation, synthesis or explicit Commons evidence → `commons-card` research search/read over an admitted local distribution; absent authorization returns unavailable. Contribution remains separate.

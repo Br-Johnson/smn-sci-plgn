@@ -20,6 +20,8 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 
 ## Local research workflows
 
+- For interpretation or synthesis, consult `commons-card` research search/read when an authorized local compiled distribution is admitted. Preserve card/commit/claim/source citations, draft and generated state, staleness and unresolved conflicts. If access is absent, report that evidence lane unavailable and continue the other lanes. Retrieval grants no contribution or disclosure authority.
+
 - For private project exports and contribution previews use `salmon-workbench-skill`.
 - For explicit life-phase hypotheses and evidence requirements use `salmon-research-framework-skill`.
 - Both are local file workflows. They do not provide hosted workbench APIs or fitted models.
@@ -53,6 +55,7 @@ Start by assigning the request to one or more lanes:
 - climate and ocean context
 - ontology and semantic resolution
 - controlled-vocabulary authoring, stable identifiers and website publication preparation
+- local Commons evidence for interpretation and synthesis
 - literature, reports, and dataset discovery
 - Salmon Data Package and metadata validation
 - composite stock briefs
