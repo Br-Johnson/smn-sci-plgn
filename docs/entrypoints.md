@@ -47,7 +47,8 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Package adapters, which only marshal JSON to metasalmonpy `v0.6.0`: `skills/salmon-terms/scripts/salmon_terms.py` and `skills/metasalmon-skill/scripts/metasalmon_api.py`
 - Plumbing the two adapters share, including the package pin: `scripts/_package_adapter.py`
 - Commons adapter, which runs the commons' own scripts at its pinned commit against the user's clone: `skills/commons-card/scripts/commons_card.py`
-- Shared stdlib helper utilities: `scripts/_common.py`
+- Shared stdlib helper utilities and credential-safe output/file handling: `scripts/_common.py`
+- Authenticated-source origin, redirect and redaction policy: `scripts/_source_auth.py`; user-run setup: `docs/source-authentication.md`; regressions: `tests/test_source_credentials.py`
 - Executable graph selector: `scripts/skill_graph_selector.py`
 - Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`
 - Stock-brief contract helper: `skills/salmon-stock-brief-workflow-skill/scripts/stock_brief_contract.py`

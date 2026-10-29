@@ -1,5 +1,12 @@
 # Knowledge Base Log
 
+## [2026-10-29] source-safety | authenticated-session-boundaries
+
+- RMIS, PTAGIS and StreamNet now use environment-only credentials, fixed HTTPS source origins and same-origin authenticated redirects.
+- Agent-side RMIS login and inline credential fields/query parameters are refused; user-run setup is documented separately.
+- Normal output and saved JSON redact configured credentials and credential-shaped fields; authenticated HTTP error bodies and CLI tracebacks are withheld.
+- Regression fixtures use invented values, fake external API responses and local TLS servers; no live authenticated access was tested.
+
 ## [2026-10-24] local-workflows | research-workbench
 
 - Added two offline project/framework skills and canonical routing nodes.
