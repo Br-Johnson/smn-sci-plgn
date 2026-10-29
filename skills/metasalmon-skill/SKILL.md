@@ -1,6 +1,6 @@
 ---
 name: metasalmon-skill
-description: Validate Salmon Data Packages and fetch the salmon ontologies through the released metasalmonpy package (v0.6.0, the Python mirror of metasalmon), with metasalmon in R as the documented alternative. Use when the user needs to check a Salmon Data Package, confirm which package release is available, or cache an ontology file. For ontology term search use salmon-terms; to judge a package's semantic review packet use sdp-semantic-review.
+description: Validate Salmon Data Packages and fetch the salmon ontologies through released metasalmonpy v0.6.0, the Python mirror of metasalmon. Includes a local fictional CSV-to-reviewed-SDP and EML recipe using SDK functions directly, with R as the documented alternative. Use to check or author a package, confirm its runtime, or cache an ontology. For term search use salmon-terms; to judge semantic review packets use sdp-semantic-review.
 ---
 
 # metasalmon
@@ -63,12 +63,19 @@ full response to a file.
 
 ## Operating rules
 
+For a complete local authoring exercise, follow the
+[fictional CSV-to-reviewed-SDP recipe](references/local-csv-recipe.md). It uses
+the released SDK directly, demonstrates strict draft refusal, requires separate
+human fixture confirmation, preserves qualifiers/sidecars in a read/write loop,
+and produces one local EML export. It adds no JSON adapter action.
+
 - Term search, meaning `find_terms()` and `sources_for_role()`, is the
   salmon-terms skill's job. This adapter answers those two action names with a
   pointer there.
-- The adapter never calls the packages' LLM features. LLM review in
-  metasalmon and metasalmonpy is opt-in, and turning it on is the user's choice,
-  made in the package directly.
+- The adapter never calls the packages' LLM features. Harness judgement of the
+  review packet is recommended, followed by the user's separate acceptance.
+  The legacy in-package provider route is deprecated in v0.6.0, remains
+  available in 0.6.x and is scheduled for removal in v0.7.0.
 - Package creation (`create_sdp()`), the review console (`review_semantics()`,
   `accept_suggestion()`, `reject_suggestion()`, `apply_sdp_semantics()`,
   `review_metadata()`, and the `set_sdp_*()` setters), and publication are not

@@ -33,6 +33,11 @@ These take data frames, interactive review, or credentials, so a JSON-on-stdin
 adapter is the wrong shape for them. Run them in Python or R with the user,
 following the package documentation.
 
+The [local fictional CSV recipe](local-csv-recipe.md) demonstrates creation,
+explicit human semantic confirmation, strict validation, a sidecar-preserving
+read/rewrite and one EML export through those released SDK functions. It is an
+executable example, not a new adapter action or a substitute package engine.
+
 ## Why Python first
 
 metasalmonpy offers every function the earlier R adapter called, so
