@@ -101,3 +101,13 @@ or transmits no source. Added an interpretation/Commons routing lane (#16).
 - Kept generic vocabulary authoring and package-backed ontology search distinct.
   Recorded pending/review state, native provenance and incomplete-evidence
   refusals remain visible; no operational identity or scientific acceptance is inferred.
+
+## [2026-10-29] public-source availability | owner discovery
+
+- Recorded owner-document availability separately from unverified live records.
+  NOAA's no-slash `/sps` path redirects to its archive-selection UI; an explicit
+  InPort metadata action offers discovery context. CRITFC still advertises its
+  legacy REST host and marks map tools offline; no replacement is invented.
+- Source failures keep their typed outcome and owner-documentation link rather
+  than masquerading as successful records. Documentation reads used no credentials
+  or research uploads; no new live plugin data-query test was run.

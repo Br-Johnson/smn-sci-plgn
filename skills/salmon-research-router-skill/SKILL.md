@@ -20,6 +20,10 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 
 ## Local research workflows
 
+For NOAA SPS and CRITFC, distinguish owner page/metadata discovery from live
+record availability. Preserve typed failures and owner-documentation links; no
+automatic replacement API or accepted cross-system identity is established.
+
 - For explicitly requested PSC terms use `psc-vocabulary` with an authorized pinned local catalog and release. Preserve provisional/domain-review and mapping status. It does not look up operational stock records. Generic `salmon-terms` does not dispatch a PSC source.
 - For connections in an admitted local graph use `graph-discovery` with the exact local project/dataset binding. Preserve source authority/version, native metadata, pending state, relationship direction and evidence refusals. It provides no hosted graph API, observations query or contribution.
 

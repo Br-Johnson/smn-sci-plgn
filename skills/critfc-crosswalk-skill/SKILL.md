@@ -9,6 +9,12 @@ description: Query the public CRITFC Columbia Basin crosswalk page and ArcGIS RE
 - Prefer the public project page and ArcGIS REST reads.
 - Treat the legacy query and map tools as browse-and-fetch surfaces, not a stable general API.
 - Keep summaries compact and do not imply authority beyond the CRITFC crosswalk scope.
+- The [owner project page](https://critfc.org/fish-and-watersheds/fishery-science/data-resources/columbia-basin-salmon-and-steelhead-crosswalk-project/)
+  was readable on 2026-10-29 and still advertises the legacy GIS host. It marks
+  its map tools offline. The last audit REST check failed DNS; no replacement
+  was verified or new live GIS query run. Use the project page and its linked
+  guide for discovery context. A failed REST result stays unavailable and links
+  to that documentation; page success does not establish records or identity.
 
 ## Input
 

@@ -254,14 +254,19 @@ def getenv_any(*names: str) -> str | None:
     return None
 
 
-def run_source_cli(main, *, source: str | None = None) -> None:
+def run_source_cli(main, *, source: str | None = None, owner_documentation: str | None = None) -> None:
     """Give one CLI run an isolated request ledger and safe typed failures."""
     ledger = _RETRIEVALS.set([])
     context = _SOURCE.set({"source": source} if source else {})
     try:
         main()
     except SourceRequestError as exc:
-        emit(exc.as_result())
+        result = exc.as_result()
+        if owner_documentation:
+            result["availability"] = {"owner_documentation": owner_documentation,
+                                      "fallback_scope": "owner_documentation_only",
+                                      "records_returned": False}
+        emit(result)
     except SourcePolicyError as exc:
         emit(result_error(exc.code, str(exc), outcome="refused", **(_SOURCE.get() or {})))
     except Exception:

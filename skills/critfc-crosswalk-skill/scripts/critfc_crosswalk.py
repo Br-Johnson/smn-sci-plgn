@@ -133,4 +133,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    run_source_cli(main, source='CRITFC Crosswalk Project')
+    run_source_cli(main, source='CRITFC Crosswalk Project', owner_documentation=PAGE_URL)

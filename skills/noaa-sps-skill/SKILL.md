@@ -9,6 +9,12 @@ description: Fetch the public NOAA Salmon Population Summary (SPS) pages and hel
 - Treat SPS as a legacy, browser-first web application rather than a documented machine API.
 - Prefer the public home page and help pages over invented query endpoints.
 - Keep summaries compact and note when a request is limited to page retrieval.
+- The owner `/sps` path without a trailing slash was readable on 2026-10-29 and
+  redirected to a same-origin APEX archive-selection page. The separate
+  `metadata` action reads [NOAA's InPort record](https://www.fisheries.noaa.gov/inport/item/17904).
+  Page/metadata success does not establish live records or a JSON API. If a
+  source fails, keep its typed unavailable result and owner-documentation link;
+  do not invent a query endpoint, log in, or automatically acquire data elsewhere.
 
 ## Input
 
@@ -17,6 +23,7 @@ description: Fetch the public NOAA Salmon Population Summary (SPS) pages and hel
 - Supported actions:
   - `home`
   - `help`
+  - `metadata` (owner InPort metadata only)
   - `request`
 - Optional fields:
   - `url`

@@ -17,6 +17,7 @@ ALLOWED_ORIGINS = ("https://www.webapps.nwfsc.noaa.gov", "https://webapps.nwfsc.
 
 
 HOME_URL = "https://www.webapps.nwfsc.noaa.gov/sps"
+METADATA_URL = "https://www.fisheries.noaa.gov/inport/item/17904"
 HELP_URL = "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm"
 
 
@@ -80,6 +81,9 @@ def main() -> None:
     elif action == "help":
         url = HELP_URL
         params = payload.get("params") or {}
+    elif action == "metadata":
+        url = METADATA_URL
+        params = {}
     elif action == "request":
         url = payload.get("url") or payload.get("path")
         if not url:
@@ -88,7 +92,7 @@ def main() -> None:
         url = resolve_source_url(url, "https://www.webapps.nwfsc.noaa.gov")
         params = payload.get("params") or {}
     else:
-        emit({"ok": False, "error": "invalid_action", "detail": "action must be home, help, or request"})
+        emit({"ok": False, "error": "invalid_action", "detail": "action must be home, help, metadata, or request"})
         return
 
     body, final_url, content_type = fetch(url, params=params, timeout=timeout)
@@ -116,6 +120,7 @@ def main() -> None:
         "ok": True,
         "source": "NOAA SPS",
         "action": action,
+        "discovery_scope": "owner_metadata_only" if action == "metadata" else "source_response_only",
         "url": final_url,
         "retrieval": source_retrievals(),
         "outcome": source_outcome(),
@@ -127,4 +132,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    run_source_cli(main, source='NOAA SPS')
+    run_source_cli(main, source='NOAA SPS', owner_documentation=METADATA_URL)

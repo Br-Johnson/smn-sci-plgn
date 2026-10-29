@@ -25,7 +25,7 @@
   "capabilities": {
     "discovery_search": {
       "status": "partial",
-      "note": "The project offers a population query tool and legacy map surfaces, but no broad public search API is documented."
+      "note": "Owner project page and linked guide provide discovery context; current live GIS record retrieval remains unverified after the recorded DNS failure."
     },
     "metadata_schema": {
       "status": "partial",
@@ -36,8 +36,8 @@
       "note": "Population/unit lookups exist by fish manager and HUC6 context, but they are project-scoped."
     },
     "identifier_crosswalks": {
-      "status": "supported",
-      "note": "The source is explicitly a crosswalk project for pop/unit boundary and naming reconciliation."
+      "status": "partial",
+      "note": "Project-scoped naming/boundary context is documented; this plugin has not verified current live crosswalk records and makes no accepted identity assertion."
     },
     "abundance_assessment": {
       "status": "missing",
@@ -74,7 +74,8 @@
   },
   "blockers": [
     "The public tools are legacy and unevenly documented.",
-    "The current scaffold does not model the full population query UI."
+    "The current scaffold does not model the full population query UI.",
+    "Owner still advertises the legacy GIS host, whose last audit check failed DNS; no replacement endpoint or working records service is claimed."
   ],
   "governance_constraints": [
     "Treat the project as source-specific crosswalk context, not a universal salmon identity authority.",
@@ -83,7 +84,7 @@
   "related_skills": [
     "critfc-crosswalk-skill"
   ],
-  "last_verified_date": "2026-04-17",
+  "last_verified_date": "2026-10-29",
   "evidence_links": [
     "https://critfc.org/fish-and-watersheds/fishery-science/data-resources/columbia-basin-salmon-and-steelhead-crosswalk-project/",
     "https://critfc.org/wp-content/uploads/2013/07/crosswalk_user_guide.pdf",
@@ -95,5 +96,15 @@
     "population query tool availability",
     "ArcGIS REST service layout",
     "legacy map/report surface changes"
-  ]
+  ],
+  "availability": {
+    "checked_date": "2026-10-29",
+    "verification_scope": "Owner-document read using web retrieval; no new live GIS query.",
+    "owner_documentation": "https://critfc.org/fish-and-watersheds/fishery-science/data-resources/columbia-basin-salmon-and-steelhead-crosswalk-project/",
+    "rest_root": "https://gis.critfc.org/arcgis/rest/services",
+    "records_retrieval": "not_verified",
+    "last_audit_rest_result": "DNS failure",
+    "replacement_service": "not_verified",
+    "note": "Owner project page remains readable and advertises this same REST host; species/HUC6 map tools are described as offline. No authoritative replacement verified."
+  }
 }
