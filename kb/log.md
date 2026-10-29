@@ -1,5 +1,12 @@
 # Knowledge Base Log
 
+## [2026-10-29] compatibility | commons-validation
+
+- Refreshed the Commons adapter's reviewed pin and retained pin/head/drift reporting.
+- Script actions stop when the checkout's tools, schema or contribution rules differ; runtime and checklist remain inspection actions.
+- Added synthetic provenance controls through the authorized adapter interface and retained ledger preview/write boundaries.
+- Private upstream conformance evidence stays outside this public repository.
+
 ## [2026-10-24] local-workflows | research-workbench
 
 - Added two offline project/framework skills and canonical routing nodes.
