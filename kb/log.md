@@ -79,3 +79,10 @@
 - The commons is private, so the adapter copies the pinned files out of the clone's git objects into a temporary directory for each call and deletes them afterwards; the plugin carries no commons content. When the clone's copies differ from the pinned ones, every response lists them as drift.
 - Added a platform card and wiki page for the commons, its skill-platform mapping, and three skill-graph edges, with a new `governance:private-content` tag.
 - The eval case grades that the skill fires, runs its adapter, and reports the pinned commit. The offline tests build a small clone of their own; the live tests run only where `SALMON_COMMONS_DIR` names a real clone, and passed against the commons' main on 2026-10-15.
+
+## 2026-10-29 — Local Commons research evidence
+
+Added admitted local compiler-distribution search/read to commons-card, separate
+from contribution tools. The reader verifies the trusted catalog and consumed
+research artifacts, preserves recorded citations/review/conflicts, and acquires
+or transmits no source. Added an interpretation/Commons routing lane (#16).

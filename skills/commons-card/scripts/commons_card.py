@@ -63,7 +63,7 @@ CHECKLIST = "CONTRIBUTING.md"
 PINNED_PATHS = (VALIDATOR, "scripts/ledger", SCHEMA, CHECKLIST)
 REQUIRED_FILES = (VALIDATOR, TABLE_WRITER, CARD_CHECK, SCHEMA, CHECKLIST)
 
-ACTIONS = ("runtime", "validate", "ledger_table", "check_card", "checklist")
+ACTIONS = ("runtime", "validate", "ledger_table", "check_card", "checklist", "search", "read")
 GIT_TIMEOUT_SECONDS = 120
 SCRIPT_TIMEOUT_SECONDS = 600
 
@@ -286,6 +286,9 @@ def handle(request: object, pin: str = COMMONS_PIN) -> dict:
     base: dict = {"action": action, "pin": {"repository": COMMONS_REPOSITORY, "commit": pin}}
     if action not in ACTIONS:
         return result_error("invalid_action", f"action must be one of {', '.join(ACTIONS)}", **base)
+    if action in ("search", "read"):
+        from _commons_research import research
+        return {**base, **research(request)}
     if action == "runtime":
         base["python"] = sys.version.split()[0]
         base["dependencies"] = {

@@ -20,16 +20,21 @@ the user's clone, and prints the commons' contribution rules.
 
 - supported: metadata/schema validation, provenance (in-card citation ledgers)
 - partial: bulk-access ergonomics (one adapter over the commons' own scripts)
-- missing: search, entity lookup, crosswalks, and every data-access category
+- partial: local literal research search and exact-card read over an admitted compiler distribution; recorded review state and citations are preserved
+- missing: entity lookup, crosswalk resolution, and every observation-data category
 
 ## Why it matters
 
 The commons is private and this plugin is public, so the plugin can carry none
-of its content and can't fetch it. The skill therefore runs nothing of its own:
-it copies the pinned scripts out of the clone's git history for each call and
-deletes them afterwards. When the commons changes those scripts, the adapter
+of its content and can't fetch it. For contribution checks, the skill copies pinned scripts from the clone's git history and deletes its copies afterwards. The research reader instead
+consumes the compiler distribution as data, without executing any of it. When the commons changes those scripts, the adapter
 reports the drift and blocks script actions before they run, including ledger
 writes. Runtime and checklist remain available for inspection, and moving the
 pin is a reviewed plugin change. A bundle-validation pass and a card-ledger
 pass report different checks; neither substitutes for the commons' full CI or
 independent scientific review.
+
+Research uses the upstream compiler JSON artifacts with explicit local admission,
+exact commit and trusted catalog hash. It performs no compilation or acquisition.
+[Research usage and limitations](../../skills/commons-card/references/research.md)
+distinguish distribution integrity, scientific review and permission to disclose.
