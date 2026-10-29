@@ -1,0 +1,736 @@
+{
+  "fixture_kind": "hand-authored synthetic contract controls, not live model captures or scientific approval",
+  "package": {
+    "tag": "v0.6.0",
+    "commit": "58aff2363519693345d4efdebe8a2027d948f6ce"
+  },
+  "sources": [
+    {
+      "repository": "salmon-data-mobilization/salmon-domain-ontology",
+      "commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+      "path": "docs/adr/0002-year-age-basis-dimensions-and-abundance.md"
+    },
+    {
+      "repository": "salmon-data-mobilization/salmon-domain-ontology",
+      "commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+      "path": "docs/proposals/2026-10-28-efs-bridge/README.md",
+      "status": "unapproved proposal, outside normative imports/builds/releases"
+    },
+    {
+      "repository": "https://gitlab.com/pacific-salmon-commission/psc-data-systems/psc-salmon-vocabularies",
+      "commit": "7040f2716dffb47f830895b10b9f3e47e50168b1",
+      "release": "v0.1.0-alpha.6",
+      "path": "data/stock-recruit-definition-revisions.json"
+    },
+    {
+      "iri": "http://vocab.nerc.ac.uk/collection/S10/current/S102/",
+      "version": "2",
+      "version_iri": "http://vocab.nerc.ac.uk/collection/S10/current/S102/2/",
+      "receipt_sha256": "b0e884a4593d9791df61f8f1c7dacbe650c90a30637f9e3dbfc1fac6087d35ff"
+    }
+  ],
+  "proposal_only_iris": [
+    "https://w3id.org/smn/UnspawnedEggAdjustment",
+    "https://w3id.org/smn/SpawnerAbundance"
+  ],
+  "cases": [
+    {
+      "case_id": "year_basis_is_not_characteristic",
+      "blocking": true,
+      "role": "property",
+      "column_name": "BROOD_YEAR",
+      "description": "Row coordinate is a brood year; the candidate is its basis, not a measured characteristic.",
+      "context_text": [
+        "Row coordinate is a brood year; the candidate is its basis, not a measured characteristic."
+      ],
+      "candidates": [
+        {
+          "iri": "https://w3id.org/smn/BroodYearBasis",
+          "label": "Brood-year basis",
+          "definition": "A year-reference basis in which a calendar year identifies a salmon cohort by the spawning year of its parents.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "review",
+        "llm_confidence": 0.9,
+        "llm_rationale": "Preserve the basis concept and the separate smn:broodYear coordinate property and xsd:gYear value; this property slot cannot hold the basis.",
+        "llm_missing_context": "Preserve the basis concept and the separate smn:broodYear coordinate property and xsd:gYear value; this property slot cannot hold the basis."
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "https://w3id.org/smn/BroodYearBasis",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "year_basis_is_not_characteristic-decision",
+            "type": "assessment",
+            "role": "property",
+            "decision": "review"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "year_basis_is_not_characteristic-no-accept",
+            "type": "assessment",
+            "role": "property",
+            "decision": "accept"
+          }
+        ]
+      },
+      "packet_id": "ee5c346d09b637f851764f6d4fd6f94ca09e2e55cba963ac6cd4c91d1b68aa9c"
+    },
+    {
+      "case_id": "coordinate_is_not_basis",
+      "blocking": true,
+      "role": "constraint",
+      "column_name": "BROOD_YEAR_BASIS",
+      "description": "The fixed biological basis of this spawning-stock abundance variable is parental spawning year, while rows carry separate brood-year coordinates.",
+      "context_text": [
+        "A fixed brood-year basis qualifies this spawning-stock abundance variable. The parental spawning year defines the cohort; rows carry separate smn:broodYear xsd:gYear coordinates."
+      ],
+      "candidates": [
+        {
+          "iri": "https://w3id.org/smn/BroodYearBasis",
+          "label": "Brood-year basis",
+          "definition": "A year-reference basis in which a calendar year identifies a salmon cohort by the spawning year of its parents.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        },
+        {
+          "iri": "https://w3id.org/smn/broodYear",
+          "label": "brood year",
+          "definition": "Relates a data record or observation to the calendar year that identifies a salmon cohort by the spawning year of its parents.",
+          "role_hints": null,
+          "source": "smn",
+          "term_type": "owl_class",
+          "native_type": "owl:DatatypeProperty",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "accept",
+        "llm_confidence": 0.9,
+        "llm_rationale": "The explicit parental-spawning basis fits the constraint; the coordinate predicate has a different role.",
+        "llm_missing_context": "",
+        "llm_selected_iri": "https://w3id.org/smn/BroodYearBasis"
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "https://w3id.org/smn/broodYear",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "coordinate_is_not_basis-decision",
+            "type": "assessment",
+            "role": "constraint",
+            "decision": "accept"
+          },
+          {
+            "rule_id": "coordinate_is_not_basis-selection",
+            "type": "selection",
+            "role": "constraint",
+            "decision": "accept",
+            "iri": "https://w3id.org/smn/BroodYearBasis"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "coordinate_is_not_basis-wrong-selection",
+            "type": "selection",
+            "role": "constraint",
+            "decision": "accept",
+            "iri": "https://w3id.org/smn/broodYear"
+          }
+        ]
+      },
+      "packet_id": "d49ceae1b7dbbb9a4f8b25c88e118e5119be6663b6d2cac41272efe8b7375aea"
+    },
+    {
+      "case_id": "age_requires_notation_basis_component",
+      "blocking": true,
+      "role": "constraint",
+      "column_name": "AGE_CODE",
+      "description": "An age code 42 is present but its notation, reference event and component have not been recorded.",
+      "context_text": [
+        "An age code 42 is present but its notation, reference event and component have not been recorded."
+      ],
+      "candidates": [
+        {
+          "iri": "https://w3id.org/smn/GilbertRichAgeNotation",
+          "label": "Gilbert-Rich age notation",
+          "definition": "Salmon age notation in which total age is annotated with the freshwater-age component as a subscript-like suffix.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        },
+        {
+          "iri": "https://w3id.org/smn/AgeAtReturnBasis",
+          "label": "Age-at-return basis",
+          "definition": "Age evaluated at the adult return event relevant to the dataset.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        },
+        {
+          "iri": "https://w3id.org/smn/TotalAgeDimension",
+          "label": "Total-age dimension",
+          "definition": "Age dimension whose value represents total salmon age under the declared age convention.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        },
+        {
+          "iri": "https://w3id.org/smn/AgeClassValue3",
+          "label": "Age-class value 3 years",
+          "definition": "Age-component value of 3 years.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "review",
+        "llm_confidence": 0.9,
+        "llm_rationale": "Do not infer 4/2 decomposition, age-at-return, total age or an age-class value from an unexplained code. Obtain notation, basis and component separately.",
+        "llm_missing_context": "Do not infer 4/2 decomposition, age-at-return, total age or an age-class value from an unexplained code. Obtain notation, basis and component separately."
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "https://w3id.org/smn/GilbertRichAgeNotation",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "age_requires_notation_basis_component-decision",
+            "type": "assessment",
+            "role": "constraint",
+            "decision": "review"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "age_requires_notation_basis_component-no-accept",
+            "type": "assessment",
+            "role": "constraint",
+            "decision": "accept"
+          }
+        ]
+      },
+      "packet_id": "a94ec5dd6a19f5fdacf1bec78068d411737e6653d96a71453ed8aa0eb94af44f"
+    },
+    {
+      "case_id": "age_value_is_not_basis_or_component",
+      "blocking": true,
+      "role": "constraint",
+      "column_name": "TOTAL_AGE_VALUE",
+      "description": "Age-class value 3 for the total-age component, with age evaluated at adult return under a declared Gilbert-Rich notation.",
+      "context_text": [
+        "Age-class value 3 for the total-age component, with age evaluated at adult return under a declared Gilbert-Rich notation."
+      ],
+      "candidates": [
+        {
+          "iri": "https://w3id.org/smn/GilbertRichAgeNotation",
+          "label": "Gilbert-Rich age notation",
+          "definition": "Salmon age notation in which total age is annotated with the freshwater-age component as a subscript-like suffix.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        },
+        {
+          "iri": "https://w3id.org/smn/AgeAtReturnBasis",
+          "label": "Age-at-return basis",
+          "definition": "Age evaluated at the adult return event relevant to the dataset.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        },
+        {
+          "iri": "https://w3id.org/smn/TotalAgeDimension",
+          "label": "Total-age dimension",
+          "definition": "Age dimension whose value represents total salmon age under the declared age convention.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        },
+        {
+          "iri": "https://w3id.org/smn/AgeClassValue3",
+          "label": "Age-class value 3 years",
+          "definition": "Age-component value of 3 years.",
+          "role_hints": "constraint",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "accept",
+        "llm_confidence": 0.9,
+        "llm_selected_iri": "https://w3id.org/smn/AgeClassValue3",
+        "llm_rationale": "The declared component, basis and notation are separate. This code is the numeric age-class value 3, not its basis, component or notation."
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "https://w3id.org/smn/AgeAtReturnBasis",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "age-value-decision",
+            "type": "assessment",
+            "role": "constraint",
+            "decision": "accept"
+          },
+          {
+            "rule_id": "age-value-selection",
+            "type": "selection",
+            "role": "constraint",
+            "decision": "accept",
+            "iri": "https://w3id.org/smn/AgeClassValue3"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "no-basis-for-age-value",
+            "type": "selection",
+            "role": "constraint",
+            "decision": "accept",
+            "iri": "https://w3id.org/smn/AgeAtReturnBasis"
+          }
+        ]
+      },
+      "packet_id": "37d45bb08b60ed175135f8b06fbc01b260390f6741cafa795f403f18a239bd5b"
+    },
+    {
+      "case_id": "efs_preserves_adjusted_variable",
+      "blocking": true,
+      "role": "variable",
+      "column_name": "EFS",
+      "description": "Effective female abundance by brood year is adjusted for eggs not spawned; this is not the raw female count.",
+      "context_text": [
+        "Synthetic only: unadjusted female estimate 100 and spawned fraction 0.5 yield adjusted EFS 50. Raw female count 100 is a distinct variable. Sampling and imputation details remain provenance."
+      ],
+      "candidates": [
+        {
+          "iri": "https://w3id.org/psc/vocab/concept/PSC-CV-000035",
+          "label": "Effective Female Spawners (EFS)",
+          "definition": "Effective Female Spawners (EFS): An estimate of female spawner abundance in the brood year (as opposed to the more traditional total of male and female spawners), which is further adjusted downward by the proportion of eggs that were not spawned, as determined by sampling on the spawning grounds.",
+          "role_hints": "variable",
+          "source": "psc",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "7040f2716dffb47f830895b10b9f3e47e50168b1",
+          "source_release": "v0.1.0-alpha.6",
+          "review_status": "provisional; domain-review-pending",
+          "source_locator": "Table 3, page 9: total_broodyr_EFS"
+        },
+        {
+          "iri": "https://example.org/fixture/RawFemaleCount",
+          "label": "Raw female spawner count",
+          "definition": "Synthetic variable: unadjusted count of females before any spawning-success adjustment.",
+          "role_hints": "variable",
+          "source": "fixture",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": null,
+          "review_status": "synthetic fixture only"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "accept",
+        "llm_confidence": 0.9,
+        "llm_rationale": "Preserve the provisional PSC variable identity and adjustment, without promoting its pending domain review.",
+        "llm_missing_context": "",
+        "llm_selected_iri": "https://w3id.org/psc/vocab/concept/PSC-CV-000035"
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "https://example.org/fixture/RawFemaleCount",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "efs_preserves_adjusted_variable-decision",
+            "type": "assessment",
+            "role": "variable",
+            "decision": "accept"
+          },
+          {
+            "rule_id": "efs_preserves_adjusted_variable-selection",
+            "type": "selection",
+            "role": "variable",
+            "decision": "accept",
+            "iri": "https://w3id.org/psc/vocab/concept/PSC-CV-000035"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "efs_preserves_adjusted_variable-wrong-selection",
+            "type": "selection",
+            "role": "variable",
+            "decision": "accept",
+            "iri": "https://example.org/fixture/RawFemaleCount"
+          }
+        ]
+      },
+      "packet_id": "78fdefa68e8b0d33d2e7e54c62b0527dfc26d99d1556dabe1d15cad4e591f172"
+    },
+    {
+      "case_id": "unknown_procedure_stays_unknown",
+      "blocking": true,
+      "role": "method",
+      "column_name": "EFS_METHOD",
+      "description": "The EFS calculation and sampling procedure were not recorded for this synthetic row.",
+      "context_text": [
+        "The EFS calculation and sampling procedure were not recorded for this synthetic row."
+      ],
+      "candidates": [
+        {
+          "iri": "https://w3id.org/smn/EnumerationMethod",
+          "label": "Enumeration method",
+          "definition": "A method used to enumerate or count salmon in the field.",
+          "role_hints": "method",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "review",
+        "llm_confidence": 0.9,
+        "llm_rationale": "No protocol or estimator is identified. Preserve unknown method and ask for procedure and adjustment provenance; do not infer enumeration from abundance.",
+        "llm_missing_context": "No protocol or estimator is identified. Preserve unknown method and ask for procedure and adjustment provenance; do not infer enumeration from abundance."
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "https://w3id.org/smn/EnumerationMethod",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "unknown_procedure_stays_unknown-decision",
+            "type": "assessment",
+            "role": "method",
+            "decision": "review"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "unknown_procedure_stays_unknown-no-accept",
+            "type": "assessment",
+            "role": "method",
+            "decision": "accept"
+          }
+        ]
+      },
+      "packet_id": "5d1ff313a48a135f86c76b07968e31e235b8230a08df0e61e9b15e9fec3d5d37"
+    },
+    {
+      "case_id": "result_class_is_not_variable",
+      "blocking": true,
+      "role": "variable",
+      "column_name": "COUNT",
+      "description": "A profile variable identifier is required; the candidate is an OWL result datum class.",
+      "context_text": [
+        "A profile variable identifier is required; the candidate is an OWL result datum class."
+      ],
+      "candidates": [
+        {
+          "iri": "https://w3id.org/smn/CatchAbundance",
+          "label": "Catch abundance",
+          "definition": "A measurement datum recording the number of salmon represented in fishery catch for a defined fishery, place, time, or stock context.",
+          "role_hints": null,
+          "source": "smn",
+          "term_type": "owl_class",
+          "native_type": "owl:Class",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "review",
+        "llm_confidence": 0.9,
+        "llm_rationale": "A result category does not identify the compound SKOS variable. Keep the measured characteristic, variable and result type distinct.",
+        "llm_missing_context": "A result category does not identify the compound SKOS variable. Keep the measured characteristic, variable and result type distinct."
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "https://w3id.org/smn/CatchAbundance",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "result_class_is_not_variable-decision",
+            "type": "assessment",
+            "role": "variable",
+            "decision": "review"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "result_class_is_not_variable-no-accept",
+            "type": "assessment",
+            "role": "variable",
+            "decision": "accept"
+          }
+        ]
+      },
+      "packet_id": "d78cb84bee4615eaad1397302e9be3d5e314a7a5e220f55064c551c507e6499d"
+    },
+    {
+      "case_id": "sample_female_value_needs_application_review",
+      "blocking": true,
+      "role": "constraint",
+      "column_name": "SEX_SCOPE",
+      "description": "A female spawning-stock component estimate is described, but its relation to sample classification is unreviewed.",
+      "context_text": [
+        "A female spawning-stock component estimate is described, but its relation to sample classification is unreviewed."
+      ],
+      "candidates": [
+        {
+          "iri": "http://vocab.nerc.ac.uk/collection/S10/current/S102/",
+          "label": "female",
+          "definition": "The sample (which may be a single specimen) comprises specimens identified as female.",
+          "role_hints": "constraint",
+          "source": "nvs",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": null,
+          "source_version": "http://vocab.nerc.ac.uk/collection/S10/current/S102/2/",
+          "source_sha256": "b0e884a4593d9791df61f8f1c7dacbe650c90a30637f9e3dbfc1fac6087d35ff",
+          "application_scope": "Sample-based source meaning; interpreting a female stock component requires domain review."
+        }
+      ],
+      "judgement": {
+        "llm_decision": "review",
+        "llm_confidence": 0.9,
+        "llm_rationale": "NERC S102 is a sample-oriented value. Keep version2 and the receipt hash; a variable-specific scoped constraint and domain review are needed, rather than asserting equivalence to a population or PATO quality.",
+        "llm_missing_context": "NERC S102 is a sample-oriented value. Keep version2 and the receipt hash; a variable-specific scoped constraint and domain review are needed, rather than asserting equivalence to a population or PATO quality."
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "http://vocab.nerc.ac.uk/collection/S10/current/S102/",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "sample_female_value_needs_application_review-decision",
+            "type": "assessment",
+            "role": "constraint",
+            "decision": "review"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "sample_female_value_needs_application_review-no-accept",
+            "type": "assessment",
+            "role": "constraint",
+            "decision": "accept"
+          }
+        ]
+      },
+      "packet_id": "b2310a0d9bb0c8176e538429862c673cdf33e12baf72790f8f97dc82bcc6c572"
+    },
+    {
+      "case_id": "proposal_not_released_shortlist",
+      "blocking": true,
+      "role": "method",
+      "column_name": "ADJUSTMENT",
+      "description": "An unspawned-egg adjustment is described; the proposed shared method remains unminted and is not offered by the released shortlist.",
+      "context_text": [
+        "An unspawned-egg adjustment is described; the proposed shared method remains unminted and is not offered by the released shortlist."
+      ],
+      "candidates": [
+        {
+          "iri": "https://w3id.org/smn/EnumerationMethod",
+          "label": "Enumeration method",
+          "definition": "A method used to enumerate or count salmon in the field.",
+          "role_hints": "method",
+          "source": "smn",
+          "term_type": "skos_concept",
+          "native_type": "skos:Concept",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7",
+          "definition_status": "source_literal"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "review",
+        "llm_confidence": 0.9,
+        "llm_rationale": "The proposed smn:UnspawnedEggAdjustment remains outside imports, builds and releases. Retain the procedure description and request owning-domain review; do not insert the proposal IRI.",
+        "llm_missing_context": "The proposed smn:UnspawnedEggAdjustment remains outside imports, builds and releases. Retain the procedure description and request owning-domain review; do not insert the proposal IRI."
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "https://w3id.org/smn/UnspawnedEggAdjustment",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "proposal_not_released_shortlist-decision",
+            "type": "assessment",
+            "role": "method",
+            "decision": "review"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "proposal_not_released_shortlist-no-accept",
+            "type": "assessment",
+            "role": "method",
+            "decision": "accept"
+          }
+        ]
+      },
+      "packet_id": "c2d8c6e126440aff41edd35ab84912898ad94a4a071816578433c2ff495ae047"
+    },
+    {
+      "case_id": "close_mapping_is_not_equivalence",
+      "blocking": true,
+      "role": "property",
+      "column_name": "ABUNDANCE_PROPERTY",
+      "description": "The shared Abundance characteristic is being reviewed; the QUDT Count candidate is only its broader mapped quantity, not an exact equivalent.",
+      "context_text": [
+        "The shared Abundance characteristic is being reviewed; the QUDT Count candidate is only its broader mapped quantity, not an exact equivalent."
+      ],
+      "candidates": [
+        {
+          "iri": "http://qudt.org/vocab/quantitykind/Count",
+          "label": "Count",
+          "definition": "A broad generic counting quantity, without the compound salmon variable identity.",
+          "role_hints": "property",
+          "source": "qudt",
+          "term_type": "quantity_kind",
+          "native_type": "qudt:QuantityKind",
+          "match_type": "label_exact",
+          "score": 0.95,
+          "source_commit": null,
+          "mapping_predicate": "skos:broadMatch",
+          "mapping_source": "https://w3id.org/smn/Abundance",
+          "mapping_status": "advisory; non-equivalence",
+          "definition_status": "fixture_paraphrase",
+          "mapping_source_commit": "e1ed7049009ee6bbf9a23794fd744f1062cf78e7"
+        }
+      ],
+      "judgement": {
+        "llm_decision": "review",
+        "llm_confidence": 0.9,
+        "llm_rationale": "A broad or close mapping supplies discovery evidence, not an exact replacement for the measured characteristic. Preserve direction and predicate without canonicalizing.",
+        "llm_missing_context": "An explicit fit assessment for this characteristic and source mapping is required."
+      },
+      "wrong_judgement": {
+        "llm_decision": "accept",
+        "llm_selected_iri": "http://qudt.org/vocab/quantitykind/Count",
+        "llm_rationale": "Deliberately wrong hand-authored control; not a model output.",
+        "llm_confidence": 0.9
+      },
+      "oracle": {
+        "required": [
+          {
+            "rule_id": "close_mapping_is_not_equivalence-decision",
+            "type": "assessment",
+            "role": "property",
+            "decision": "review"
+          }
+        ],
+        "forbidden": [
+          {
+            "rule_id": "close_mapping_is_not_equivalence-no-accept",
+            "type": "assessment",
+            "role": "property",
+            "decision": "accept"
+          }
+        ]
+      },
+      "packet_id": "a3f6b9bfcfd353b2269550b3bcb13a0e178c69592028e1154fa8814b8270363c"
+    }
+  ]
+}
