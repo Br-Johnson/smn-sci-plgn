@@ -66,6 +66,21 @@ class PluginChecksTests(unittest.TestCase):
         vs.check_package_pins(self.root)
         vs.check_no_local_term_search(self.root)
 
+    def test_controlled_vocabulary_authoring_literals_are_allowed(self) -> None:
+        vs.check_no_local_term_search(self.root)
+
+    def test_controlled_vocabulary_authoring_cannot_grow_term_search(self) -> None:
+        path = self.root / "skills" / "controlled-vocabulary" / "scripts" / "controlled_vocabulary.py"
+        with path.open("a") as stream:
+            stream.write("\ndef search_terms(query):\n    return []\n")
+        self.assert_rejected(vs.check_no_local_term_search, self.root, fragment="defines search_terms()")
+
+    def test_controlled_vocabulary_authoring_cannot_call_discovery_services(self) -> None:
+        path = self.root / "skills" / "controlled-vocabulary" / "scripts" / "controlled_vocabulary.py"
+        with path.open("a") as stream:
+            stream.write("\n# https://" + "ebi.ac.uk/ols" + "\n")
+        self.assert_rejected(vs.check_no_local_term_search, self.root, fragment="ebi.ac.uk/ols")
+
     # Manifests ---------------------------------------------------------------
 
     def test_manifest_version_drift_is_rejected(self) -> None:

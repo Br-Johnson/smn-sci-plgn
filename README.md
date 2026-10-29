@@ -511,3 +511,18 @@ The highest-current blockers remain:
 `salmon-research-framework-skill` creates and checks a local hypothesis/evidence proposal. First-winter age/cohort and direct-survival claims require explicit evidence entries. Entries remain unverified proposals; no model, scientific acceptance, identity bridge or publication occurs. Both skills use Python standard-library helpers and need no API key.
 
 The existing SDK adapter remains at its documented pin and implemented actions. These local helpers do not require a package-pin change or claim new SDK creation/review capabilities. Framework provenance and article capability evidence: [framing](skills/salmon-research-framework-skill/references/framing.md).
+
+## Controlled-vocabulary authoring
+
+`controlled-vocabulary` creates a small CSV-authoritative SKOS vocabulary with
+stable W3ID term IRIs, source-backed definitions, immutable local editions and
+a static GitHub Pages website. Its portable standard-library helper validates
+identifiers, labels, hierarchy and release integrity, then prepares a manual
+Pages workflow and reviewed W3ID redirect contribution. Local preparation does
+not register a namespace, change Pages settings or publish. Existing vocabulary
+and namespace contracts stay authoritative; term discovery remains in the
+package-backed `salmon-terms` skill.
+
+Start at [the skill](skills/controlled-vocabulary/SKILL.md). The reproducible
+fictional workflow and its publication limits are covered by
+`tests/test_controlled_vocabulary.py`.

@@ -28,6 +28,7 @@ Do not keep the router in the foreground for narrow single-source lookups when a
 
 - `salmon-entity-normalizer-skill`
 - `salmon-terms`
+- `controlled-vocabulary` for authoring and publication preparation, rather than ordinary term lookup
 - `metasalmon-skill`
 - `streamnet-api-skill`
 - `ptagis-skill`
@@ -51,6 +52,7 @@ Start by assigning the request to one or more lanes:
 - genetics and stock identification
 - climate and ocean context
 - ontology and semantic resolution
+- controlled-vocabulary authoring, stable identifiers and website publication preparation
 - literature, reports, and dataset discovery
 - Salmon Data Package and metadata validation
 - composite stock briefs
