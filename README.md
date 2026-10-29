@@ -215,6 +215,7 @@ logic of its own; the package searches the shared `smn` ontology, the DFO
 
 Current coverage:
 - `find_terms()`: role-aware search returning labels, IRIs, definitions, scores, and per-source diagnostics
+- Exact smn/gcdfo release or local-snapshot selection, with the package's unchanged version/hash/manifest provenance and explicit refusal on invalid selections
 - `sources_for_role()`: which sources each semantic role searches by default
 - runtime and package-version inspection
 

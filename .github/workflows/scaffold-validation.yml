@@ -65,4 +65,6 @@ jobs:
       - name: Run the package adapters against the pinned release
         env:
           SMN_PLUGIN_LIVE_ADAPTERS: "1"
-        run: python3 -m unittest discover -s tests -p 'test_package_adapters.py' -v
+        run: |
+          python3 -m unittest discover -s tests -p 'test_package_adapters.py' -v
+          python3 -m unittest discover -s tests -p 'test_term_snapshot_controls.py' -v

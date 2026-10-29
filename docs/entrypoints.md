@@ -7,6 +7,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Validate the scaffold: `python3 scripts/validate_scaffold.py`
 - Run the offline regression suite (selector routes, validator guards, adapter startup): `python3 -m unittest discover -s tests -p 'test_*.py'`
 - Run the live package-adapter tests, which need uv and network access: `SMN_PLUGIN_LIVE_ADAPTERS=1 python3 -m unittest discover -s tests -p 'test_package_adapters.py'`
+- Run exact-release snapshot adapter controls without ontology-service access: `SMN_PLUGIN_PINNED_PYTHON=/path/to/existing/pinned-release/python python3 -m unittest discover -s tests -p 'test_term_snapshot_controls.py' -v`. The interpreter must carry the actual v0.6.0 Git commit; CI's existing live-adapter profile can acquire that interpreter through uv instead.
 - Run one eval case against a live model: `claude plugin eval . --no-publish --ablation none --runs 1 --case <case> --allow-tools Bash`, plus `Write` for the stock-brief case and one `"WebFetch(domain:<host>)"` grant for each host the case's `description` names. It needs Claude Code 2.1.269 or later, and every run is billed model usage. `scripts/validate_scaffold.py` checks the case files offline, and no case has been scored yet.
 - Install for Codex / OpenAI: `python3 scripts/install_codex_plugin.py`
 - Install for Claude Code as a plugin: `claude plugin marketplace add Br-Johnson/smn-sci-plgn`, then `claude plugin install salmon-science-research@smn-sci-plgn`
@@ -48,6 +49,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 ## Canonical Scripts
 
 - Package adapters, which only marshal JSON to metasalmonpy `v0.6.0`: `skills/salmon-terms/scripts/salmon_terms.py` and `skills/metasalmon-skill/scripts/metasalmon_api.py`
+  - `salmon-terms` forwards `release` / `snapshot_dir` and returns unchanged `ontology_release` provenance; its pinned-source/field guards prevent silent unsupported or misspelled requests. Regression seam: the JSON CLI in `tests/test_term_snapshot_controls.py`.
 - Plumbing the two adapters share, including the package pin: `scripts/_package_adapter.py`
 - Commons adapter, which runs the commons' own scripts at its pinned commit against the user's clone: `skills/commons-card/scripts/commons_card.py`
   - `runtime`/`checklist` inspect the pin and drift; script actions return `upstream_drift` before running when tools, schema or contribution rules differ.
