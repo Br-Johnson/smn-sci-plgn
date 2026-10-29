@@ -13,6 +13,7 @@
 - Agent-side RMIS login and inline credential fields/query parameters are refused; user-run setup is documented separately.
 - Normal output and saved JSON redact configured credentials and credential-shaped fields; authenticated HTTP error bodies and CLI tracebacks are withheld.
 - Regression fixtures use invented values, fake external API responses and local TLS servers; no live authenticated access was tested.
+- Follow-up guards validate the final outgoing URL and encode source identifiers as opaque path segments; raw query-string parsing preserves question marks in ordinary values.
 
 ## [2026-10-24] local-workflows | research-workbench
 

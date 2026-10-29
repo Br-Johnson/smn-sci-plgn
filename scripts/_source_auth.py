@@ -73,6 +73,7 @@ def _origin(url: str) -> tuple[str, str, int]:
 
 def source_urlopen(req: request.Request, *, timeout: int, allowed_origins=None):
     """Open a source request; credentials require an explicit HTTPS origin."""
+    validate_source_url(req.full_url)
     if authenticated_headers(dict(req.header_items())):
         if not allowed_origins:
             raise SourcePolicyError("destination_policy_required", "Authenticated source requests require an explicit destination policy.")
@@ -81,6 +82,7 @@ def source_urlopen(req: request.Request, *, timeout: int, allowed_origins=None):
             raise SourcePolicyError("destination_refused", "The authenticated destination is outside the source origin policy.")
         class OriginRedirects(request.HTTPRedirectHandler):
             def redirect_request(self, req, fp, code, msg, headers, newurl):
+                validate_source_url(newurl)
                 if _origin(newurl) != origin:
                     raise SourcePolicyError("redirect_refused", "Authenticated source redirects must remain on the original HTTPS origin.")
                 return super().redirect_request(req, fp, code, msg, headers, newurl)
@@ -104,11 +106,46 @@ def contains_inline_credentials(value: Any) -> bool:
             if credential_field(str(key)) or str(key).lower() == "email":
                 return True
             if key in {"params", "path"} and isinstance(content, str):
-                query = parse.urlsplit(content).query if "?" in content else content.lstrip("?")
-                if any(credential_field(name) for name, _ in parse.parse_qsl(query, keep_blank_values=True)):
+                # params is a query string, so '?' inside a value is data.
+                # path is a URL/path and only its actual query is relevant.
+                query = content.lstrip("?") if key == "params" else parse.urlsplit(content).query
+                if _query_contains_credentials(query):
                     return True
             if contains_inline_credentials(content):
                 return True
     elif isinstance(value, list):
         return any(contains_inline_credentials(content) for content in value)
     return False
+
+
+def _query_contains_credentials(query: str) -> bool:
+    return any(credential_field(name) or name.lower() == "email" for name, _ in parse.parse_qsl(query, keep_blank_values=True))
+
+
+def source_path_segment(value: str | int) -> str:
+    """Treat a source identifier as one opaque path segment, never URL syntax."""
+    if not isinstance(value, str) and type(value) is not int:
+        raise SourcePolicyError("invalid_identifier", "Source identifiers must be text or integers.")
+    text = str(value)
+    if not text or any(ord(character) < 32 or ord(character) == 127 for character in text):
+        raise SourcePolicyError("invalid_identifier", "Source identifiers must be nonempty and contain no control characters.")
+    queries = [text.partition("?")[2], text.partition("#")[2]]
+    if "=" in text:
+        queries.append(text)
+    if any(_query_contains_credentials(query) for query in queries):
+        raise SourcePolicyError("inline_credentials_refused", "Credentials cannot be supplied in source identifiers or URLs. Use the local environment.")
+    return parse.quote(text, safe="")
+
+
+def validate_source_url(url: str) -> None:
+    """Check the actual outgoing URL after all path and query construction."""
+    try:
+        parsed = parse.urlsplit(url)
+    except ValueError:
+        raise SourcePolicyError("invalid_source_url", "The source URL is invalid.") from None
+    # Opaque encoded identifiers cannot hide credential-shaped query syntax.
+    for segment in parsed.path.split("/"):
+        if segment:
+            source_path_segment(parse.unquote(segment))
+    if parsed.username is not None or parsed.password is not None or _query_contains_credentials(parsed.query) or _query_contains_credentials(parsed.fragment):
+        raise SourcePolicyError("inline_credentials_refused", "Credentials cannot be supplied in source identifiers or URLs. Use the local environment.")

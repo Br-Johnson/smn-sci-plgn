@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _source_auth import SourcePolicyError
+from _source_auth import SourcePolicyError, source_path_segment
 from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, http_get_json, load_input, result_error, write_raw
 
 
@@ -66,12 +66,12 @@ def main() -> None:
         if not table_id:
             emit(result_error("missing_table_id", "table action requires table_id"))
             return
-        path = f"/api/v1/ca/tables/{table_id}"
+        path = f"/api/v1/ca/tables/{source_path_segment(table_id)}"
         params = payload.get("params") or {}
     elif action == "records":
         record_id = payload.get("record_id")
         if record_id:
-            path = f"/api/v1/ca/{record_id}"
+            path = f"/api/v1/ca/{source_path_segment(record_id)}"
             params = payload.get("params") or {}
         else:
             path = "/api/v1/ca"
