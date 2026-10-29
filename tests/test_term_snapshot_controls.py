@@ -2,8 +2,9 @@
 
 Set SMN_PLUGIN_PINNED_PYTHON to an existing pinned-release interpreter to run
 without acquiring dependencies. The existing live-adapter CI profile instead
-uses uv once to locate its pinned interpreter. Neither route contacts ontology
-services: only the transport boundaries are replaced in the child process.
+executes each command inside uv's pinned runtime; an interpreter path need not
+survive uv's process. Neither route contacts ontology services: only the
+transport boundaries are replaced in the child process.
 """
 
 import json
@@ -37,36 +38,30 @@ requests.sessions.Session.request = refused
 class SnapshotAdapterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.python = os.environ.get("SMN_PLUGIN_PINNED_PYTHON")
-        if not cls.python:
-            result = subprocess.run(
-                ["uv", "run", "-q", "--no-project", "--with", REQUIREMENT,
-                 "python", "-c", "import sys; print(sys.executable)"],
-                text=True, capture_output=True, timeout=900, check=False,
-            )
-            if result.returncode:
-                raise AssertionError(result.stderr)
-            cls.python = result.stdout.strip()
+        python = os.environ.get("SMN_PLUGIN_PINNED_PYTHON")
+        cls.python_command = [python] if python else [
+            "uv", "run", "-q", "--no-project", "--with", REQUIREMENT, "python",
+        ]
         provenance = cls.run_python("""
 import importlib.metadata as metadata, json, metasalmonpy
 print(json.dumps({"version": metasalmonpy.__version__,
     "origin": json.loads(metadata.distribution("metasalmonpy").read_text("direct_url.json"))}))
-""")
+""", timeout=900)
         if provenance["version"] != "0.6.0" or provenance["origin"].get("vcs_info", {}).get("commit_id") != COMMIT:
             raise AssertionError("snapshot controls require the actual pinned v0.6.0 Git release")
 
     @classmethod
-    def run_python(cls, code, *args, payload=None, env=None):
+    def run_python(cls, code, *args, payload=None, env=None, timeout=60):
         child_env = dict(os.environ)
         child_env.pop("PYTHONPATH", None)
         child_env["PYTHONDONTWRITEBYTECODE"] = "1"
         if env:
             child_env.update(env)
         result = subprocess.run(
-            [cls.python, "-c", NO_NETWORK + code + "\nassert network_attempts == 0, 'unexpected service request'\n",
+            [*cls.python_command, "-c", NO_NETWORK + code + "\nassert network_attempts == 0, 'unexpected service request'\n",
              *map(str, args)],
             input=None if payload is None else json.dumps(payload),
-            text=True, capture_output=True, timeout=60, env=child_env, check=False,
+            text=True, capture_output=True, timeout=timeout, env=child_env, check=False,
         )
         if result.returncode:
             raise AssertionError(result.stderr or result.stdout)
@@ -84,6 +79,33 @@ print(json.dumps({"results": json.loads(frame.to_json(orient="records")),
     "ontology_release": (json.loads(frame.attrs["ontology_release"].to_json(orient="records"))
                          if "ontology_release" in frame.attrs else None)}))
 """, query, json.dumps(kwargs))
+
+    def test_uv_bootstrap_keeps_execution_inside_the_runtime_lifetime(self):
+        result = self.run_python("""
+import json, os, shutil, subprocess, sys, tempfile
+from pathlib import Path
+root = Path(sys.argv[1])
+with tempfile.TemporaryDirectory() as temporary:
+    folder = Path(temporary)
+    shim = folder / "uv"
+    shutil.copyfile(root / "tests/fixtures/expired_uv.py", shim)
+    shim.chmod(0o755)
+    log = folder / "uv.jsonl"
+    env = dict(os.environ)
+    env.pop("SMN_PLUGIN_PINNED_PYTHON", None)
+    env.update(SMN_PLUGIN_LIVE_ADAPTERS="1", SMN_TEST_ACTIVE_PYTHON=sys.executable,
+               SMN_TEST_UV_LOG=str(log), PATH=str(folder) + os.pathsep + env["PATH"])
+    child = subprocess.run([sys.executable, "-B", "-m", "unittest", "discover",
+        "-s", str(root / "tests"), "-p", "test_term_snapshot_controls.py",
+        "-k", "test_exact_smn_snapshot_keeps_the_package_results_and_provenance"],
+        env=env, text=True, capture_output=True, timeout=30)
+    calls = [json.loads(line) for line in log.read_text().splitlines()]
+    print(json.dumps({"returncode": child.returncode, "stderr": child.stderr,
+                      "calls": calls}))
+""", ROOT)
+        self.assertEqual(result["returncode"], 0, result["stderr"])
+        self.assertGreaterEqual(len(result["calls"]), 3)
+        self.assertTrue(all(call["mode"] == "execute" for call in result["calls"]))
 
     def test_exact_smn_snapshot_keeps_the_package_results_and_provenance(self):
         controls = {"sources": ["smn"], "expand_query": False,
