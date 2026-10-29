@@ -7,7 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import emit, getenv_any, http_get_json, load_input, result_error, write_raw
+from _source_auth import SourcePolicyError
+from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, http_get_json, load_input, result_error, write_raw
 
 
 BASE_URL = "https://api.streamnet.org"
@@ -39,13 +40,16 @@ def main() -> None:
         emit(result_error("invalid_input", "expected a JSON object"))
         return
 
+    if inline_credentials_refused(payload):
+        return
+
     action = payload.get("action")
     if action not in {"tables", "table", "records", "request"}:
         emit(result_error("invalid_action", "action must be one of tables, table, records, request"))
         return
 
     headers = {}
-    api_key = payload.get("api_key") or getenv_any("STREAMNET_API_KEY")
+    api_key = getenv_any("STREAMNET_API_KEY")
     warnings = []
     if api_key:
         headers["XApiKey"] = api_key
@@ -85,7 +89,9 @@ def main() -> None:
 
     url = f"{BASE_URL}{path}"
     try:
-        data, full_url = http_get_json(url, params=params, headers=headers, timeout=timeout)
+        data, full_url = http_get_json(url, params=params, headers=headers, timeout=timeout, allowed_origins=(BASE_URL,))
+    except SourcePolicyError:
+        raise
     except RuntimeError as exc:
         detail = json.loads(str(exc))
         message = "StreamNet request failed"
@@ -126,4 +132,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_source_cli(main)

@@ -7,7 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import emit, getenv_any, http_get_json, load_input, result_error, write_raw
+from _source_auth import SourcePolicyError
+from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, http_get_json, load_input, result_error, write_raw
 
 
 BASE_URL = "https://api.ptagis.org"
@@ -41,6 +42,9 @@ def main() -> None:
 
     if not isinstance(payload, dict):
         emit(result_error("invalid_input", "expected a JSON object"))
+        return
+
+    if inline_credentials_refused(payload):
         return
 
     action = payload.get("action")
@@ -107,7 +111,7 @@ def main() -> None:
         return
 
     headers = {}
-    token = payload.get("auth_token") or getenv_any("PTAGIS_API_TOKEN", "PTAGIS_API_KEY")
+    token = getenv_any("PTAGIS_API_TOKEN", "PTAGIS_API_KEY")
     warnings = []
     if token:
         headers["Authorization"] = f"Bearer {token}"
@@ -116,7 +120,9 @@ def main() -> None:
 
     url = f"{BASE_URL}{path}"
     try:
-        data, full_url = http_get_json(url, params=params, headers=headers, timeout=timeout)
+        data, full_url = http_get_json(url, params=params, headers=headers, timeout=timeout, allowed_origins=(BASE_URL,))
+    except SourcePolicyError:
+        raise
     except RuntimeError as exc:
         detail = json.loads(str(exc))
         message = "PTAGIS request failed"
@@ -157,4 +163,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_source_cli(main)

@@ -49,7 +49,8 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Commons adapter, which runs the commons' own scripts at its pinned commit against the user's clone: `skills/commons-card/scripts/commons_card.py`
   - `runtime`/`checklist` inspect the pin and drift; script actions return `upstream_drift` before running when tools, schema or contribution rules differ.
   - Offline contract checks: `python3 -m unittest discover -s tests -p 'test_commons_card.py'`. With an authorized clone, set `SALMON_COMMONS_DIR` to enable the real-tool synthetic controls and read-only bundle/ledger checks.
-- Shared stdlib helper utilities: `scripts/_common.py`
+- Shared stdlib helper utilities and credential-safe output/file handling: `scripts/_common.py`
+- Authenticated-source origin, redirect and redaction policy: `scripts/_source_auth.py`; user-run setup: `docs/source-authentication.md`; regressions: `tests/test_source_credentials.py`
 - Executable graph selector: `scripts/skill_graph_selector.py`
 - Whole-repo structural and watch-surface validation: `scripts/validate_scaffold.py`
 - Stock-brief contract helper: `skills/salmon-stock-brief-workflow-skill/scripts/stock_brief_contract.py`

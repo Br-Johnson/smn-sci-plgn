@@ -45,3 +45,13 @@ For the plugin:
 - use API mode for authenticated machine queries
 - treat the legacy RMIS reporting UI as a secondary surface for future browser-automation work
 - do not assume anonymous RMIS data access
+
+
+## Plugin session boundary
+
+The upstream login endpoint is not exposed as an agent login workflow. The
+plugin's legacy `login` action refuses with `local_auth_required`. Configure
+`RMIS_API_KEY`, `RMPC_API_KEY` or `RMIS_JWT` in the user's own local environment;
+never send credentials through chat, JSON fields or query parameters.
+[Local authentication](../../../docs/source-authentication.md) documents the
+user-run route, redacted output and fixed HTTPS origin/redirect policy.

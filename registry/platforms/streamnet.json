@@ -74,7 +74,8 @@
     "The wrapper currently covers only a narrow Coordinated Assessment slice."
   ],
   "governance_constraints": [
-    "Credential-gated access means the agent must distinguish unsupported from unauthorized."
+    "Credential-gated access means the agent must distinguish unsupported from unauthorized.",
+    "Plugin credentials come only from the user-configured local environment; inline credentials and agent-side login are refused. Authenticated transport is HTTPS-only, with fixed source-origin and same-origin redirect policy; normal output and saved JSON redact credentials."
   ],
   "related_skills": [
     "streamnet-api-skill"
@@ -83,7 +84,9 @@
   "evidence_links": [
     "https://www.streamnet.org/resources/exchange-tools/rest-api-documentation/",
     "skills/streamnet-api-skill/SKILL.md",
-    "skills/streamnet-api-skill/scripts/streamnet_api.py"
+    "skills/streamnet-api-skill/scripts/streamnet_api.py",
+    "docs/source-authentication.md",
+    "tests/test_source_credentials.py"
   ],
   "watch_fields": [
     "auth model",

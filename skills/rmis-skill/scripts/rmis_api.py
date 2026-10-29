@@ -9,7 +9,8 @@ from urllib import error, parse, request
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from _common import emit, getenv_any, load_input, result_error, write_raw
+from _source_auth import authenticated_headers, source_urlopen
+from _common import run_source_cli, inline_credentials_refused, emit, getenv_any, load_input, result_error, write_raw
 
 
 API_BASE = "https://phish.rmis.org"
@@ -51,6 +52,7 @@ def fetch(
     headers: dict[str, str] | None = None,
     body: dict | None = None,
     timeout: int = 20,
+    allowed_origins: tuple[str, ...] | None = None,
 ) -> tuple[int, bytes, dict[str, str], str]:
     payload = None
     request_headers = headers.copy() if headers else {}
@@ -59,10 +61,10 @@ def fetch(
         request_headers.setdefault("Content-Type", "application/json")
     req = request.Request(url, data=payload, headers=request_headers, method=method)
     try:
-        with request.urlopen(req, timeout=timeout) as response:
+        with source_urlopen(req, timeout=timeout, allowed_origins=allowed_origins) as response:
             return response.status, response.read(), dict(response.headers.items()), url
     except error.HTTPError as exc:
-        return exc.code, exc.read(), dict(exc.headers.items()), url
+        return exc.code, b"" if authenticated_headers(headers) else exc.read(), {}, url
 
 
 def parse_json_response(status: int, body: bytes):
@@ -92,18 +94,17 @@ def summarize(data):
 def resolve_auth_headers(payload: dict) -> tuple[dict[str, str], list[str]]:
     warnings = []
     auth_mode = payload.get("auth_mode")
-    auth_token = payload.get("auth_token")
 
     api_key = None
     jwt_token = None
     if auth_mode == "api_key":
-        api_key = auth_token or getenv_any("RMIS_API_KEY", "RMPC_API_KEY")
+        api_key = getenv_any("RMIS_API_KEY", "RMPC_API_KEY")
     elif auth_mode == "jwt":
-        jwt_token = auth_token or getenv_any("RMIS_JWT")
+        jwt_token = getenv_any("RMIS_JWT")
     else:
-        api_key = auth_token or getenv_any("RMIS_API_KEY", "RMPC_API_KEY")
+        api_key = getenv_any("RMIS_API_KEY", "RMPC_API_KEY")
         if not api_key:
-            jwt_token = auth_token or getenv_any("RMIS_JWT")
+            jwt_token = getenv_any("RMIS_JWT")
 
     headers: dict[str, str] = {"Accept": "application/json"}
     if api_key:
@@ -111,7 +112,7 @@ def resolve_auth_headers(payload: dict) -> tuple[dict[str, str], list[str]]:
     elif jwt_token:
         headers["Authorization"] = jwt_token
     else:
-        warnings.append("no RMIS_API_KEY, RMPC_API_KEY, RMIS_JWT, or auth_token provided")
+        warnings.append("no RMIS_API_KEY, RMPC_API_KEY or RMIS_JWT configured in the local environment")
     return headers, warnings
 
 
@@ -157,35 +158,13 @@ def main() -> None:
         return
 
     if action == "login":
-        email = payload.get("email") or getenv_any("RMIS_EMAIL")
-        password = payload.get("password") or getenv_any("RMIS_PASSWORD")
-        if not email or not password:
-            emit(result_error("missing_credentials", "login requires email and password"))
-            return
-        body = {"email": email, "password": password, "jwt": bool(payload.get("jwt", False))}
-        status, raw, _, url = fetch(f"{API_BASE}/bauth", method="POST", body=body, timeout=timeout)
-        text, data = parse_json_response(status, raw)
-        if status != 200 or not isinstance(data, dict):
-            emit(
-                result_error(
-                    "http_error",
-                    "RMIS login failed",
-                    status=status,
-                    url=url,
-                    body_preview=text[:400],
-                )
-            )
-            return
-        emit(
-            {
-                "ok": True,
-                "source": "RMIS API",
-                "action": "login",
-                "url": url,
-                "token": data.get("token"),
-                "token_type": "jwt" if body["jwt"] else "api_key_or_token",
-            }
-        )
+        emit(result_error(
+            "local_auth_required",
+            "Authenticate in your own terminal or the source portal, then use an environment credential. Never submit a password or key through chat.",
+        ))
+        return
+
+    if inline_credentials_refused(payload):
         return
 
     if action not in set(ACTION_TO_PATH) | {"request"}:
@@ -213,7 +192,7 @@ def main() -> None:
         emit(result_error("invalid_params", str(exc)))
         return
 
-    status, raw, _, final_url = fetch(url, headers=headers, timeout=timeout)
+    status, raw, _, final_url = fetch(url, headers=headers, timeout=timeout, allowed_origins=(API_BASE,))
     text, data = parse_json_response(status, raw)
 
     if status != 200 or data is None:
@@ -255,4 +234,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_source_cli(main)

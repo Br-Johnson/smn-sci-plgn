@@ -294,7 +294,8 @@ Authenticated wrapper for the live RMIS / RMPC API plus public RMIS status looku
 
 Current coverage:
 - public RMIS version announcement lookup
-- API login for API key or JWT retrieval
+- environment-based authenticated reads with a fixed HTTPS origin policy; agent-side login is refused
+- [user-run local authentication](docs/source-authentication.md), credential redaction and redirect safeguards
 - authenticated `release`, `recovery`, `location`, `catchsample`, `description`, and `files` GET calls
 - generic request path for future expansion
 
