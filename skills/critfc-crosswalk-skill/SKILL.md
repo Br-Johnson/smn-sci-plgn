@@ -42,3 +42,11 @@ echo '{"action":"rest_root"}' | python3 skills/critfc-crosswalk-skill/scripts/cr
 - `records`
 - `raw_output_path`
 - `warnings`
+
+
+## Transport and provenance
+
+Use the [source transport contract](../../docs/source-transport.md) for allowed
+origins, redirect rules, retrieval provenance and typed failures. An unavailable
+source is reported separately from a successful empty result; another evidence
+lane can continue.

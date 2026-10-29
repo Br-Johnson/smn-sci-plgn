@@ -16,3 +16,11 @@ DART is the current scaffold's catalog surface for Columbia River passage, river
 ## Why it matters
 
 DART helps the router find the right Columbia query surface, but it is still a page-discovery helper rather than a structured data skill.
+
+
+## Transport contract
+
+The adapter uses the shared [source transport contract](../../docs/source-transport.md):
+explicit HTTPS origins, checked redirects, real final-origin provenance and
+typed failures. The synthetic transport tests establish these local behaviors;
+they do not establish current service availability.

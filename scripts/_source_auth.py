@@ -63,7 +63,7 @@ class SourcePolicyError(RuntimeError):
 def _origin(url: str) -> tuple[str, str, int]:
     try:
         parsed = parse.urlsplit(url)
-        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        port = parsed.port if parsed.port is not None else (443 if parsed.scheme == "https" else 80)
         if parsed.scheme != "https" or not parsed.hostname or parsed.username is not None or parsed.password is not None:
             raise ValueError
         return parsed.scheme, parsed.hostname.lower(), port
@@ -72,31 +72,17 @@ def _origin(url: str) -> tuple[str, str, int]:
 
 
 def source_urlopen(req: request.Request, *, timeout: int, allowed_origins=None):
-    """Open a source request; credentials require an explicit HTTPS origin."""
-    validate_source_url(req.full_url)
-    if authenticated_headers(dict(req.header_items())):
-        if not allowed_origins:
-            raise SourcePolicyError("destination_policy_required", "Authenticated source requests require an explicit destination policy.")
-        origin = _origin(req.full_url)
-        if origin not in {_origin(allowed) for allowed in allowed_origins}:
-            raise SourcePolicyError("destination_refused", "The authenticated destination is outside the source origin policy.")
-        class OriginRedirects(request.HTTPRedirectHandler):
-            def redirect_request(self, req, fp, code, msg, headers, newurl):
-                validate_source_url(newurl)
-                if _origin(newurl) != origin:
-                    raise SourcePolicyError("redirect_refused", "Authenticated source redirects must remain on the original HTTPS origin.")
-                return super().redirect_request(req, fp, code, msg, headers, newurl)
+    """Keep named-source requests within policy before every network hop."""
+    sensitive = authenticated_headers(dict(req.header_items()))
+    validate_source_destination(req.full_url, allowed_origins)
+    original = req.full_url if sensitive else None
 
-        try:
-            return request.build_opener(OriginRedirects()).open(req, timeout=timeout)
-        except SourcePolicyError:
-            raise
-        except error.HTTPError:
-            # The caller reports status only and withholds authenticated bodies.
-            raise
-        except (error.URLError, OSError, ValueError):
-            raise SourcePolicyError("transport_failed", "Authenticated source transport failed; sensitive diagnostics are withheld.") from None
-    return request.urlopen(req, timeout=timeout)
+    class OriginRedirects(request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            validate_source_destination(newurl, allowed_origins, authenticated_origin=original)
+            return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+    return request.build_opener(OriginRedirects()).open(req, timeout=timeout)
 
 
 def contains_inline_credentials(value: Any) -> bool:
@@ -149,3 +135,14 @@ def validate_source_url(url: str) -> None:
             source_path_segment(parse.unquote(segment))
     if parsed.username is not None or parsed.password is not None or _query_contains_credentials(parsed.query) or _query_contains_credentials(parsed.fragment):
         raise SourcePolicyError("inline_credentials_refused", "Credentials cannot be supplied in source identifiers or URLs. Use the local environment.")
+
+
+def validate_source_destination(url: str, allowed_origins, *, authenticated_origin: str | None = None) -> None:
+    validate_source_url(url)
+    if not allowed_origins:
+        raise SourcePolicyError("destination_policy_required", "Source requests require an explicit destination policy.")
+    origin = _origin(url)
+    if origin not in {_origin(allowed) for allowed in allowed_origins}:
+        raise SourcePolicyError("destination_refused", "The destination is outside the named source origin policy.")
+    if authenticated_origin is not None and origin != _origin(authenticated_origin):
+        raise SourcePolicyError("redirect_refused", "Authenticated source redirects must remain on the original HTTPS origin.")

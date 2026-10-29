@@ -50,6 +50,14 @@ echo '{"action":"dataset_search","q":"salmon"}' | python3 skills/npafc-skill/scr
 - `records`
 - `raw_output_path`
 - `warnings`
+
+
+## Transport and provenance
+
+Use the [source transport contract](../../docs/source-transport.md) for allowed
+origins, redirect rules, retrieval provenance and typed failures. An unavailable
+source is reported separately from a successful empty result; another evidence
+lane can continue.
 - `output` (preview mode, count, limits and truncation)
 
 Default output is at most five rows per collection and 16 KiB of serialized

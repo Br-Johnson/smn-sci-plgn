@@ -78,7 +78,8 @@
     "The scaffold only fetches page/help content and does not reverse-engineer private query endpoints."
   ],
   "governance_constraints": [
-    "Treat SPS as browser-first recovery-planning context rather than a general-purpose machine API."
+    "Treat SPS as browser-first recovery-planning context rather than a general-purpose machine API.",
+    "Named-source HTTP reads enforce explicit HTTPS origins and redirect destinations; successful reads carry final-origin retrieval provenance and failures use bounded non-sensitive typed JSON."
   ],
   "related_skills": [
     "noaa-sps-skill"
@@ -87,7 +88,9 @@
   "evidence_links": [
     "https://www.webapps.nwfsc.noaa.gov/sps/",
     "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/introduction.htm",
-    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/map_query.htm"
+    "https://www.webapps.nwfsc.noaa.gov/appim/appthemes/spspub2.0/public/Help/%21SSL%21/WebHelp/map_query.htm",
+    "docs/source-transport.md",
+    "tests/test_public_source_transport.py"
   ],
   "watch_fields": [
     "public home-page layout",

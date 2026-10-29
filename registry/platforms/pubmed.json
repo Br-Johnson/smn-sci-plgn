@@ -72,7 +72,8 @@
     "The skill is intentionally compact and does not cover the wider Entrez or PMC surface."
   ],
   "governance_constraints": [
-    "Public access is straightforward, but query volume should still be kept modest."
+    "Public access is straightforward, but query volume should still be kept modest.",
+    "Named-source HTTP reads enforce explicit HTTPS origins and redirect destinations; successful reads carry final-origin retrieval provenance and failures use bounded non-sensitive typed JSON."
   ],
   "related_skills": [
     "salmon-literature-skill"
@@ -81,7 +82,9 @@
   "evidence_links": [
     "https://www.ncbi.nlm.nih.gov/books/NBK25501/",
     "skills/salmon-literature-skill/SKILL.md",
-    "skills/salmon-literature-skill/scripts/salmon_literature.py"
+    "skills/salmon-literature-skill/scripts/salmon_literature.py",
+    "docs/source-transport.md",
+    "tests/test_public_source_transport.py"
   ],
   "watch_fields": [
     "E-utilities parameter contract",

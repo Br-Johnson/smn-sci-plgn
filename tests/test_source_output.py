@@ -27,6 +27,8 @@ class Response:
     def read(self): return body
     def geturl(self): return self.url
 def fixture(req, *args, **kwargs):
+    if isinstance(req, urllib.request.OpenerDirector):
+        req = args[0]
     return Response(req.full_url if hasattr(req, "full_url") else req)
 def forbid_network(event, args):
     if event in {"socket.connect", "socket.getaddrinfo"}:

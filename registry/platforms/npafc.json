@@ -78,7 +78,8 @@
     "Dataset content is heterogeneous and should be treated as source-specific."
   ],
   "governance_constraints": [
-    "Keep catalogue metadata separate from the underlying research datasets and downloads."
+    "Keep catalogue metadata separate from the underlying research datasets and downloads.",
+    "Named-source HTTP reads enforce explicit HTTPS origins and redirect destinations; successful reads carry final-origin retrieval provenance and failures use bounded non-sensitive typed JSON."
   ],
   "related_skills": [
     "npafc-skill"
@@ -88,7 +89,9 @@
     "https://data.npafc.org/en/",
     "https://data.npafc.org/",
     "https://www.npafc.org/statistics/",
-    "https://docs.ckan.org/en/latest/api/"
+    "https://docs.ckan.org/en/latest/api/",
+    "docs/source-transport.md",
+    "tests/test_public_source_transport.py"
   ],
   "watch_fields": [
     "CKAN API contract",

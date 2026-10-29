@@ -46,14 +46,16 @@ class Response:
     def __enter__(self): return self
     def __exit__(self, *args): pass
     def read(self): return sys.argv[2].encode()
-    def geturl(self): return "https://fixture.invalid/response"
+    def geturl(self): return self.url
 def open_fixture(*args, **kwargs):
     fixture = json.loads(sys.argv[2])
     if fixture.get("fixture_forbid_transport"):
         raise AssertionError("refused fixture reached external transport")
     if fixture.get("fixture_http_error"):
         raise urllib.error.HTTPError("https://fixture.invalid/response", 401, "Unauthorized", {}, io.BytesIO(json.dumps(fixture).encode()))
-    return Response()
+    response = Response()
+    response.url = next(arg.full_url for arg in args if isinstance(arg, urllib.request.Request))
+    return response
 urllib.request.urlopen = open_fixture
 urllib.request.OpenerDirector.open = open_fixture
 runpy.run_path(sys.argv[1], run_name="__main__")

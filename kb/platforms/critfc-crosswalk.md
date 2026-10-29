@@ -16,3 +16,11 @@ CRITFC crosswalk is the Columbia Basin pop/unit reconciliation scaffold for salm
 ## Why it matters
 
 It is one of the few source-family wrappers that is explicitly about crosswalks rather than just records, but it remains project-specific and legacy-oriented.
+
+
+## Transport contract
+
+The adapter uses the shared [source transport contract](../../docs/source-transport.md):
+explicit HTTPS origins, checked redirects, real final-origin provenance and
+typed failures. The synthetic transport tests establish these local behaviors;
+they do not establish current service availability.

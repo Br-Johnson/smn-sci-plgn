@@ -42,3 +42,11 @@ echo '{"action":"home"}' | python3 skills/noaa-sps-skill/scripts/noaa_sps.py
 - `records`
 - `raw_output_path`
 - `warnings`
+
+
+## Transport and provenance
+
+Use the [source transport contract](../../docs/source-transport.md) for allowed
+origins, redirect rules, retrieval provenance and typed failures. An unavailable
+source is reported separately from a successful empty result; another evidence
+lane can continue.
