@@ -1,0 +1,20 @@
+{
+  "name": "smn-sci-plgn",
+  "interface": {
+    "displayName": "Salmon Science Research"
+  },
+  "plugins": [
+    {
+      "name": "salmon-science-research",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Research"
+    }
+  ]
+}

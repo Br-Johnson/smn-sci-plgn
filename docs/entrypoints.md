@@ -9,7 +9,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 - Run the live package-adapter tests, which need uv and network access: `SMN_PLUGIN_LIVE_ADAPTERS=1 python3 -m unittest discover -s tests -p 'test_package_adapters.py'`
 - Run exact-release snapshot adapter controls without ontology-service access: `SMN_PLUGIN_PINNED_PYTHON=/path/to/existing/pinned-release/python python3 -m unittest discover -s tests -p 'test_term_snapshot_controls.py' -v`. The interpreter must carry the actual v0.6.0 Git commit; CI's existing live-adapter profile can acquire that interpreter through uv instead.
 - Run one eval case against a live model: `claude plugin eval . --no-publish --ablation none --runs 1 --case <case> --allow-tools Bash`, plus `Write` for the stock-brief case and one `"WebFetch(domain:<host>)"` grant for each host the case's `description` names. It needs Claude Code 2.1.269 or later, and every run is billed model usage. `scripts/validate_scaffold.py` checks the case files offline, and no case has been scored yet.
-- Install for Codex / OpenAI: `python3 scripts/install_codex_plugin.py`
+- Native Codex install: `codex plugin marketplace add Br-Johnson/smn-sci-plgn --ref v0.2.0 --json`, then `codex plugin add salmon-science-research@smn-sci-plgn --json`. Verify with `codex plugin list --json`; use a current CLI with plugin subcommands (including the desktop app's bundled CLI). The custom development-link helper remains `python3 scripts/install_codex_plugin.py`.
 - Install for Claude Code as a plugin: `claude plugin marketplace add Br-Johnson/smn-sci-plgn`, then `claude plugin install salmon-science-research@smn-sci-plgn`
 - Link the skills into `~/.claude/skills/` for local development: `python3 scripts/install_claude_skills.py`
 - Official Claude Code checks, when the `claude` CLI is installed: `claude plugin validate --strict .` for the marketplace, and `claude plugin validate --strict .claude-plugin/plugin.json` for the plugin and its skills. Run both, because at the repository root the CLI reads only the marketplace.
@@ -17,7 +17,7 @@ Purpose: keep one short, reliable map of what to run, what to edit, and where th
 ## Canonical Docs
 
 - Repo overview and setup: `README.md`
-- Plugin manifests, which must agree: `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`
+- Plugin manifests and catalogs, which must agree on the component set: `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`. Both plugin manifests carry the version; the catalogs point to the repository root.
 - Living parity-gap register: `docs/platform-gap-register.md`
 - Machine-readable platform truth: `registry/platforms/`
 - Machine-readable routing topology: `registry/skill-graph.json`

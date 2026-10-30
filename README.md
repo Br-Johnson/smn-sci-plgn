@@ -8,7 +8,7 @@ Canonical repository:
 
 This repository is one plugin with two manifests, plus plain skill directories:
 
-- Codex / OpenAI plugin mode via [.codex-plugin/plugin.json](./.codex-plugin/plugin.json)
+- Codex / OpenAI plugin mode via [.codex-plugin/plugin.json](./.codex-plugin/plugin.json) and the native [.agents/plugins/marketplace.json](./.agents/plugins/marketplace.json) catalog
 - Claude Code plugin mode via [.claude-plugin/plugin.json](./.claude-plugin/plugin.json) and [.claude-plugin/marketplace.json](./.claude-plugin/marketplace.json)
 - Agent Skills directories under [skills/](./skills/), which both manifests load
 
@@ -24,7 +24,7 @@ The design follows the same high-level pattern as the Life Science Research plug
 
 ## Status
 
-This is a `0.1.0` repo, not a complete salmon platform.
+Current plugin version: `0.2.0`.
 
 What is real now:
 - Codex and Claude Code plugin manifests, checked for agreement
@@ -69,15 +69,34 @@ Requirements:
 - optional: R with `metasalmon` `v0.6.0` for the documented R route
 - for `commons-card` contribution checks: git, uv, and an authorized clone of the private salmon knowledge commons; its script declares PyYAML and jsonschema inline for those upstream checks. Research reads a separately admitted local compiled distribution without those dependencies; see [the research contract](skills/commons-card/references/research.md).
 
-Install for Codex / OpenAI:
+The released `v0.6.0` package pair rejects the mapping justification
+`semapv:AgentBasedMatching`. Preserve that justification, its evidence and review
+status; do not relabel it to make validation pass. Adoption of a released pair
+supporting it remains tracked in [#21](https://github.com/Br-Johnson/smn-sci-plgn/issues/21)
+and [metasalmon #283](https://github.com/salmon-data-mobilization/metasalmon/issues/283).
+The plugin's unsupported-source guard protects the existing release's empty-result
+diagnostic defect; it does not add mapping support to the package.
+
+Install through a current Codex CLI with `plugin` subcommands:
 
 ```bash
-python3 scripts/install_codex_plugin.py
+codex plugin marketplace add Br-Johnson/smn-sci-plgn --ref v0.2.0 --json
+codex plugin add salmon-science-research@smn-sci-plgn --json
+codex plugin marketplace list --json
+codex plugin list --json
 ```
 
-This script:
-- symlinks the repo into `~/plugins/salmon-science-research`
-- adds or updates an entry in `~/.agents/plugins/marketplace.json`
+Use the desktop app's bundled CLI if the shell's `codex` is older or lacks
+these subcommands. The marketplace is pinned to the release tag; the plugin
+loads the same 20 skill directories described by both manifests. Confirm the
+installed version and start a new session to use the updated inventory,
+including `controlled-vocabulary`.
+
+The retained `scripts/install_codex_plugin.py` helper is for a custom local
+development marketplace: it symlinks the checkout into
+`~/plugins/salmon-science-research` and writes
+`~/.agents/plugins/marketplace.json`. The native commands above use Codex's
+managed registry. Keep one active installation of this bundle in each harness.
 
 Install for Claude Code as a plugin:
 
@@ -142,6 +161,7 @@ report on your machine rather than publishing it to claude.ai.
 
 ```text
 smn-sci-plgn/
+├── .agents/plugins/marketplace.json
 ├── .codex-plugin/plugin.json
 ├── .claude-plugin/
 │   ├── plugin.json

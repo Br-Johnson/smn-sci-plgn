@@ -189,11 +189,14 @@ def validate_manifests(repo_root: Path) -> dict:
     codex_path = repo_root / ".codex-plugin" / "plugin.json"
     claude_path = repo_root / ".claude-plugin" / "plugin.json"
     marketplace_path = repo_root / ".claude-plugin" / "marketplace.json"
+    native_marketplace_path = repo_root / ".agents" / "plugins" / "marketplace.json"
     for path in (codex_path, claude_path, marketplace_path):
         require(path.exists(), f"plugin manifest missing: {path.relative_to(repo_root)}")
+    require(native_marketplace_path.exists(), "native Codex marketplace missing: .agents/plugins/marketplace.json")
     codex = load_json(codex_path)
     claude = load_json(claude_path)
     marketplace = load_json(marketplace_path)
+    native_marketplace = load_json(native_marketplace_path)
 
     missing = [key for key in ("name", "version", "description", "skills", "interface") if key not in codex]
     require(not missing, f".codex-plugin/plugin.json missing keys: {missing}")
@@ -247,12 +250,34 @@ def validate_manifests(repo_root: Path) -> dict:
         entry.get("description", claude["description"]) == claude["description"],
         "marketplace.json plugin description must match the plugin manifests",
     )
+
+    # Native Codex discovers this catalog at the marketplace repository root.
+    # It points at the same component set as the Claude catalog above.
+    require(native_marketplace.get("name") == marketplace["name"], "native Codex marketplace name must match Claude marketplace")
+    require(
+        native_marketplace.get("interface", {}).get("displayName") == display_name,
+        "native Codex marketplace displayName must match the plugin",
+    )
+    native_entries = native_marketplace.get("plugins")
+    require(isinstance(native_entries, list) and len(native_entries) == 1, "native Codex marketplace must list exactly this plugin")
+    native_entry = native_entries[0]
+    require(isinstance(native_entry, dict), "native Codex marketplace plugin must be an object")
+    require(native_entry.get("name") == codex["name"], "native Codex marketplace plugin name must match the manifests")
+    source = native_entry.get("source")
+    require(
+        isinstance(source, dict) and source.get("source") == "local" and source.get("path") in {".", "./"},
+        "native Codex marketplace source must be the local repository root",
+    )
+    require(
+        native_entry.get("policy") == {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+        "native Codex marketplace must offer explicit installation and on-install authentication",
+    )
     return {
         "plugin": claude["name"],
         "version": claude["version"],
         "marketplace": marketplace["name"],
         "manifests": [
-            str(path.relative_to(repo_root)) for path in (codex_path, claude_path, marketplace_path)
+            str(path.relative_to(repo_root)) for path in (codex_path, claude_path, marketplace_path, native_marketplace_path)
         ],
     }
 

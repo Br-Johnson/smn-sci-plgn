@@ -37,19 +37,26 @@ other harness use the folder that holds this file, which is
 The adapter reads one JSON object from stdin and writes one to stdout.
 
 - `find_terms` (the default): calls `find_terms(query, role=None, sources=None,
-  expand_query=True, release=None, snapshot_dir=None)`. `query` is required;
+  expand_query=True, release=None, snapshot_dir=None)`. `query` is a required string;
   `role`, `sources`, `expand_query`, `release` and `snapshot_dir` pass through
   to the package. `max_items` (default 10) shortens the list the package already
-  ranked, and `total` says how many rows it returned. The supported fields are
+  ranked, and `total` says how many rows it returned. `max_items` must be a
+  positive JSON integer; `expand_query` must be a JSON boolean, not a string,
+  number or null. The supported fields are
   those controls plus `action`, `max_items`, `save_raw` and
   `raw_output_path`; unknown fields are refused as `invalid_input`.
 - `sources_for_role`: calls `sources_for_role(role)`, the ordered source list
   a role searches by default.
 - `runtime`: the Python and metasalmonpy versions that actually ran, and the pin.
 
-Every response carries `runtime`, so each result records the package version
-that produced it. `save_raw` and `raw_output_path` write the full response to a
-file, as in the other skills.
+After loading the SDK, each response carries `runtime`, recording the package
+version that produced it. Common malformed controls are refused before SDK
+loading. `save_raw` must be a JSON boolean; `raw_output_path`, when supplied,
+must be a non-empty string or null. With `save_raw: true`, the full response is
+written to that path, or `salmon-terms-raw.json` in the current directory when
+the path is omitted or null. If saving fails, one JSON response retains the
+findings, diagnostics and runtime with `ok: false`, `error.code: raw_output_failed` and
+`raw_output_path: null`; it does not print a traceback or filesystem details.
 
 Roles are `variable`, `property`, `entity`, `unit`, `constraint`, and
 `statistical_modifier`, plus `method` for code values. Omit `sources` and the

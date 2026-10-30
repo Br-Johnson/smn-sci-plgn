@@ -38,7 +38,8 @@ The adapter reads one JSON object from stdin and writes one to stdout.
 - `runtime` (the default): the Python and metasalmonpy versions that ran, the
   pin, and whether `Rscript` and metasalmon are available for the R route.
 - `catalog`: this adapter's actions and every function metasalmonpy exports.
-- `validate_salmon_datapackage`: `path` is required. With `require_iris: true`
+- `validate_salmon_datapackage`: `path` is a required string. `require_iris`
+  must be a JSON boolean, not a string, number or null. With `require_iris: true`
   the package runs its strict pre-publication check, which fails on any
   remaining `REVIEW:` IRI or placeholder metadata. On failure `error.message` is
   the package's own message and `issues` holds its typed issue table when the
@@ -58,10 +59,24 @@ The adapter reads one JSON object from stdin and writes one to stdout.
   sdp-semantic-review skill drives them and documents their fields; use that
   skill rather than calling them on their own.
 
-Every response carries `runtime`. `save_raw` and `raw_output_path` write the
-full response to a file.
+After loading the SDK, each response carries `runtime`. Common malformed
+controls are refused before SDK loading. `save_raw` must be a JSON boolean;
+`raw_output_path`, when supplied, must be a non-empty string or null. With
+`save_raw: true`, the full response is written to that path, or
+`metasalmon-raw.json` in the current directory when the path is omitted or
+null. If saving fails, one JSON response retains the findings and runtime with `ok: false`,
+`error.code: raw_output_failed` and `raw_output_path: null`; it does not print
+a traceback or filesystem details. `fallback_urls` is an array of non-empty
+strings, so one URL string is never treated as individual characters.
 
 ## Operating rules
+
+The pinned `v0.6.0` pair rejects `semapv:AgentBasedMatching` as a mapping
+justification. Keep the original justification, evidence and review status;
+report the package's refusal instead of relabeling the mapping. Support merged
+on upstream main is not part of this release pin. Released-pair adoption remains
+tracked in [plugin #21](https://github.com/Br-Johnson/smn-sci-plgn/issues/21)
+and [metasalmon #283](https://github.com/salmon-data-mobilization/metasalmon/issues/283).
 
 For a complete local authoring exercise, follow the
 [fictional CSV-to-reviewed-SDP recipe](references/local-csv-recipe.md). It uses
